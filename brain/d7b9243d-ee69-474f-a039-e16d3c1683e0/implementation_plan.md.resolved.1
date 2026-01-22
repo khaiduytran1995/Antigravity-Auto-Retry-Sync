@@ -1,0 +1,30 @@
+# Implementation Plan - Google API Sandbox Style Image Gen
+
+The goal is to restore image generation functionality by using the working `gemini-2.0-flash-exp-image-generation` model and injecting the user's provided API keys as defaults.
+
+## User Review Required
+> [!IMPORTANT]
+> I will be hardcoding the provided API keys into the client-side code ([geminiImageDirect.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/services/geminiImageDirect.ts)) as a fallback. This means these keys will be visible in the browser network traffic/sources, which is expected for a "sandbox" style client-side app.
+
+## Proposed Changes
+
+### Service Layer
+
+#### [MODIFY] [geminiImageDirect.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/services/geminiImageDirect.ts)
+- Hardcode the full list of 24 provided API keys into [geminiImageDirect.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/services/geminiImageDirect.ts).
+- Implement a robust **Key Rotation System**:
+    - Randomize initial key selection to distribute load.
+    - If a key fails (429/403), immediately try the next key.
+    - Track failed keys in memory to avoid retrying them in the same session.
+- Force usage of **`gemini-2.0-flash-exp`** (and `gemini-2.0-flash-exp-image-generation`) as these are the current "Sandbox" models that allow free usage.
+- Remove dependence on user entering keys in UI (make it plug-and-play).
+
+## Verification Plan
+
+### Automated Tests
+- Re-run [test_gemini25_keys.py](file:///c:/Users/hp/Downloads/fashiond-main/test_gemini25_keys.py) (optional, already confirmed model works).
+
+### Manual Verification
+- User should open the app > Virtual Try On.
+- Even without entering keys in settings, the app should use the hardcoded backup keys.
+- Image generation should succeed using `gemini-2.0-flash-exp-image-generation`.

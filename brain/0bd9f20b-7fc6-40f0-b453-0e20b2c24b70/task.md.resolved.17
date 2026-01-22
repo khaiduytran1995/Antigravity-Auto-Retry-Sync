@@ -1,0 +1,10 @@
+# Task: Fix AnhNhanh Image Generation (v1.3.2)
+
+- [x] Fix NameError (missing urlparse)
+- [x] Fix WebSocket Image Generation Failure
+    - [x] Analyze WebSocket domains (v2, v3, ws)
+    - [x] Identify backend IPs (Cloudflare vs Viettel)
+    - [x] Update [UnifiedProxyServer](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py#368-536) with Port 80 & 443 support
+    - [x] Verify [hosts](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/decrypted_bypass_code.py#30-41) and `certs` coverage for all domains
+- [x] Implement Unified Proxy (127.0.0.1)
+- [x] Final Testing and Cleanup

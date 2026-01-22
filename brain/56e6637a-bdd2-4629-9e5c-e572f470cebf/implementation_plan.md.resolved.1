@@ -1,0 +1,51 @@
+# Bypass Implementation Plan: Server Emulation
+
+## Goal
+Redirect the application's traffic to a local server that mimics `hamy.io.vn` and returns valid license responses using the extracted `Master Secret Key`.
+
+## Components
+
+### 1. Mock Server (`mock_backend.py`)
+A Python Flask server running on port 80 (or 443 with self-signed certs, though we'll try HTTP first or handle SSL if needed).
+*   **Dependencies:** `flask`, `cryptography`
+*   **Routes:**
+    *   `/x9m4k7/activate_secure.php`: Handles activation requests.
+    *   `/x9m4k7/update.php`: Return "no update" or "latest version".
+    *   `/register.php`: Optional HTML page.
+*   **Logic:**
+    *   Derive `MasterKey` from `VEO_ULTRA_NEXTGEN_2.0_MASTER_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION` using SHA-256.
+    *   Decrypt incoming JSON payloads (AES-256-GCM).
+    *   Validate HMAC signature (optional, but good for correctness).
+    *   Generate a "Success" response:
+        ```json
+        {
+            "status": "success",
+            "data": {
+                "activated": true,
+                "username": "BypassedUser",
+                "valid_until": "2099-12-31",
+                "is_unlimited": true,
+                "package_name": "VIP LIFETIME"
+            }
+        }
+        ```
+    *   Encrypt the response and sign it using the same Master Key.
+
+### 2. Traffic Redirection
+*   **Hosts File:** Map `hamy.io.vn` to `127.0.0.1`.
+*   **SSL Handling:** The app uses `https`.
+    *   We need to see if the app verifies SSL certificates (`verify=True` in requests).
+    *   Strings showed `verify_and_decrypt_response` (1416417) and `verify` argument in `requests.post`.
+    *   If SSL pinning is active or cert verification is on, we might need to patch the binary or install a self-signed cert.
+    *   *Optimization:* Try running the server on HTTP first? No, app hardcodes `https://`.
+    *   **Solution:** We will generate a self-signed certificate for `hamy.io.vn` and run the Flask server with SSL. If the app rejects it, we will have to instruct the user to "Trust" the cert or use a patching method.
+
+## Step-by-Step Execution
+1.  [ ] Create `security_utils.py`: Helper class for AES-GCM encryption/decryption.
+2.  [ ] Create `mock_backend.py`: The Flask server.
+3.  [ ] Create `run_bypass.bat`: Script to set up hosts entry (requires Admin) and start the server.
+4.  [ ] Verify: User runs the app and checks activation status.
+
+## Risk Assessment
+- **SSL Verification:** If the app strictly verifies SSL certificates (pinned or standard CA), a self-signed cert won't work without adding it to the OS trust store. We will attempt adding it to the store.
+- **Strict Mode:** The app might have integrity checks preventing it from running if it detects tampering, but this "Server Emulation" approach touches no app files, only the network route.

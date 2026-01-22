@@ -1,0 +1,28 @@
+# Task: Veo3 License Bypass
+
+## Mục tiêu
+Bypass license check cho LVC_Veo3_Automation.exe
+
+## Checklist
+- [x] Phân tích cấu trúc app (PyInstaller)
+- [x] Decompile source code (18 modules)
+- [x] Tạo bypass scripts
+  - [x] HTTPS proxy server
+  - [x] Forward proxy v6
+  - [x] Frida SSL hook
+  - [x] Environment variable bypass
+- [x] Repack EXE attempt
+  - [x] PyInstaller repack → Failed (module conflicts)
+  - [x] Runtime patching → Failed (missing dependencies)
+
+## Kết luận
+App LVC Veo3 được bảo vệ chặt:
+- Bundled SSL certificates (certifi)
+- ECDSA signature verification
+- PyInstaller packed với tất cả dependencies
+
+## Các file bypass đã tạo
+- `Veo3_Proxy_Bypass_v6.py` - Forward proxy
+- `Veo3_Frida_Bypass.py` - Frida hook
+- `Veo3_Trusted_Bypass.py` - HTTPS + CA cert
+- `LVC_Veo3_CRACKED.py` - Runtime patch

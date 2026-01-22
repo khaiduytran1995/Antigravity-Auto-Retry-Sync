@@ -1,0 +1,7 @@
+# Task Checklist
+
+- [ ] Analyze extension structure and `manifest.json` [/]
+- [ ] Identify and map frontend components (popup, options, content scripts) [ ]
+- [ ] Identify and map backend/server endpoints [ ]
+- [ ] Analyze core logic and operational flow [ ]
+- [ ] Summarize findings for the user [ ]

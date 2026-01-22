@@ -1,0 +1,18 @@
+# Combined Bypass + Image Generator Tool
+
+## Goal
+Create a single tool that combines:
+1. Bypass server functionality (fake VIP, unlimited)
+2. Standalone image generation via WebSocket
+
+## Tasks
+
+- [/] Plan implementation
+- [ ] Create [AnhNhanh_Complete.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/AnhNhanh_Complete.py)
+  - [ ] Add bypass server (hosts, SSL, local API)
+  - [ ] Add WebSocket image generation
+  - [ ] Add menu with options for both modes
+  - [ ] Add license key management
+- [ ] Test bypass mode
+- [ ] Test direct generation mode
+- [ ] Create batch file to run

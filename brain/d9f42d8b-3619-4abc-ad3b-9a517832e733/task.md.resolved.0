@@ -1,0 +1,6 @@
+# Task Checklist: Restoring Real Connection
+
+- [/] Check [C:\Windows\System32\drivers\etc\hosts](file:///Windows/System32/drivers/etc/hosts) for redirections
+- [ ] Verify if application has internal proxy settings
+- [ ] Create a "Clean Start" script for the user
+- [ ] Verify connection to the real API

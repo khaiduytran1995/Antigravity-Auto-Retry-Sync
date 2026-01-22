@@ -1,0 +1,23 @@
+# Task: Debugging and Fixing FINAL Bypass Script
+
+## Objectives
+Fix the `FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py` script to ensure it works as expected for image generation and account management.
+
+## Roadmap
+
+### Phase 1: Syncing Bypass Logic
+- [x] Restore `CURRENT_LICENSE_KEY` and synchronization logic
+- [x] Implement "Mock-First" strategy for API endpoints (`packages.php`, [verify](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/decompiled_source/decompiled_main_window_imagen.py#591-601), [token](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/TokenLogger_Bypass.py#64-94))
+- [x] Align response formatting with working [Imagen4_Bypass_Launcher.py](file:///d:/chichbong_image/Imagen4_Bypass_Launcher.py)
+
+### Phase 2: Cleanup and Restoration
+- [x] Full system cleanup (Remove hosts blocking, netsh rules, flush DNS)
+
+### Phase 3: Account Creation Debugging
+- [x] Identify failure reasons (Missing [brand](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/decompiled_source/decompiled_license_service_imagen.py#24-50) field, DNS/Hosts interference)
+- [x] Implement `brand: "anhnhanh"` in registration payload
+- [x] Implement internal DNS patching to bypass hosts file during registration
+- [x] Verify account creation logic
+
+## Next Steps
+- [ ] User testing and verification of unlimited image generation

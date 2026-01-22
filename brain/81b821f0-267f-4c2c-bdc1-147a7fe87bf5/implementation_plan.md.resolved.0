@@ -1,0 +1,68 @@
+# Security Hardening - Veo Automation Anti-Bypass
+
+## Problem Description
+The [licenseManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/licenseManager.js) file has been **completely bypassed** - it always returns `success: true` without contacting the license server. This allows anyone to use the application without a valid license.
+
+### Critical Vulnerabilities Found
+
+1. **[licenseManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/licenseManager.js)** - Lines 24-41: The `verifyLicense()` function always returns `{success: true}` without any server validation
+2. **[licenseManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/licenseManager.js)** - Line 35: Hardcoded bypass key `'BYPASS-LICENSE-KEY'`
+3. **[licenseManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/licenseManager.js)** - Lines 43-50: `checkSavedLicense()` always returns `true`
+
+> [!CAUTION]
+> The current code makes license validation completely useless - anyone can use the app.
+
+---
+
+## Proposed Changes
+
+### [MODIFY] [licenseManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/licenseManager.js)
+
+Restore proper license validation by:
+
+1. **Remove bypass code** - Delete lines 26-40 that hardcode success
+2. **Restore API call** - Use `axios` to call `LICENSE_API_URL` with the key and machine ID
+3. **Validate server response** - Only return success if server confirms license is valid
+4. **Add signature verification** - Verify response signature to prevent tampering
+
+```diff
+-console.log(`[Bypass] Simulating successful license verification for key: ${key}`);
+-global.SECRET_CONFIG = { ... };
+-store.set('license_key', key || 'BYPASS-LICENSE-KEY');
+-return { success: true };
++const machineId = await this.getMachineId();
++const response = await axios_1.default.get(LICENSE_API_URL, {
++    params: { action: "validate", key, machineId },
++    timeout: 10000
++});
++if (response.data?.valid) {
++    global.SECRET_CONFIG = response.data.config;
++    store.set('license_key', key);
++    return { success: true };
++}
++return { success: false, message: response.data?.message || "Invalid license" };
+```
+
+---
+
+## Verification Plan
+
+### Manual Verification
+
+1. **Test with invalid license key:**
+   - Launch `Veo Automation.exe`
+   - Enter any random key (e.g., `TEST-INVALID-123`)
+   - Expected: Should show error "Invalid license" and NOT unlock the app
+
+2. **Test with no license key:**
+   - Delete `config.json` in `%APPDATA%/veo-automation/`
+   - Launch app
+   - Expected: Should show license input screen, NOT auto-unlock
+
+3. **Test network failure:**
+   - Disconnect from internet
+   - Try to validate a key
+   - Expected: Should show error about network connectivity
+
+> [!IMPORTANT]
+> I need your confirmation before proceeding with these changes. Do you have the original (non-bypassed) version of [licenseManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/licenseManager.js) that I can use as reference, or should I implement the server validation from scratch based on the API endpoint I found in the code?

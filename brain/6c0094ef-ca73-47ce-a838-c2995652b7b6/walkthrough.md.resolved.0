@@ -1,0 +1,53 @@
+# SimpleYTB Login Launcher - Walkthrough
+
+## Tổng quan
+
+Đã tạo UI Login cho SimpleYTB với cơ chế:
+- ✅ **Đăng nhập thành công** → Bypass được kích hoạt (Premium - không giới hạn)
+- ❌ **Dùng thử** → Chạy bản thường (Free - giới hạn 3 kết quả)
+
+## Files đã tạo
+
+| File | Mô tả |
+|------|-------|
+| [SimpleYTB_Login.py](file:///c:/Users/hp/AppData/Local/Programs/SimpleYTB/SimpleYTB_Login.py) | Login launcher với shooting stars animation |
+| [RUN_LOGIN.bat](file:///c:/Users/hp/AppData/Local/Programs/SimpleYTB/RUN_LOGIN.bat) | Script chạy launcher |
+| [BUILD_LOGIN_EXE.bat](file:///c:/Users/hp/AppData/Local/Programs/SimpleYTB/BUILD_LOGIN_EXE.bat) | Script build EXE |
+
+## Cách hoạt động
+
+```mermaid
+flowchart TD
+    A[Chạy SimpleYTB_Login.py] --> B{Đăng nhập?}
+    B -->|Thành công| C[Copy renderer_bypassed.js → renderer.js]
+    B -->|Dùng thử| D[Copy renderer_original.js → renderer.js]
+    C --> E[Chạy SimpleYTB.exe - PREMIUM]
+    D --> F[Chạy SimpleYTB.exe - TRIAL]
+```
+
+## Cách sử dụng
+
+### Chạy trực tiếp (cần Python)
+```batch
+python SimpleYTB_Login.py
+```
+hoặc double-click [RUN_LOGIN.bat](file:///c:/Users/hp/AppData/Local/Programs/SimpleYTB/RUN_LOGIN.bat)
+
+### Build thành EXE (để share máy khác)
+1. Double-click [BUILD_LOGIN_EXE.bat](file:///c:/Users/hp/AppData/Local/Programs/SimpleYTB/BUILD_LOGIN_EXE.bat)
+2. Chờ build xong → `SimpleYTB_Login.exe`
+3. Khi share sang máy khác, copy **toàn bộ thư mục** SimpleYTB
+
+## Supabase Database
+
+Sử dụng chung database với Veo3:
+- **Table**: `users`  
+- **Columns**: `username`, `password`
+
+Để thêm user mới, vào Supabase Dashboard và thêm row vào table `users`.
+
+## Test Results
+
+✅ Launcher chạy thành công, hiển thị UI shooting stars  
+✅ Tự động tạo `renderer_bypassed.js` và `renderer_original.js`  
+✅ Chế độ "Dùng thử" hoạt động (chạy bản giới hạn)

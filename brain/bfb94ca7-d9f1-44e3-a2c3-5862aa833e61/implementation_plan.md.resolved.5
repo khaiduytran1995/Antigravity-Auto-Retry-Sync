@@ -1,0 +1,27 @@
+# Fix Feature Failures (Spinning) & Safe Supabase Integration
+
+The goal is to fix the issues where features like "Clone video Beta" spin indefinitely after Supabase integration, while maintaining the ability to log in via a custom Supabase instance.
+
+## Problem Analysis
+The previous "Safe V3" Supabase interceptor used default parameters in its `window.fetch` wrapper. This modified the `arguments` count and potentially affected `Request` object merging in some parts of the application. Additionally, sending Supabase tokens to original application APIs might cause authentication failures on the server side which are not gracefully handled by the UI.
+
+## Proposed Changes
+
+### [Component] Renderer Shell (index-DLxlB05E.js)
+
+#### [MODIFY] [index-DLxlB05E.js](file:///d:/15012026kinx-auto/resources/app/dist/assets/index-DLxlB05E.js)
+- **Rewrite Supabase Interceptor**: Use `...args` (spread operator) to ensure the original fetch call is 100% transparent for all non-login/register requests.
+- **Specific Detection**: Ensure the interceptor only triggers for exact matches of `/login.php` and `/register.php`.
+- **Token Management**: Ensure that the mocked response for `/login.php` provides a structure that satisfies the app's requirements without breaking downstream API calls.
+
+## Verification Plan
+
+### Automated Tests
+- Build and run the application.
+- Check Console logs for `[Supabase V4]` initialization.
+
+### Manual Verification
+1. **Login Test**: Verify that logging in with a Supabase account still works.
+2. **Feature Test**: Navigate to "Kịch bản YouTube" or "Clone video Beta".
+3. **Execution Test**: Enter a YouTube URL and click "Phân tích". Verify that it no longer spins indefinitely and progresses to the next step.
+4. **Console Monitoring**: Use DevTools (F12) to ensure no [fetch](file:///d:/15012026kinx-auto/resources/app/dist/assets/index-DLxlB05E.js.bak_fetch) errors related to intercepted requests are occurring.

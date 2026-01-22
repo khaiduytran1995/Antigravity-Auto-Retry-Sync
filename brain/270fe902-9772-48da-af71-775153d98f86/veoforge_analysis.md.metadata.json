@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Complete technical analysis of VeoForge 3.4.0 Electron application including:\n- Application structure and file organization\n- Bytenode protection mechanism for core logic\n- HWID-based license verification via Supabase RPC\n- Credit-based billing system with dynamic pricing\n- Veo3 account pool management with smart rotation\n- Multi-provider captcha fallback system\n- All IPC endpoints and Supabase tables\n- Identified vulnerabilities and bypass strategies",
+  "updatedAt": "2026-01-18T07:24:54.424785700Z"
+}

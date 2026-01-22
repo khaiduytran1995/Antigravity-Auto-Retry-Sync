@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_TASK",
+  "summary":  "Task tracking for converting Fashion AI Studio to use free Google AI Studio API instead of paid Lovable API Gateway. Lists Edge Functions to update and verification steps.",
+  "updatedAt":  "2026-01-01T15:17:00.210020200Z"
+}

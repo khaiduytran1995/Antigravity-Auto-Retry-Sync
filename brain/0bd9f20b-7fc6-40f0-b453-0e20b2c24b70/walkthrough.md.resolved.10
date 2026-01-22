@@ -1,0 +1,22 @@
+# Walkthrough - Smart WebSocket Routing
+
+I have implemented a **"Điều hướng thông minh" (Smart Routing)** mechanism for the WebSocket proxy. This ensures that the application connects to the correct backend server based on the domain it's requesting.
+
+## Changes Made
+
+### Dynamic WebSocket Routing
+Previously, the script forced all WebSocket connections to a single IP address. In version 1.3.2, the app uses different servers for different tasks.
+
+- **`api.chichbong.me` / `v2.chichbong.me`**: Routed to Cloudflare IP (`104.21.79.194`).
+- **`v3.chichbong.me` / `ws.chichbong.me`**: Routed to Viettel IP (`125.235.4.59`).
+
+The script now intercepts these requests on `127.0.0.2:443` and handles the mapping automatically.
+
+## Verification Results
+
+### Logs
+You should now see logs like this when generating images:
+`[WS] App connected: v3.chichbong.me -> Routing to 125.235.4.59`
+`[WS] Connected to real server: 125.235.4.59`
+
+This confirms the traffic is being steered correctly.

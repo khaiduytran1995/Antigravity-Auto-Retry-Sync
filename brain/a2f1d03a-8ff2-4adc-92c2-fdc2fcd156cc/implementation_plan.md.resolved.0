@@ -1,0 +1,20 @@
+# Debugging SECRET_CONFIG Issue in flowVideo.js
+
+We are investigating why `secretConfig.apiEndpoint` is `undefined` in [flowVideo.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/flowVideo.js), leading to a crash.
+
+## Proposed Changes
+
+### [Component] Electron Main Process Services
+
+#### [MODIFY] [flowVideo.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowVideo.js)
+
+- Add debug logging to inspect `global.SECRET_CONFIG` before it is accessed.
+- Add a defensive check and fallback for `apiEndpoint` to prevent the crash.
+
+## Verification Plan
+
+### Manual Verification
+1. Apply the debug logs to [flowVideo.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/flowVideo.js).
+2. Ask the user to run the application and attempt video generation.
+3. Observe the console output (or ask the user to provide it) to see the state of `secretConfig`.
+4. Verify if the defensive check prevents the crash and allows the operation to proceed (or shows a more helpful error).

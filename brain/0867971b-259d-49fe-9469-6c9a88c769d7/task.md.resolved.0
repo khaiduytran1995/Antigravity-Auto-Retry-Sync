@@ -1,0 +1,8 @@
+# Task: Analyze Chichbong Image Tool
+
+- [/] Research and understand the codebase structure in `d:\chichbong_image`
+    - [/] List files in the directory
+    - [ ] Identify backend components and scripts
+    - [ ] Map API endpoints and external service dependencies
+- [ ] Document the operational flow and logic
+- [ ] Provide a comprehensive summary to the user

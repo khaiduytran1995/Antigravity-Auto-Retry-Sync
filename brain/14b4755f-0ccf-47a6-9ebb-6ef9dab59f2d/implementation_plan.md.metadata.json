@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Technical plan to bypass the license verification system of Veo Automation by patching the `licenseManager.js` file. This involves mocking the `verifyLicense` and `checkSavedLicense` functions to return a successful state with a predefined configuration.",
+  "updatedAt": "2026-01-14T08:29:07.001413Z"
+}

@@ -1,0 +1,74 @@
+# VEO Backend Server - Walkthrough
+
+## Tổng quan
+
+Đã tạo thành công backend server riêng trên Vercel để thay thế `ta.ltruowng.space/apiveo`.
+
+## Kết quả
+
+| Hạng mục | Chi tiết |
+|---|---|
+| **URL Backend** | `https://veo-backend.vercel.app` |
+| **Số endpoints** | 7 endpoints |
+| **Trạng thái** | ✅ Đang hoạt động |
+
+---
+
+## Các Endpoints đã tạo
+
+| Endpoint | Chức năng | File |
+|---|---|---|
+| `/api/login` | Đăng nhập Supabase | [login.js](file:///d:/15012026kinx-auto/veo-backend/api/login.js) |
+| `/api/profile` | Thông tin user + VIP | [profile.js](file:///d:/15012026kinx-auto/veo-backend/api/profile.js) |
+| `/api/check_session` | Kiểm tra session | [check_session.js](file:///d:/15012026kinx-auto/veo-backend/api/check_session.js) |
+| `/api/prf2` | **Cookie Manager** | [prf2.js](file:///d:/15012026kinx-auto/veo-backend/api/prf2.js) |
+| `/api/cookie_data` | Dữ liệu cookie | [cookie_data.js](file:///d:/15012026kinx-auto/veo-backend/api/cookie_data.js) |
+| `/api/get_transaction_history` | Lịch sử giao dịch | [get_transaction_history.js](file:///d:/15012026kinx-auto/veo-backend/api/get_transaction_history.js) |
+
+---
+
+## Cookie Manager Page
+
+Trang quản lý Cookie được tạo giống y hệt bản gốc:
+
+![Cookie Manager](file:///C:/Users/hp/.gemini/antigravity/brain/bfb94ca7-d9f1-44e3-a2c3-5862aa833e61/cookie_manager_verification_1768650703405.png)
+
+---
+
+## Thay đổi trong App
+
+Đã cập nhật [app.asar](file:///d:/15012026kinx-auto/resources/app.asar) để sử dụng backend mới:
+
+```diff
+-Ls="https://ta.ltruowng.space/apiveo"
++Ls="https://veo-backend.vercel.app/api"
+```
+
+---
+
+## Cấu trúc Project
+
+```
+veo-backend/
+├── api/
+│   ├── _config.js
+│   ├── login.js
+│   ├── profile.js
+│   ├── check_session.js
+│   ├── prf2.js (Cookie Manager)
+│   ├── cookie_data.js
+│   └── get_transaction_history.js
+├── package.json
+├── vercel.json
+└── README.md
+```
+
+---
+
+## Kiểm tra tiếp theo
+
+1. Khởi động lại app
+2. Đăng nhập với tài khoản Supabase
+3. Mở Cookie Manager: `https://veo-backend.vercel.app/api/prf2`
+4. Nhập Cookie và Bearer Token từ Google
+5. Thử các tính năng tạo ảnh

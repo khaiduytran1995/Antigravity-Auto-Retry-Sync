@@ -1,0 +1,24 @@
+# Task: Tạo Tool Get Pool User
+
+## Mục tiêu
+Tạo tool để lấy danh sách users từ server/API và:
+- Xuất ra file CSV
+- Thêm vào GUI hiện tại
+
+## Các bước thực hiện
+
+- [/] Phân tích codebase hiện tại để hiểu cấu trúc API
+- [ ] Xác định API endpoint cho get pool user (cần hỏi user)
+- [ ] Tạo function `get_pool_users()` để gọi API
+- [ ] Tạo function `export_to_csv()` để xuất dữ liệu
+- [ ] Thêm tab/section mới vào GUI
+- [ ] Test và verify
+
+## API Endpoints đã tìm thấy
+- `https://11labs.net/api/license/activate.php` - Đăng ký license
+- `https://11labs.net/api/license/verify.php` - Verify license
+- `https://11labs.net/api/checker/get-imagen4-token.php` - Lấy token
+
+## Cần xác nhận từ user
+- API endpoint cụ thể để lấy pool user là gì?
+- Dữ liệu trả về có những trường nào?

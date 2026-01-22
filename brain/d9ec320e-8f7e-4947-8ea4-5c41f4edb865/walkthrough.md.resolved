@@ -1,0 +1,149 @@
+# TransVideoAI v4.1 - Reverse Engineering Analysis
+
+## Executive Summary
+
+TransVideoAI v4.1 có một **cơ chế activation giả** và **chứa MALWARE nguy hiểm**.
+
+> [!CAUTION]
+> **gfx_sources.rar chứa backdoor/miner giả mạo thành "Microsoft Edge Update"!**
+> Không chạy ứng dụng này trên máy thật!
+
+---
+
+## Cấu Trúc Ứng Dụng
+
+```mermaid
+flowchart TD
+    A[TransVideoAI.exe<br>.NET Launcher] --> B[BackupUtility.vbs]
+    B --> C{Check %TEMP%\TransVideoAI.exe}
+    C -->|Not exists| D[Extract TransVideoAI.rar<br>password: README]
+    C -->|Exists| E[Run Activation Form]
+    D --> E
+    B --> F[Extract gfx_sources.rar<br>⚠️ MALWARE]
+    F --> G[Run gfx.exe<br>⚠️ BACKDOOR]
+    
+    style A fill:#e1f5fe
+    style G fill:#ffcdd2
+    style F fill:#ffcdd2
+```
+
+---
+
+## Phân Tích Form Activation
+
+### [Activation TransVideoAI.exe](file:///C:/Users/hp/AppData/Local/Temp/TransVideoAI.exe)
+
+Assembly: `Activation TransVideoAI, Version=1.0.0.0`
+
+**IL Code của `btnActivate_Click`:**
+
+```
+ldarg.0
+ldfld Form1.txtActivationCode
+callvirt Control.get_Text
+callvirt String.Trim
+call String.IsNullOrEmpty
+brfalse.s 33                    ; if not empty, jump
+
+; ❌ Show "Vui lòng nhập mã kích hoạt!" - Empty input error
+ldstr "⛔ Vui lòng nhập mã kích hoạt!"
+callvirt Control.set_Text
+callvirt Color.get_Red
+callvirt Control.set_ForeColor
+ret
+
+; ❌ Show "Mã kích hoạt không hợp lệ!" - ALWAYS fails
+ldstr "⛔ Mã kích hoạt không hợp lệ! Liên hệ: 0902158119"
+callvirt Control.set_Text
+callvirt Color.get_Red  
+callvirt Control.set_ForeColor
+ret
+```
+
+> [!IMPORTANT]
+> **Form này LUÔN LUÔN trả về "không hợp lệ"!**
+> Không có logic kiểm tra mã kích hoạt thực sự.
+> Đây chỉ là màn hình thu tiền - người dùng phải liên hệ Zalo để mua key.
+
+---
+
+## 🚨 MALWARE PHÁT HIỆN: gfx.exe
+
+### Thông tin Assembly
+
+| Thuộc tính | Giá trị |
+|------------|---------|
+| Assembly Name | `User OOBE Broker` (giả mạo Windows) |
+| Namespace | `Github.Program` |
+| File Size | 18,944 bytes |
+| Source Path | [gfx_sources.rar](file:///C:/Program%20Files%20%28x86%29/TransVideoAI/TransVideoAI%20v4.1/resources/tools/gfx_sources.rar) (password: README) |
+
+### Chức Năng Độc Hại
+
+```csharp
+// Methods trong Github.Program
+DenyAdministratorModifyPermission()  // Ngăn admin xóa
+AddExclusionPaths()                   // Bypass Windows Defender
+AddProcessExclusionRegistry()         // Registry persistence
+CreateServices()                      // Tạo Windows services
+CreateTask()                          // Scheduled task (on logon)
+RunWindowsDefenderSecurity()          // Disable Defender
+Decompress()                          // Extract payloads
+```
+
+### Payload Files
+
+| File | Destination | Mô tả |
+|------|-------------|-------|
+| `services.rar` | `C:\Windows\SysWOW64` | Giả mạo system services |
+| `Microsoft.MicrosoftEdgeUpdate.rar` | `C:\ProgramData\Microsoft\` | **MINER/BACKDOOR** (10MB) |
+| `NET_Framework_4.8.rar` | `C:\Windows\System32` | Dependencies |
+| `data.rar` | Unknown | Configuration |
+
+### Persistence Mechanisms
+
+1. **Windows Defender Exclusions:**
+   ```powershell
+   Add-MpPreference -ExclusionPath 'C:\'
+   Add-MpPreference -ExclusionPath '%TEMP%'
+   ```
+
+2. **Registry Modifications:**
+   - `SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions\Extensions`
+
+3. **Scheduled Task:**
+   - Trigger: On Logon
+   - Name: `WindowsDefenderSecurity`
+
+4. **Windows Service:**
+   - Drops to: `C:\Windows\System32\WinSYS.exe`
+
+---
+
+## Real Application Structure
+
+Ứng dụng thực sự là Python-based với:
+
+- **GUI Framework:** PyQt
+- **AI Libraries:** ONNX Runtime, OpenCV (cvextern.dll)
+- **Browser Automation:** Playwright (Chromium bundled)
+- **Core Features:**
+  - Face detection/recognition (`xlib/face/`)
+  - Video processing (`xlib/ffmpeg/`)
+  - GPU acceleration via OpenCL (`xlib/avecl/`)
+
+---
+
+## Kết Luận
+
+1. **Activation Form là giả** - Chỉ hiển thị thông báo lỗi để người dùng liên hệ mua key
+2. **Không có key validation** - Tác giả có thể patch manual hoặc gửi phiên bản full
+3. **Bundled Malware** - `gfx.exe` là dropper cài backdoor/miner
+4. **Risk Level: CRITICAL** - Không nên chạy trên máy thật
+
+> [!WARNING]
+> Nếu đã chạy ứng dụng này, cần kiểm tra:
+> - `C:\Windows\System32\WinSYS.exe`
+> - `C:\ProgramData\Microsoft\Microsoft.MicrosoftEdgeUpdate`
+> - Windows Task Scheduler → "WindowsDefenderSecurity"
+> - Services có tên lạ

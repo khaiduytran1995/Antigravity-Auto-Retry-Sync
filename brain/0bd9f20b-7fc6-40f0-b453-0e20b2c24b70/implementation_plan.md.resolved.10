@@ -1,0 +1,30 @@
+# Implementation Plan - Unified Proxy & Port 80 Interception
+
+The current multi-IP approach (127.0.0.2) is not capturing generation traffic. This plan switches to a unified 127.0.0.1 architecture and adds support for insecure (Port 80) connections.
+
+## Proposed Changes
+
+### [MODIFY] [FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py)
+
+1.  **Unified IP Strategy**:
+    - Change all `127.0.0.2` entries to `127.0.0.1`.
+    - All domains (`11labs.net`, `api.chichbong.me`, `v2`, `v3`, [ws](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/test_ws_proxy_connection.py#9-40)) will point to `127.0.0.1`.
+
+2.  **Master Proxy (Port 443)**:
+    - Implement a single server that handles both HTTP and WebSockets on port 443.
+    - Leverage `websockets.serve`'s `process_request` hook to handle regular HTTP requests (API calls) while allowing WebSocket upgrades for image generation.
+
+3.  **Insecure Proxy (Port 80)**:
+    - Start an additional WebSocket/HTTP proxy on port 80 to catch any fallback "non-SSL" traffic mentioned in the app's strings.
+
+4.  **Logging Enhancement**:
+    - Add a "Catch-All" log for any request reaching the proxy to identify if the app is using an unknown domain.
+
+## Verification Plan
+
+### Automated Tests
+- `python test_ws_proxy_connection.py` should now hit the proxy on `127.0.0.1`.
+
+### Manual Verification
+- Start bypass and observe if `[PROXY] ...` appears for ALL requests.
+- Verify if the `v3.chichbong.me` connection is finally captured.

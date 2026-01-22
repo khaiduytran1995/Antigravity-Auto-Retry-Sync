@@ -1,0 +1,10 @@
+# Task: Fix AnhNhanh Image Generation (v1.3.2)
+
+- [x] Fix NameError (missing urlparse)
+- [/] Fix WebSocket Image Generation Failure
+    - [x] Analyze WebSocket domains (v2, v3, ws)
+    - [x] Identify backend IPs (Cloudflare vs Viettel)
+    - [ ] Update [WebSocketProxyServer](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/Imagen4_Bypass_Launcher.py#401-504) to use dynamic routing
+    - [ ] Verify [hosts](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/VEO3_BYPASS_FINAL.py#258-267) and `certs` coverage for all domains
+- [ ] Verify Image Generation in App
+- [ ] Final Testing and Cleanup

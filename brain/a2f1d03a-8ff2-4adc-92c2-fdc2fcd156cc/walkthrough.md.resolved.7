@@ -1,0 +1,23 @@
+# Zero-Fail Stabilization: Atomic Shield & Task Isolation 🛡️
+
+I have completed the final stabilization phase. The system now includes two major layers of protection to ensure your accounts stay safe and your generation process remains steady.
+
+## 1. Atomic Shield (Session Recovery) 🔒
+- **Atomic Locking**: The second a recovery starts, all other calls are blocked. No race conditions.
+- **Strict Rejection**: While logging in, the app rejects new API requests to allow the browser to focus 100% on the login process.
+- **Auto-Wait**: Generation services will "wait and retry" if they see a recovery is in progress.
+
+## 2. Task Isolation & Cooldown (Per Account) ⏸️
+- **1 Command Per Account**: I have implemented a strict lock. Each account will now process **strictly 1 request at a time**.
+- **Mandatory 30s Rest**: After a video or image is successfully generated, the account is forced to "rest" for **30 seconds**. This mimics human behavior and prevents Google from flagging your account for bot-like activity.
+- **Smart Queueing**: If you send multiple prompts to the same account, they will now wait in line and process one-by-one with the 30s gap between them.
+
+## Verification Logs:
+- `🔒 Generation lock active. Waiting...` (Prompt is waiting its turn).
+- `✅ Task complete. Mandatory 30s COOLDOWN started...` (Account is resting).
+- `🔓 Cooldown finished. Account ready for next task.` (Back to work).
+
+## How to use:
+Just continue using the app as normal. These protections are built-in and automatic. You will notice that tasks now process sequentially per account, ensuring maximum stability.
+
+If you see the 30s cooldown in the logs, please do not worry—it is working exactly as requested to protect your accounts.

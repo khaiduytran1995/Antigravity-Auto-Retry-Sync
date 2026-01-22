@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "I am refining the \"Generation Lock\" to match the user's specific timing requirements: 5s delay after a successful task completion, and a maximum 30s wait for a running task before allowing a new one. This ensures better throughput while maintaining account safety.",
+  "updatedAt": "2026-01-15T06:16:06.482719Z",
+  "version": "6"
+}

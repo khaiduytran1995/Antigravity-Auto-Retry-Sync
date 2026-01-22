@@ -1,0 +1,26 @@
+# Walkthrough: Restoring Real Connection
+
+I have created tools to restore the real connection for Chichbong Image and ensure it no longer uses the bypass proxy or host blocking.
+
+## Changes Made
+
+### Restoration Scripts
+
+1. **[RESTORE_CONNECTION.bat](file:///d:/chichbong_image/RESTORE_CONNECTION.bat)**
+   - Removes `api.chichbong.me` and `11labs.net` from the Windows `hosts` file.
+   - Requires Administrator privileges.
+   - Pings the real API to verify connectivity.
+
+2. **[RUN_NORMAL.bat](file:///d:/chichbong_image/RUN_NORMAL.bat)**
+   - Launches [chichbong_generator.exe](file:///d:/chichbong_image/chichbong_generator.exe) directly without the proxy server.
+
+## Verification Steps
+
+### 1. Removing Host Redirections
+Run [RESTORE_CONNECTION.bat](file:///d:/chichbong_image/RESTORE_CONNECTION.bat) as Administrator. It will clean up the `hosts` file and test the connection.
+
+### 2. Running the Tool
+Use [RUN_NORMAL.bat](file:///d:/chichbong_image/RUN_NORMAL.bat) to start the application. It will now connect directly to the official servers.
+
+> [!IMPORTANT]
+> Since the tool now connects to the real server, you will need a valid license or account as required by the official service.

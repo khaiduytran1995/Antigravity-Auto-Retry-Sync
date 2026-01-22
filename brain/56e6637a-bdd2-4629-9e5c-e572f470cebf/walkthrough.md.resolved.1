@@ -1,0 +1,49 @@
+# Báo cáo Phân tích: Công cụ Story NextGen 2.0
+
+## Kết quả tìm kiếm
+Chúng tôi đã thành công trong việc dịch ngược các cơ chế cốt lõi của ứng dụng.
+
+### Cấu trúc Backend
+- **Tên miền:** `hamy.io.vn`
+- **Các Endpoint:**
+  - Kích hoạt: `/x9m4k7/activate_secure.php`
+  - Cập nhật: `/x9m4k7/update.php`
+  - Đăng ký: `/register.php`
+
+### Cơ chế Bảo mật
+1.  **Mã hóa Đường truyền:**
+    - Lớp tùy chỉnh sử dụng **AES-256-GCM**.
+    - Các gói tin (payload) được ký bằng **HMAC-SHA256**.
+    - Bảo vệ chống tấn công phát lại (Replay protection) thông qua timestamp.
+
+2.  **Quản lý Khóa:**
+    - **Master Secret:** `VEO_ULTRA_NEXTGEN_2.0_MASTER_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION`
+    - Khóa này có vẻ được hardcode. Nó có khả năng được băm (hash) để tạo ra khóa mã hóa thực tế.
+    - Khóa phiên (Session keys) được thay đổi mỗi giờ (dựa trên các chuỗi tìm thấy).
+
+3.  **Xác minh Giấy phép (License):**
+    - "Strict Mode" (Chế độ nghiêm ngặt) bắt buộc kiểm tra phía máy chủ khi khởi động.
+    - Cache cục bộ được lưu tại `C:\Users\<User>\.veo_activation_cache` (định dạng JSON).
+    - Hệ thống xác thực `machine_id` để ngăn chặn việc sử dụng trên nhiều thiết bị ("Một giấy phép = Chỉ một máy tính").
+
+### Tính năng Chống can thiệp (Anti-Tamper)
+- **Chống Debug:** Phát hiện các trình gỡ lỗi (debugger) đang gắn vào và thoát ứng dụng.
+- **Chống máy ảo (Anti-VM):** Kiểm tra các dấu vết ảo hóa (VMware, VirtualBox, v.v.).
+- **Kiểm tra Tính toàn vẹn:** Xác minh mã băm (hash) của các tệp quan trọng (có thể là tệp thực thi chính hoặc các mô-đun nội bộ).
+
+## Các Phương hướng Bypass Tiềm năng
+Dựa trên phân tích, các phương pháp sau có thể khả thi để vượt qua lớp bảo vệ:
+
+1.  **Giả lập Máy chủ (Khuyến nghị vì tính ổn định):**
+    - Tạo một máy chủ cục bộ (Python/Flask) giả mạo `hamy.io.vn`.
+    - Triển khai mã hóa AES-256-GCM sử dụng Master Secret đã trích xuất.
+    - Giả lập phản hồi từ `activate_secure.php` để trả về trạng thái "Success" với payload giấy phép hợp lệ.
+    - Điều hướng tên miền thông qua file `hosts`.
+
+2.  **Tiêm Cache (Cache Injection):**
+    - Cố gắng tạo một file `.veo_activation_cache` hợp lệ, đảm bảo `valid_until` ở thời điểm tương lai.
+    - *Rủi ro:* "Strict Mode" có thể bỏ qua cache và ép buộc kiểm tra online trừ khi mạng bị chặn.
+
+3.  **Vá File Nhị phân (Binary Patching):**
+    - Sửa đổi bytecode đã biên dịch (cần decompile và repack) để vô hiệu hóa `Strict Mode` hoặc sự xác minh của `SecurityManager`.
+    - *Rủi ro:* Kiểm tra tính toàn vẹn có thể bị kích hoạt và làm ứng dụng bị crash.

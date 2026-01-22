@@ -1,0 +1,142 @@
+# AutoVeo3 Rebuild - Custom Server Implementation
+
+Rebuild AutoVeo3.exe với Vercel + Supabase backend để kiểm soát hoàn toàn xác thực và tính năng.
+
+## User Review Required
+
+> [!IMPORTANT]
+> Bạn cần cung cấp **Vercel project URL** sau khi deploy backend. Hiện tại đã có code trong `autoveo3-backend/` sẵn sàng deploy.
+
+> [!WARNING]
+> Supabase credentials đã hardcode trong code. Cần tạo table `users` trong Supabase với schema phù hợp.
+
+---
+
+## Proposed Changes
+
+### Phase 1: Vercel Backend Deployment
+
+#### [EXISTING] [autoveo3-backend/](file:///d:/AutoVeo330122025/autoveo3-backend)
+Backend API đã có sẵn với các endpoints:
+- `POST /api/auth/login` - Đăng nhập
+- `POST /api/auth/logout` - Đăng xuất  
+- `GET /api/auth/profile` - Lấy thông tin user
+- `GET /api/auth/verify-status` - Xác thực token
+
+**Actions:**
+1. Deploy lên Vercel: `vercel --prod`
+2. Lấy URL production (ví dụ: `https://autoveo3-backend.vercel.app`)
+
+---
+
+### Phase 2: Supabase Database Setup
+
+Tạo table `users` với schema:
+
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    email TEXT,
+    full_name TEXT,
+    type_role TEXT DEFAULT 'ADMIN',
+    display_name TEXT DEFAULT 'Administrator',
+    is_active BOOLEAN DEFAULT true,
+    permissions JSONB DEFAULT '["*"]',
+    openai_permission BOOLEAN DEFAULT true,
+    clone_limit INTEGER DEFAULT 999999,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tạo admin user
+INSERT INTO users (username, password, full_name, type_role, display_name)
+VALUES ('admin', 'admin123', 'Administrator', 'ADMIN', 'Administrator');
+```
+
+---
+
+### Phase 3: Source Code Modification
+
+#### [MODIFY] [backend_auth_service.py](file:///d:/AutoVeo330122025/rebuild_source/decompiled_backend_auth_service.py)
+
+Thay đổi dòng 21:
+```diff
+-BACKEND_BASE_URL = 'https://back.sharefilecorel.com'
++BACKEND_BASE_URL = 'https://YOUR-VERCEL-URL.vercel.app'  # Thay bằng URL thực tế
+```
+
+#### [NEW] Cấu trúc thư mục mới
+
+```
+auto_veo3/
+├── __init__.py
+├── main.py (entry point)
+├── config/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── settings.py
+│   └── timing_config.py
+├── models/
+│   ├── __init__.py
+│   ├── account.py
+│   ├── project.py
+│   └── video.py
+├── services/
+│   ├── __init__.py
+│   ├── auth_manager.py
+│   ├── backend_auth_service.py
+│   ├── veo3_service.py
+│   └── ... (các file khác)
+└── ui/
+    ├── __init__.py
+    ├── account_panel.py
+    ├── settings_drawer.py
+    └── sidebar.py
+```
+
+---
+
+### Phase 4: Build EXE
+
+#### Dependencies cần cài:
+```
+flet>=0.25.0
+httpx>=0.27.0
+cryptography>=43.0.0
+playwright>=1.48.0
+selenium>=4.25.0
+imageio-ffmpeg>=0.5.0
+lxml>=5.0.0
+```
+
+#### PyInstaller command:
+```bash
+pyinstaller --onefile --windowed --name AutoVeo3_Custom \
+    --add-data "flet_desktop;flet_desktop" \
+    --add-data "playwright;playwright" \
+    main.py
+```
+
+---
+
+## Verification Plan
+
+### Step 1: Test Vercel Backend
+```bash
+# Test login endpoint
+curl -X POST https://YOUR-URL.vercel.app/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+### Step 2: Test Built EXE
+1. Chạy EXE
+2. Login với `admin` / `admin123`
+3. Verify hiển thị role "Administrator"
+
+### Step 3: Manual Verification
+- [ ] App khởi động không lỗi
+- [ ] Login thành công với user trong Supabase
+- [ ] Hiển thị đúng thông tin user (role, permissions)
+- [ ] Logout hoạt động

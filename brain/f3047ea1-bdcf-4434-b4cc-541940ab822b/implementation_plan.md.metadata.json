@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "This plan describes how to redirect the Prompt Generator license requests to a Supabase backend. It involves modifying the local bypass server to act as a bridge, querying a Supabase table for license status instead of returning hardcoded success.",
+  "updatedAt": "2026-01-22T12:56:01.803887800Z"
+}

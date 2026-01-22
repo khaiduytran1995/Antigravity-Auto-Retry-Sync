@@ -1,0 +1,6 @@
+- [x] Previous Analysis Complete
+- [x] Selective Proxy Bypass
+    - [x] Create proxy that bypasses hoanphicrypto.com
+    - [x] Forward elevenlabs.io/click to real server
+    - [x] Handle HTTPS CONNECT tunneling
+    - [ ] User testing

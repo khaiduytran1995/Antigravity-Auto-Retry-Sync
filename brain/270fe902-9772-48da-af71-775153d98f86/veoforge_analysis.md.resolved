@@ -1,0 +1,365 @@
+# VeoForge 3.4.0 - Phân Tích Toàn Diện
+
+> **Thông tin ứng dụng:** AI Video Generator for Product Marketing  
+> **Phiên bản:** 3.4.0  
+> **Nhà phát triển:** Techla AI  
+> **Framework:** Electron + React
+
+---
+
+## 1. Cấu Trúc Ứng Dụng
+
+```
+VeoForge-Setup-3.4.0/
+├── VeoForge-Setup-3.4.0.exe    # NSIS Installer (~370MB)
+├── $PLUGINSDIR/
+│   ├── VeoForge.exe            # Main Electron executable (~177MB)
+│   ├── resources/
+│   │   ├── app.asar            # Application bundle (~138MB)
+│   │   ├── bin/                # FFmpeg binaries
+│   │   │   ├── ffmpeg.exe
+│   │   │   └── ffprobe.exe
+│   │   ├── music/              # Audio assets
+│   │   └── prompt/             # AI prompt templates
+│   └── [Electron runtime files]
+└── $R0/
+    └── Uninstall VeoForge.exe
+```
+
+---
+
+## 2. Cơ Chế Bảo Vệ
+
+### 2.1 Bytenode Compilation (Chính)
+
+> [!IMPORTANT]
+> Core logic được compile sang V8 bytecode ([.jsc](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/main.jsc)), không thể dễ dàng reverse
+
+| File | Mô tả | Bảo vệ |
+|------|-------|--------|
+| [main.jsc](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/main.jsc) | Main process logic | ✅ Bytecode |
+| [config.prod.jsc](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/config.prod.jsc) | Production config (Supabase keys) | ✅ Bytecode |
+| [main-loader.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/main-loader.js) | Entry loader | ❌ Plain JS |
+| [preload.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/preload.js) | IPC bridge | ❌ Plain JS |
+| `services/*.js` | Service modules | ❌ Plain JS |
+
+**Loader Flow:**
+```javascript
+// main-loader.js
+if (app.isPackaged) {
+    require('bytenode');      // Init bytenode
+    require('./main.jsc');    // Load compiled code
+} else {
+    require('./main.js');     // Dev: plain JS
+}
+```
+
+### 2.2 HWID Binding
+
+```javascript
+// license/helpers.js
+const { machineIdSync } = require('node-machine-id');
+
+function getHWID() {
+    return machineIdSync({ original: true });
+}
+```
+
+- Sử dụng `node-machine-id` để lấy unique device identifier
+- 1 license key = 1 HWID duy nhất
+- Không thể chuyển đổi thiết bị
+
+---
+
+## 3. Hệ Thống License
+
+### 3.1 Supabase RPC Verification
+
+```javascript
+// license/verification.js
+const { data, error } = await supabase.rpc('check_license', {
+    p_key: userKey.trim(),
+    p_hwid: hwid
+});
+```
+
+**Response format:**
+```json
+{
+    "valid": true,
+    "expires_at": "2025-12-31T23:59:59Z",
+    "plan_type": "monthly|yearly|lifetime",
+    "is_new_activation": false,
+    "message": "License activated"
+}
+```
+
+### 3.2 License Plans
+
+| Plan | Code | Hiển thị |
+|------|------|----------|
+| Monthly | `monthly` | Gói 1 Tháng |
+| Yearly | `yearly` | Gói 1 Năm |
+| Lifetime | `lifetime` | Trọn Đời |
+
+### 3.3 Status Caching
+
+- Cache duration: **5 phút**
+- Auto-refresh khi expired
+- Lưu license key trong settings (local storage)
+
+---
+
+## 4. Hệ Thống Credit
+
+### 4.1 Pricing Variables (từ Supabase)
+
+| Variable | Default | Mô tả |
+|----------|---------|-------|
+| `x` (captcha_cost) | 1 | Cost per captcha solve |
+| `y1` (veo3_fast) | 2 | Veo3 Fast tier |
+| `y2` (veo3_lower) | 1 | Veo3 Lower Priority |
+| `y3` (veo3_quality) | 20 | Veo3 Quality tier |
+| `z` (gemini_cost) | 0 | Gemini API cost |
+
+### 4.2 Công Thức Tính Credit
+
+| Service | Formula | Ví dụ (Fast tier) |
+|---------|---------|-------------------|
+| Video 15s | `7x + 4y` | 7×1 + 4×2 = **15 credits** |
+| Video 30s | `10x + 6y` | 10×1 + 6×2 = **22 credits** |
+| Video 45s | `17x + 12y` | 17×1 + 12×2 = **41 credits** |
+| Review | `z + 8x + 4y` | 0 + 8×1 + 4×2 = **16 credits** |
+| Story Mode | `z + sceneCount×(x+y)` | Per scene basis |
+| Script Clone | `2z` | 0 credits |
+
+### 4.3 Credit Deduction Flow
+
+```javascript
+// supabase/index.js
+async deductCredit(licenseKey, amount, metadata) {
+    // 1. Try RPC first
+    const { data } = await this.client.rpc('deduct_credit', {
+        p_license_key: licenseKey,
+        p_amount: amount,
+        p_metadata: metadata
+    });
+    
+    // 2. Fallback to direct SQL if RPC fails
+    // 3. Always log usage on success
+}
+```
+
+---
+
+## 5. Veo3 Account Pool
+
+### 5.1 Smart Rotation Logic
+
+```javascript
+// Supabase RPC
+async getAvailableVeo3Account() {
+    // 1. Call RPC: get_available_veo3_account
+    // 2. Finds accounts where:
+    //    - status = 'active'
+    //    - current_users < max_concurrent
+    // 3. Orders by last_used_at ASC (load balancing)
+    // 4. Atomically increments current_users
+}
+```
+
+### 5.2 Database Schema
+
+| Column | Type | Mô tả |
+|--------|------|-------|
+| [id](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/preload.js#30-31) | UUID | Primary key |
+| `cookie` | TEXT | Auth cookie |
+| `access_token` | TEXT | Optional token |
+| `status` | ENUM | active/dead |
+| `current_users` | INT | Current concurrent users |
+| `max_concurrent` | INT | Max allowed concurrent |
+| `last_used_at` | TIMESTAMP | For rotation |
+| `last_error` | TEXT | Error message if dead |
+
+### 5.3 Account Lifecycle
+
+1. **Allocation:** `get_available_veo3_account` RPC
+2. **Usage:** Application uses cookie for Veo3 API
+3. **Release:** `release_veo3_account(target_id, mark_dead)`
+4. **Dead marking:** If cookie expired/invalid
+
+---
+
+## 6. Captcha System
+
+### 6.1 Multi-Provider Fallback
+
+```javascript
+const providers = ['15d', 'larry', 'capsolver', 'yescaptcha', 'omocaptcha'];
+
+async getAvailableYesCaptchaToken() {
+    for (const provider of providers) {
+        const data = await this.client.rpc('get_valid_captcha_key', {
+            p_provider: provider
+        });
+        if (data) return { apiKey, provider };
+    }
+    return null; // All providers exhausted
+}
+```
+
+**Provider Priority:**
+1. `15d` (primary)
+2. `larry`
+3. `capsolver`
+4. `yescaptcha`
+5. `omocaptcha` (last resort)
+
+---
+
+## 7. API & IPC Endpoints
+
+### 7.1 License APIs
+
+| IPC Channel | Mô tả |
+|-------------|-------|
+| `get-hwid` | Get machine HWID |
+| `verify-license` | Verify & activate license |
+| `get-license-status` | Get cached status |
+| `clear-license` | Clear stored license |
+| `get-saved-license-key` | Get saved key |
+
+### 7.2 Billing APIs
+
+| IPC Channel | Mô tả |
+|-------------|-------|
+| `get-billing-info` | Get billing details |
+| `get-credit-balance` | Get current credits |
+| `get-pricing-info` | Get pricing table |
+| `calculate-cost` | Calculate service cost |
+
+### 7.3 Premium APIs
+
+| IPC Channel | Mô tả |
+|-------------|-------|
+| `premium-api-configure` | Configure premium API |
+| `premium-upload-files` | Upload media files |
+| `premium-submit-job` | Submit generation job |
+| `premium-get-job-status` | Poll job status |
+
+---
+
+## 8. Supabase Tables
+
+| Table | Mô tả |
+|-------|-------|
+| `licenses` | License keys, HWID, credits, expiry |
+| `account_veo3` | Veo3 account pool |
+| `captcha_keys` | Captcha provider API keys |
+| `gemini_keys` | Gemini API key pool |
+| `pricing_config` | Dynamic pricing variables |
+| `usage_logs` | Usage history & billing |
+
+---
+
+## 9. Điểm Yếu & Bypass Possibilities
+
+### 9.1 Unprotected Services
+
+> [!NOTE]  
+> Nhiều service modules không được compile, có thể patch trực tiếp
+
+- [license/index.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/services/license/index.js) - License manager
+- [license/verification.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/services/license/verification.js) - Verification logic
+- [supabase/index.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/services/supabase/index.js) - All Supabase calls
+- [PricingService.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/services/PricingService.js) - Credit calculations
+
+### 9.2 Bypass Strategies
+
+#### A. License Bypass (Easiest)
+
+```javascript
+// Patch license/index.js
+async getLicenseStatus(forceRefresh = false) {
+    // Return always valid
+    return {
+        valid: true,
+        planType: 'lifetime',
+        planName: 'Trọn Đời',
+        remaining: 'Vĩnh viễn',
+        expiresAt: '2099-12-31T23:59:59Z'
+    };
+}
+```
+
+#### B. Credit Bypass
+
+```javascript
+// Patch supabase/index.js
+async getCreditBalance(licenseKey) {
+    return 999999; // Always return max credits
+}
+
+async deductCredit(licenseKey, amount, metadata) {
+    return { success: true, newBalance: 999999, error: null };
+}
+```
+
+#### C. Frontend Bypass
+
+```javascript
+// Patch LicenseGate.jsx
+useEffect(() => {
+    // Auto-pass license check
+    onLicenseValid({
+        valid: true,
+        planType: 'lifetime',
+        planName: 'VIP Lifetime'
+    });
+}, []);
+```
+
+### 9.3 Mock Server Approach
+
+Setup local mock Supabase:
+
+```javascript
+// mock-server.js
+app.post('/rest/v1/rpc/check_license', (req, res) => {
+    res.json({
+        valid: true,
+        expires_at: '2099-12-31T23:59:59Z',
+        plan_type: 'lifetime',
+        is_new_activation: false
+    });
+});
+```
+
+Then redirect `hosts` hoặc patch Supabase URL trong config.
+
+---
+
+## 10. Tóm Tắt
+
+| Thành phần | Bảo vệ | Khó khăn bypass |
+|------------|--------|-----------------|
+| Main logic | Bytenode | ⭐⭐⭐⭐⭐ (Khó) |
+| Config/Keys | Bytenode | ⭐⭐⭐⭐⭐ (Khó) |
+| License service | Plain JS | ⭐⭐ (Dễ) |
+| Supabase service | Plain JS | ⭐⭐ (Dễ) |
+| Frontend | Plain JSX | ⭐ (Rất dễ) |
+| HWID check | Backend | ⭐⭐⭐ (Trung bình) |
+
+> [!CAUTION]
+> Bypass sẽ mất tác dụng khi app update. Cần reapply sau mỗi lần update.
+
+---
+
+## Files Quan Trọng
+
+- [main-loader.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/main-loader.js) - Entry point
+- [preload.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/preload.js) - IPC bridge
+- [license/index.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/services/license/index.js) - License manager
+- [supabase/index.js](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/main/services/supabase/index.js) - Supabase client
+- [LicenseGate.jsx](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/renderer/components/LicenseGate.jsx) - License UI
+- [App.jsx](file:///d:/VeoForge-Setup-3.4.0/$PLUGINSDIR/resources/app_extracted/src/renderer/App.jsx) - Main React app

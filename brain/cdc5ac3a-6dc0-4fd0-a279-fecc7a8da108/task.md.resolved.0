@@ -1,0 +1,7 @@
+# Task: Fix "Access is denied" error in AnhNhanh image generation
+
+- [/] Analyze `websocket_client_simple.py` and surrounding files for permission issues <!-- id: 0 -->
+- [ ] Investigate application logs or error context if available <!-- id: 1 -->
+- [ ] Identify the specific operation causing `WinError 5` <!-- id: 2 -->
+- [ ] Implement fix (e.g., adjust permissions, change paths, or fix command execution) <!-- id: 3 -->
+- [ ] Verify the fix with the user <!-- id: 4 -->

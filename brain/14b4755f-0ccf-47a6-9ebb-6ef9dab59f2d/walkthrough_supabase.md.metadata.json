@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Walkthrough documenting the successful integration of Supabase authentication into the Veo Automation tool. It describes the new UI components and the logic used to protect the main application interface.",
+  "updatedAt": "2026-01-14T08:38:52.787461400Z"
+}

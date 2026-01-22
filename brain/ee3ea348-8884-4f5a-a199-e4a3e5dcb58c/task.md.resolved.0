@@ -1,0 +1,18 @@
+# Task: Deep Analysis of Kinx Auto
+
+- [/] Preliminary Analysis of the Project Structure
+    - [x] Identify application type (Electron)
+    - [ ] Explore external resources and config files
+    - [ ] Extract and analyze [app.asar](file:///d:/15012026kinx-auto/resources/app.asar) (if possible)
+- [ ] Backend and Core Logic Analysis
+    - [ ] Identify main process entry point
+    - [ ] Analyze IPC communication
+    - [ ] Map API endpoints and external services
+- [ ] Frontend Analysis
+    - [ ] Analyze technology stack (React, Vue, etc.)
+    - [ ] Understand key UI components and flows
+- [ ] Security and Licensing Analysis
+    - [ ] Investigate licensing mechanisms (if any)
+    - [ ] Check for obfuscation or protection
+- [ ] Comprehensive Summary and Report
+    - [ ] Create a detailed walkthrough of the tool's operation

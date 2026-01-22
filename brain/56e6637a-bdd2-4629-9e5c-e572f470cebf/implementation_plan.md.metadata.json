@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Updated implementation plan to address the failed bypass. The new strategy involves finding the \"Cần kích hoạt\" string in IDA Pro to locate the GUI activation logic and patching it directly, alongside forcing the activation check functions to return 'True'.",
+  "updatedAt": "2026-01-21T23:46:45.745602500Z",
+  "version": "2"
+}

@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary":  "Patch `bytecode-loader.cjs` to include `importModuleDynamically` callback to fix `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING`.",
+  "updatedAt":  "2026-01-11T18:48:05.519269Z"
+}

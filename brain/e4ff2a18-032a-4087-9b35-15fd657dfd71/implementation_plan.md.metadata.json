@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary":  "Plan to migrate Fashion AI Studio from paid Lovable API Gateway to free Google AI Studio API. Covers modifications to 3 Edge Functions (generate-storyboard, analyze-fashion, virtual-tryon) and 3 frontend components to support user API keys with automatic key rotation.",
+  "updatedAt":  "2026-01-01T15:17:00.262450200Z"
+}

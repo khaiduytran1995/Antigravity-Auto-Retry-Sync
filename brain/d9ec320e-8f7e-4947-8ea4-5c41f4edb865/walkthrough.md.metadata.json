@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Complete reverse engineering analysis of TransVideoAI v4.1 showing:\n1. Activation form is a dummy - always returns 'invalid' regardless of input\n2. gfx.exe is malware that installs backdoor/miner (Microsoft Edge Update disguise)\n3. Malware persistence via Windows Defender exclusions, scheduled tasks, and services\n4. Real app is Python-based with AI/video processing capabilities",
+  "updatedAt": "2026-01-18T02:06:59.134450800Z"
+}

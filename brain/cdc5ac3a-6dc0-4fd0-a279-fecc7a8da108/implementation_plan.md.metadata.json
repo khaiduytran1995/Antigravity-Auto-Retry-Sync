@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary":  "- Wrap `debug_log` in `try...except` in `websocket_client_simple.py` and `api_imagen_service.py`.\n- Improve error handling in `websocket_client_simple.py` to catch and explain `WinError 5`.\n- Change local loopback from `127.0.0.2` to `127.0.0.1` in the bypass script for better compatibility.\n- Add a script to fix firewall rules for the application EXEs.\n- Provide clear instructions to the user.",
+  "updatedAt":  "2026-01-11T16:15:43.470498300Z"
+}

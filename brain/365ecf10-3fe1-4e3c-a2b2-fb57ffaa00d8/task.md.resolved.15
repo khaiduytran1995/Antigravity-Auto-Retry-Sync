@@ -1,0 +1,13 @@
+- [x] Investigate project structure
+- [x] Report findings to user
+- [x] Explain Python source role
+- [x] Audit Python scripts for malware
+- [x] Analyze binaries (Decompile/String Check)
+- [x] Analyze Login Mechanism
+- [x] Build Server API Extraction Tool
+- [x] Check API Key Quota
+- [ ] Analyze Quota Display Logic
+    - [x] Analyze screenshot (Done mentally)
+    - [ ] Check [debug_log.txt](file:///d:/09012026Elevenlabs/debug_log.txt) for network responses
+    - [ ] Check [caidat_minimax.txt](file:///d:/09012026Elevenlabs/py/caidat_minimax.txt)
+    - [ ] Explain "Virtual Quota" (Reseller Credit) vs "Real Key Quota"

@@ -1,0 +1,6 @@
+- [x] Analysis Complete
+- [x] API Token Miner Created
+- [ ] HWID Lock Bypass
+    - [ ] Scan binaries for HWID mechanism
+    - [ ] Create HWID spoofer
+    - [ ] Test bypass

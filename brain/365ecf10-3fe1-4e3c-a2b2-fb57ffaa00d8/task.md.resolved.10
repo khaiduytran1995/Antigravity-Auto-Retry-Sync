@@ -1,0 +1,11 @@
+- [x] Investigate project structure
+- [x] Report findings to user
+- [x] Explain Python source role
+- [x] Audit Python scripts for malware
+- [x] Analyze binaries (Decompile/String Check)
+- [x] Analyze Login Mechanism
+- [ ] Build Server API Extraction Tool
+    - [ ] Create `api_explorer.py` to probe `hoanphicrypto.com` endpoints
+    - [ ] Fetch `api.txt` and `apiduphong.txt` (Potential Key Leak)
+    - [ ] Test `register_device.php` (Login Simulation)
+    - [ ] Run script and report data found

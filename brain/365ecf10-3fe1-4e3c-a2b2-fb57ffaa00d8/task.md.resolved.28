@@ -1,0 +1,5 @@
+- [x] Analysis Complete
+- [ ] Request HWID Spoofer
+    - [ ] Create proxy that modifies HWID in outgoing requests
+    - [ ] Keep response unchanged (real API key)
+    - [ ] Test with tool

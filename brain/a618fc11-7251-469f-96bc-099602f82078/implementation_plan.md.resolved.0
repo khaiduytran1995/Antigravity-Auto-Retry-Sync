@@ -1,0 +1,24 @@
+# Decompile Prompt Generator
+
+This plan outlines the steps to decompile the [Prompt_Generator_DinhRin_5.2.exe](file:///d:/Prompt_Generator_DinhRin_5.2/Prompt_Generator_DinhRin_5.2.exe) application and its associated payload [27~](file:///d:/Prompt_Generator_DinhRin_5.2/27~).
+
+## Proposed Changes
+
+### [Component] Extraction and Analysis
+- [ ] Refine [unpacker.py](file:///d:/Prompt_Generator_DinhRin_5.2/unpacker.py) to correctly extract all 239 files from [27~](file:///d:/Prompt_Generator_DinhRin_5.2/27~) without encoding errors.
+- [ ] Identify the main entry point and application logic among the extracted files.
+- [ ] Check if any extracted file is a ZIP archive or contains Python bytecode (`.pyc`).
+
+### [Component] Decompilation
+- [ ] If Python bytecode is found, use appropriate decompilation tools (e.g., `pycdc`, `uncompyle6`).
+- [ ] If the code is compiled to native (Nuitka/Cython), identify critical logic for reverse engineering.
+
+## Verification Plan
+
+### Automated Tests
+- [ ] Verify that the extracted files match the expected count (239).
+- [ ] Check the integrity of the extracted DLLs by verifying their PE headers.
+
+### Manual Verification
+- [ ] Inspect the decompiled source code for readability and completeness.
+- [ ] Verify if the "Prompt Generator" logic (Vietnamese tool) is recovered.

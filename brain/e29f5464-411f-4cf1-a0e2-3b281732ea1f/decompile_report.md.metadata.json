@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_OTHER",
+  "summary":  "Full decompilation report of giongai.exe showing all API endpoints, servers, and branding system. Confirms all traffic goes to 11labs.net with no Supabase or alternative backend.",
+  "updatedAt":  "2026-01-08T10:42:06.792718400Z"
+}

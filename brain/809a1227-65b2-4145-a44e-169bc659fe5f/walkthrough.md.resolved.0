@@ -1,0 +1,48 @@
+# Kinx Auto Application Analysis
+
+## Objective
+Analyze the Kinx Auto application to understand its API usage, specifically regarding Google API keys, and identify potential bypass mechanisms.
+
+## Findings
+
+### 1. Application Type and Structure
+- **Type**: Electron Application.
+- **Main Entry Point**: `dist-electron/main.js` (inside [app.asar](file:///d:/09012026kinx-auto/resources/app.asar)).
+- **Dependencies**: `@google/genai`, `puppeteer`, `fluent-ffmpeg`.
+
+### 2. Obfuscation
+- The `main.js` file is heavily obfuscated using a standard array-shifting technique.
+- String arrays `_0x1c14` (source) and helper `_0x32d1` (decoder) were identified.
+- Deobfuscation revealed core logic and API endpoints.
+
+### 3. API Usage Analysis
+- **Endpoint**: The application communicates with **`https://aisandbox-pa.googleapis.com`**.
+- **Path**: `/v1/projects/{projectId}/flowMedia:batchGenerateImages`.
+- **Authentication**: 
+  - The application **does not** appear to use a standard API Key (`AIza...`).
+  - Instead, it uses **Cookie-based authentication**.
+  - The code constructs requests using a "cookie" property pulled from a global configuration object (`_0x4bacfe`).
+  - This suggests the app automates a user session (likely via Puppeteer) to acquire cookies for the internal/sandbox API.
+
+### 4. Code Evidence
+- **URL Construction**:
+  ```javascript
+  // Decoded fragments
+  'https://ai' + 'sandbox-pa' + '.googleapi' + 's.com/v1/p' + 'rojects/' + {projectId} + '/flowMedia' + ':batchGenerateImages'
+  ```
+- **Auth Logic**:
+  ```javascript
+  // Extracted from main.js
+  {'url': _0x3065df, 'cookie': _0x4bacfe['cookie'], ...}
+  ```
+- **Renderer Analysis**:
+  - Searched `dist/assets/index-DLxlB05E.js` for `GenerativeAI` or `AIza` usage but found no matches. This reinforces that the main logic (and likely the image generation) is handled in the main process via the sandbox API.
+
+## Conclusion & Bypass Strategy
+- **Current State**: The user-provided API key (`AIza...`) cannot be simply "injected" because the application targets `aisandbox-pa`, which requires session cookies and internal/scoped access, not a public API key.
+- **Potential Bypass**:
+  1. **Session Hijacking**: The app logic relies on `_0x4bacfe` being populated with valid cookies. A bypass would involve injecting a valid `__Secure-3PSID` or similar cookie into this object.
+  2. **API Rewrite (Complex)**: To use the `AIza` key, the application's underlying logic would need to be rewritten to target the public `generativelanguage.googleapis.com` endpoint. However, the `flowMedia:batchGenerateImages` model/endpoint might not have a direct equivalent in the public API generic text generation, or it requires specific Imagen payloads which differ.
+
+## Recommendation
+The most viable path for "bypassing" limitations (e.g., if the goal is to use without a paid account) is to obtain valid cookies from a working session (using the "Cookie Export Tool" concept mentioned in history) and inject them, rather than trying to force an API key.

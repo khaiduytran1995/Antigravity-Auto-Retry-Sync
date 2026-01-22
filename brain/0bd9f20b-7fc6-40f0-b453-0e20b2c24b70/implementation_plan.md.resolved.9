@@ -1,0 +1,29 @@
+# Implementation Plan - WebSocket Domain Routing Fix
+
+The application (v1.3.2) uses multiple WebSocket domains for image generation. Specifically, `v3.chichbong.me` and `ws.chichbong.me` use a different backend IP than `api.chichbong.me`. This plan refactors the proxy to be domain-aware.
+
+## Proposed Changes
+
+### [MODIFY] [FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py)
+
+1.  **Dynamic Routing Configuration**:
+    - Add `REAL_WS_V3_IP = "125.235.4.59"` (Viettel backend).
+    - Maintain `REAL_WS_IP = "104.21.79.194"` (Cloudflare backend).
+
+2.  **WebSocket Proxy Refactor**:
+    - Extract `Host` header from client connection.
+    - Set `target_ip = REAL_WS_V3_IP` if requested host is `v3` or [ws](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/test_ws_proxy_connection.py#9-40).
+    - Set `target_ip = REAL_WS_IP` otherwise.
+    - Forward the request to the correct backend with the original `Host` and `Origin`.
+
+3.  **Comprehensive Hosts & Certs**:
+    - Ensure all domains are redirected: `api`, `v2`, `v3`, [ws](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/test_ws_proxy_connection.py#9-40).
+    - Ensure SSL certificates include all domains in Subject Alternative Name (SAN).
+
+## Verification Plan
+
+### Manual Verification
+- Run the script and observe the logs.
+- Trigger an image generation in the app.
+- Check if `[WS] Connecting to v3.chichbong.me via 125.235.4.59` appears in the logs.
+- Confirm if the image generation succeeds.

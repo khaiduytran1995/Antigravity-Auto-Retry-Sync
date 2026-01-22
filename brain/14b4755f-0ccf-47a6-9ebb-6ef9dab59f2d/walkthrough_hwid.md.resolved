@@ -1,0 +1,51 @@
+# Walkthrough: HWID Locking & Video Fix
+
+I have successfully implemented the Hardware ID (HWID) locking mechanism and fixed the video generation issue.
+
+## 1. Video Generation Fix
+The "404 Not Found" error when clicking "Bắt đầu" to create a video was caused by an incomplete API endpoint. I have updated the [licenseManager.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/licenseManager.js) to use the full endpoint.
+
+#### [MODIFY] [licenseManager.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/licenseManager.js)
+```diff
+-apiEndpoint: "https://aisandbox-pa.googleapis.com",
++apiEndpoint: "https://aisandbox-pa.googleapis.com/v1/video:batchAsyncGenerateVideoText",
+```
+
+## 2. HWID Locking Implementation
+This feature restricts each Supabase account to a single machine.
+
+### Backend Changes
+Added a new IPC handler to retrieve the machine's unique ID using the `node-machine-id` library.
+
+#### [MODIFY] [main.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/main.js)
+Added `license:get-machine-id` handler.
+
+#### [MODIFY] [preload.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/preload.js)
+Exposed `window.electronAPI.getMachineId()` to the frontend.
+
+### Frontend Changes
+Updated the login logic in [index.html](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist/index.html) to bind and validate the HWID.
+
+#### [MODIFY] [index.html](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist/index.html)
+- **First Login (or Register):** The machine's HWID is saved to the user's Supabase `user_metadata`.
+- **Subsequent Logins:** The app compares the current machine's HWID with the one stored in Supabase.
+- **Mismatch:** If a different machine tries to log in, the app displays: `"Tài khoản này đã được kích hoạt trên máy khác (HWID mismatch). Vui lòng liên hệ Admin."` and signs the user out.
+
+### Registration Disabled
+As requested, I have removed the registration link and logic from the app. New accounts can no longer be created by users; they must use accounts provided by the Admin.
+
+#### [MODIFY] [index.html](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist/index.html)
+- Removed "Register" toggle link.
+- Simplified [setupAuthUI](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist/index.html#205-283) to handle login only.
+
+## Verification Plan
+
+### How to Test:
+1. **Login Only:** Check the login screen; the "Register" option should be gone.
+2. **Video Generation:** Restart the app and try creating a video. The 404 error should be gone.
+3. **HWID Binding:** Log in with a provided account. It will automatically bind to your current machine on the first login.
+4. **HWID Validation:** Subsequent logins check for matching HWID.
+5. **Visual Status:** Watch the status text during login for step-by-step feedback.
+
+> [!IMPORTANT]
+> Please restart the application for all changes to take effect.

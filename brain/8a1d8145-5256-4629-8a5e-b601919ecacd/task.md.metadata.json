@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Checklist for updating app.asar to version 2.2.9.0 - extract, patch, and rebuild.",
+  "updatedAt": "2026-01-18T17:28:08.011467900Z"
+}

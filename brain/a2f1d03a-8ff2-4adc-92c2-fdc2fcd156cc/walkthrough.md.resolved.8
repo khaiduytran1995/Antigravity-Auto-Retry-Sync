@@ -1,0 +1,24 @@
+# Zero-Fail Stabilization: Smart Task Overlap 🛡️🚀
+
+I have refined the task isolation system to match your specific requirements. The system now balances account safety with maximum productivity.
+
+## Refined "Smart Overlap" Rules 🧠
+
+### 1. The 5-Second Success Rule ✅
+- **Logic**: After a video or image is successfully generated, the account will wait **exactly 5 seconds** before starting the next job. 
+- **Goal**: This gives the account a small "breather" and mimics a human clicking wait times.
+
+### 2. The 30-Second Max Wait Rule ⏳
+- **Logic**: If a task is still running, the system will wait a **maximum of 30 seconds**.
+- **Overlap**: If the previous task takes *longer* than 30 seconds to finish, the app will now allow the next command to be sent anyway (overlapping). 
+- **Goal**: This ensures that slow-polling tasks don't block the entire queue forever.
+
+## Verification Logs:
+- `⏳ Success cooldown. Waiting 5000ms...` (Resting after success).
+- `🔒 Task running (10s). Waiting max 20s...` (Queueing up for the next one).
+- `🔓 Task running > 30s. Allowing overlap.` (Rule #2 in action).
+
+## How to use:
+The app now handles this timing automatically. You can send prompts as fast as you want, and the "Smart Overlap" logic will pace them perfectly for you.
+
+Everything is now set up exactly as you requested! Ready for batch generation. 🎬

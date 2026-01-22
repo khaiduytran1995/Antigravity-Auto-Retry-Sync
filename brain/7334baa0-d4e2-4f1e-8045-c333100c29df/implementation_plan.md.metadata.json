@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "A plan to bypass license verification using a local proxy server (Interception Mode) instead of binary patching.",
+  "updatedAt": "2026-01-22T11:07:37.520469600Z"
+}

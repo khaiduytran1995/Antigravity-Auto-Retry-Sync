@@ -1,0 +1,9 @@
+# Security Hardening Against Bypass - Veo Automation
+
+## Tasks
+- [x] Analyze application structure and identify bypass vulnerabilities
+- [/] Create implementation plan for security fixes
+- [ ] Restore [licenseManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/licenseManager.js) to proper server validation
+- [ ] Add integrity checks for critical files
+- [ ] Review and secure [tokenManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/tokenManager.js) and related services
+- [ ] Verify security fixes work correctly

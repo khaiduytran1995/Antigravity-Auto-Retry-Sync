@@ -1,0 +1,8 @@
+# Task Breakdown
+
+- [ ] Explore the directory structure of `d:\VideoAIStudio_Installer_v2.0.2` [/]
+- [ ] Identify the core application files (e.g., Electron resources, Python scripts, etc.) [ ]
+- [ ] Decompile or extract application resources if necessary (e.g., `app.asar`) [ ]
+- [ ] Search for server endpoints and API URLs within the codebase [ ]
+- [ ] Analyze the operational logic and communication flow [ ]
+- [ ] Document the findings in a comprehensive report [ ]

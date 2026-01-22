@@ -1,0 +1,6 @@
+# Debugging Download Error
+
+- [ ] Search for `app:downloadAndSave` handler <!-- id: 0 -->
+- [ ] Analyze the implementation of the download handler <!-- id: 1 -->
+- [x] Fix the `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING` error <!-- id: 2 -->
+- [ ] Verify the fix <!-- id: 3 -->

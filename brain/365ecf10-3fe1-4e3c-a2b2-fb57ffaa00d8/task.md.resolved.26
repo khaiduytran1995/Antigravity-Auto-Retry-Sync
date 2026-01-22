@@ -1,0 +1,6 @@
+- [x] Analysis Complete
+- [ ] API Token Miner
+    - [ ] Create logging proxy to capture all traffic
+    - [ ] Extract API keys/tokens from responses
+    - [ ] Save tokens to file
+    - [ ] Create launcher

@@ -1,0 +1,12 @@
+# Task: Phân Tích LVC_Veo3_Automation Tool
+
+## Mục tiêu
+Phân tích toàn bộ thông tin về ứng dụng PyInstaller [LVC_Veo3_Automation.exe](file:///D:/LVC_Veo3_Automation_v1.2.47/LVC_Veo3_Automation.exe)
+
+## Checklist
+- [/] Khám phá cấu trúc thư mục workspace
+- [ ] Trích xuất nội dung PyInstaller (pyinstxtractor)
+- [ ] Phân tích các file .pyc chính
+- [ ] Xác định các API endpoints và server
+- [ ] Phân tích hệ thống license/authentication
+- [ ] Tạo báo cáo phân tích chi tiết

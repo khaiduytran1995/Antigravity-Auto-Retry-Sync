@@ -1,0 +1,1350 @@
+<!-- 
+HƯỚNG DẪN SỬ DỤNG TRONG ELEMENTOR:
+1. Tạo một Trang mới hoặc mở trang bạn muốn sửa bằng Elementor.
+2. Thêm một Section (Mục) mới (chọn loại 1 cột).
+3. Tìm widget có tên là "HTML" trong thanh công cụ bên trái.
+4. Kéo widget HTML thả vào Section vừa tạo.
+5. Copy TOÀN BỘ nội dung bên dưới và dán vào ô "HTML Code" của widget đó.
+6. Lưu và xem thử.
+-->
+
+<style>
+    /* Dán nội dung CSS vào đây */
+    :root {
+        --primary-color: #b40000;
+        --secondary-color: #1a1a1a;
+        --accent-color: #d4af37;
+        --text-color: #333;
+        --light-bg: #f9f9f9;
+        --white: #ffffff;
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Roboto', sans-serif;
+        --transition: all 0.3s ease;
+        scroll-behavior: smooth;
+    }
+
+    /* Reset cơ bản cho phạm vi widget này để tránh xung đột */
+    .ut-le-tram-custom-design * {
+        box-sizing: border-box;
+    }
+
+    .ut-le-tram-custom-design {
+        font-family: var(--font-body);
+        color: var(--text-color);
+        line-height: 1.6;
+        background-color: var(--white);
+        width: 100%;
+    }
+
+    .ut-le-tram-custom-design a {
+        text-decoration: none;
+        color: inherit;
+        transition: var(--transition);
+    }
+
+    .ut-le-tram-custom-design ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .ut-le-tram-custom-design img {
+        max-width: 100%;
+        display: block;
+    }
+
+    /* Desktop (Default) */
+    .ut-le-tram-custom-design .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    /* Typography */
+    .ut-le-tram-custom-design h1,
+    .ut-le-tram-custom-design h2,
+    .ut-le-tram-custom-design h3 {
+        font-family: var(--font-heading);
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+    }
+
+    .ut-le-tram-custom-design .section-title {
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        /* Responsive font size */
+        text-align: center;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    .ut-le-tram-custom-design .divider {
+        width: 60px;
+        height: 3px;
+        background-color: var(--accent-color);
+        margin: 0 0 20px 0;
+    }
+
+    .ut-le-tram-custom-design .divider.center {
+        margin: 0 auto 40px auto;
+    }
+
+    /* Buttons */
+    .ut-le-tram-custom-design .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        border: 2px solid transparent;
+        font-family: var(--font-body);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        background-color: var(--primary-color);
+        color: var(--white);
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .ut-le-tram-custom-design .btn:hover {
+        background-color: var(--white);
+        color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Shine Effect */
+    .ut-le-tram-custom-design .btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: 0.5s;
+        z-index: -1;
+    }
+
+    .ut-le-tram-custom-design .btn:hover::after {
+        left: 100%;
+    }
+
+    /* Utility Classes for Split Slider */
+    .desktop-only {
+        display: block;
+    }
+
+    .mobile-only {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .desktop-only {
+            display: none;
+        }
+
+        .mobile-only {
+            display: block;
+        }
+    }
+
+    /* Hero Slider Desktop */
+    .ut-le-tram-custom-design .hero-desktop {
+        position: relative;
+        overflow: hidden;
+        height: 600px;
+        /* Fixed height for desktop */
+        background-color: #000;
+    }
+
+    /* Hero Slider Mobile */
+    .ut-le-tram-custom-design .hero-mobile {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        aspect-ratio: 16/9;
+        /* Force 16:9 ratio to show full image */
+        background-color: #000;
+    }
+
+    .ut-le-tram-custom-design .slider {
+        position: relative;
+        height: 100%;
+    }
+
+    .ut-le-tram-custom-design .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out;
+        z-index: 1;
+    }
+
+    .ut-le-tram-custom-design .slide.active {
+        opacity: 1;
+        z-index: 2;
+    }
+
+    /* Background Image with Ken Burns Effect */
+    .ut-le-tram-custom-design .slide-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transform: scale(1);
+        transition: transform 10s linear;
+    }
+
+    .ut-le-tram-custom-design .slide.active .slide-bg {
+        transform: scale(1.1);
+        /* Zoom in effect */
+    }
+
+    /* Overlay Gradient for Readability */
+    .ut-le-tram-custom-design .slide-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0) 100%);
+        z-index: 2;
+    }
+
+    /* Content Positioning */
+    .ut-le-tram-custom-design .slide-content {
+        position: absolute;
+        top: 50%;
+        left: 10%;
+        /* Align left */
+        transform: translateY(-50%);
+        z-index: 10;
+        max-width: 600px;
+        color: var(--white);
+        padding: 20px;
+    }
+
+    /* Text Animations */
+    .ut-le-tram-custom-design .slide-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: 15px;
+        line-height: 1.1;
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease 0.3s;
+    }
+
+    .ut-le-tram-custom-design .slide.active .slide-title {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .ut-le-tram-custom-design .slide-desc {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        color: #f0f0f0;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.8);
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease 0.5s;
+    }
+
+    .ut-le-tram-custom-design .slide.active .slide-desc {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .ut-le-tram-custom-design .slide-btn-wrapper {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease 0.7s;
+    }
+
+    .ut-le-tram-custom-design .slide.active .slide-btn-wrapper {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Accent Text */
+    .ut-le-tram-custom-design .text-accent {
+        color: var(--accent-color);
+    }
+
+    /* Slider Controls */
+    .ut-le-tram-custom-design .slider-controls button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        color: var(--white);
+        font-size: 1.5rem;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: var(--transition);
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .ut-le-tram-custom-design .slider-controls button:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .ut-le-tram-custom-design .prev-slide {
+        left: 30px;
+    }
+
+    .ut-le-tram-custom-design .next-slide {
+        right: 30px;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .ut-le-tram-custom-design .slide-title {
+            font-size: 2.5rem;
+        }
+
+        .ut-le-tram-custom-design .slide-overlay {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%);
+            /* Darker bottom on mobile */
+        }
+
+        .ut-le-tram-custom-design .slide-content {
+            left: 5%;
+            right: 5%;
+            width: 90%;
+            text-align: center;
+            bottom: 10%;
+            top: auto;
+            transform: none;
+        }
+    }
+
+    /* Mobile Slider Typography & Layout Refinement */
+    .ut-le-tram-custom-design .hero-mobile .slide-content {
+        position: absolute !important;
+        bottom: 10px !important;
+        right: 10px !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+        text-align: right !important;
+        width: auto !important;
+        max-width: 60% !important;
+        /* Prevent full width to show image */
+        padding: 0 !important;
+    }
+
+    .ut-le-tram-custom-design .hero-mobile .slide-title {
+        font-size: 0.9rem !important;
+        /* Extreme reduction */
+        margin-bottom: 2px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .ut-le-tram-custom-design .hero-mobile .slide-desc {
+        font-size: 0.65rem !important;
+        /* Extreme reduction */
+        margin-bottom: 5px;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        /* Limit to 2 lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .ut-le-tram-custom-design .hero-mobile .btn {
+        font-size: 0.6rem !important;
+        /* Extreme reduction */
+        padding: 4px 10px !important;
+        text-transform: none !important;
+        /* Optional: remove uppercase to save space */
+    }
+
+    @media (max-width: 480px) {
+        .ut-le-tram-custom-design .slider-controls {
+            display: none;
+            /* Hide arrows on mobile */
+        }
+
+        /* Categories Mobile Refinement - ULTRA COMPACT 3 COLUMNS */
+        .ut-le-tram-custom-design .category-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            /* 3 Columns to see all */
+            gap: 5px !important;
+            /* Tiny gap */
+        }
+
+        .ut-le-tram-custom-design .category-image img {
+            height: 80px !important;
+            /* Thumbnail size */
+        }
+
+        .ut-le-tram-custom-design .category-info {
+            padding: 4px !important;
+            /* Minimal padding */
+        }
+
+        .ut-le-tram-custom-design .category-info h3 {
+            font-size: 0.75rem !important;
+            /* Tiny font */
+            line-height: 1.2 !important;
+        }
+    }
+
+    /* Categories - Updated for better visibility */
+    .ut-le-tram-custom-design .categories {
+        padding: 80px 0;
+        background-color: var(--light-bg);
+    }
+
+    .ut-le-tram-custom-design .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+    }
+
+    /* Note: Mobile category styles are handled in the @media block above */
+
+    .ut-le-tram-custom-design .category-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        background: var(--white);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ut-le-tram-custom-design .category-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .ut-le-tram-custom-design .category-image {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ut-le-tram-custom-design .category-image img {
+        width: 100%;
+        height: 350px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .ut-le-tram-custom-design .category-item:hover .category-image img {
+        transform: scale(1.1);
+    }
+
+    .ut-le-tram-custom-design .category-info {
+        background: var(--white);
+        padding: 20px;
+        text-align: center;
+        border-top: 1px solid #eee;
+    }
+
+    .ut-le-tram-custom-design .category-info h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    /* Feature Section - Fixed Layout */
+    .ut-le-tram-custom-design .section {
+        padding: 80px 0;
+    }
+
+    .ut-le-tram-custom-design .alt-bg {
+        background-color: #fffbf0;
+    }
+
+    .ut-le-tram-custom-design .feature-row {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+        /* Clean gap, no overlap */
+    }
+
+    .ut-le-tram-custom-design .feature-row.reverse {
+        flex-direction: row-reverse;
+    }
+
+    .ut-le-tram-custom-design .feature-image {
+        flex: 1;
+        position: relative;
+    }
+
+    .ut-le-tram-custom-design .feature-image img {
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        display: block;
+    }
+
+    .ut-le-tram-custom-design .feature-content {
+        flex: 1;
+        padding: 20px;
+    }
+
+    .ut-le-tram-custom-design .highlight-text {
+        color: var(--primary-color);
+        font-weight: 500;
+        font-style: italic;
+        border-left: 4px solid var(--accent-color);
+        padding-left: 20px;
+        margin: 25px 0;
+        background: #fff5f5;
+        padding: 15px 20px;
+        border-radius: 0 8px 8px 0;
+    }
+
+    /* Feature Section Responsive */
+    @media (max-width: 992px) {
+
+        .ut-le-tram-custom-design .feature-row,
+        .ut-le-tram-custom-design .feature-row.reverse {
+            flex-direction: column;
+            text-align: center;
+            gap: 30px;
+        }
+
+        .ut-le-tram-custom-design .highlight-text {
+            border-left: none;
+            border-top: 4px solid var(--accent-color);
+            padding-top: 20px;
+            padding-left: 0;
+            margin-top: 20px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .ut-le-tram-custom-design .feature-image {
+            max-width: 100%;
+        }
+    }
+
+    /* Products Section - Mobile Slider */
+    .ut-le-tram-custom-design .product-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+    }
+
+    @media (max-width: 1024px) {
+        .ut-le-tram-custom-design .product-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .ut-le-tram-custom-design .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .ut-le-tram-custom-design .product-grid {
+            display: flex;
+            /* Flexbox for slider */
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 15px;
+            padding-bottom: 20px;
+            /* Space for scrollbar if any */
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            /* Hide scrollbar Firefox */
+        }
+
+        .ut-le-tram-custom-design .product-grid::-webkit-scrollbar {
+            display: none;
+            /* Hide scrollbar Chrome/Safari */
+        }
+
+        .ut-le-tram-custom-design .product-card {
+            min-width: 85vw;
+            /* Show 1 product almost full width */
+            scroll-snap-align: center;
+            margin-right: 0;
+        }
+
+        .ut-le-tram-custom-design .product-image img {
+            height: 300px;
+            /* Taller image on mobile */
+        }
+
+        .ut-le-tram-custom-design .product-details {
+            padding: 15px;
+        }
+
+        .ut-le-tram-custom-design .product-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    .ut-le-tram-custom-design .product-card {
+        background: var(--white);
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        position: relative;
+    }
+
+    .ut-le-tram-custom-design .product-card:hover {
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: transparent;
+        transform: translateY(-10px);
+    }
+
+    .ut-le-tram-custom-design .product-image {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ut-le-tram-custom-design .product-image img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+    .ut-le-tram-custom-design .product-card:hover .product-image img {
+        transform: scale(1.1);
+    }
+
+    .ut-le-tram-custom-design .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        opacity: 0;
+        transition: var(--transition);
+        transform: translateY(20px);
+    }
+
+    .ut-le-tram-custom-design .product-card:hover .product-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .ut-le-tram-custom-design .btn-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--white);
+        color: var(--primary-color);
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .ut-le-tram-custom-design .btn-icon:hover {
+        background: var(--primary-color);
+        color: var(--white);
+        transform: scale(1.1);
+    }
+
+    .ut-le-tram-custom-design .product-details {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .ut-le-tram-custom-design .product-title {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+
+    .ut-le-tram-custom-design .btn-link {
+        color: var(--primary-color);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    /* Stats Section */
+    .ut-le-tram-custom-design .stats-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://utletram.vn/wp-content/uploads/2025/11/504c7b69932e1e70473f.jpg');
+        background-attachment: fixed;
+        background-size: cover;
+        color: var(--white);
+        text-align: center;
+    }
+
+    .ut-le-tram-custom-design .stats-grid {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 40px;
+    }
+
+    @media (max-width: 768px) {
+        .ut-le-tram-custom-design .stats-grid {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 5px !important;
+            justify-content: space-between !important;
+        }
+
+        .ut-le-tram-custom-design .stat-item {
+            flex: 1;
+            padding: 0 2px;
+        }
+
+        .ut-le-tram-custom-design .stat-number {
+            font-size: 1.5rem !important;
+            margin-bottom: 5px !important;
+        }
+
+        .ut-le-tram-custom-design .stat-label {
+            font-size: 0.7rem !important;
+            line-height: 1.2;
+            display: block;
+        }
+    }
+
+
+
+    .ut-le-tram-custom-design .stat-number {
+        display: block;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--accent-color);
+        font-family: var(--font-heading);
+        margin-bottom: 10px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .ut-le-tram-custom-design .fade-in-up {
+        animation: fadeInUp 1s ease forwards;
+        opacity: 0;
+    }
+
+    .ut-le-tram-custom-design .fade-in-left {
+        animation: fadeInLeft 1s ease forwards;
+        opacity: 0;
+    }
+
+    .ut-le-tram-custom-design .fade-in-right {
+        animation: fadeInRight 1s ease forwards;
+        opacity: 0;
+    }
+
+    .ut-le-tram-custom-design .delay-100 {
+        animation-delay: 0.2s;
+    }
+
+    .ut-le-tram-custom-design .delay-200 {
+        animation-delay: 0.4s;
+    }
+
+    /* Mobile Spacing Adjustments */
+    @media (max-width: 480px) {
+
+        .ut-le-tram-custom-design .section,
+        .ut-le-tram-custom-design .categories {
+            padding: 30px 0 !important;
+        }
+
+        .ut-le-tram-custom-design .feature-row {
+            gap: 20px !important;
+        }
+
+        .ut-le-tram-custom-design .divider {
+            margin-bottom: 15px !important;
+        }
+
+        .ut-le-tram-custom-design .slide-content {
+            top: auto !important;
+            bottom: 60px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            text-align: center !important;
+            align-items: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            max-width: 1100px !important;
+        }
+
+        .ut-le-tram-custom-design .slide-title {
+            font-size: 3.2rem !important;
+            margin-bottom: 15px !important;
+            letter-spacing: 1px;
+            line-height: 1.2 !important;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .ut-le-tram-custom-design .slide-desc {
+            font-size: 1.1rem !important;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5 !important;
+            font-weight: 400;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+        }
+    }
+
+    /* Hero Slider Shadow (Desktop Only) */
+    .ut-le-tram-custom-design .hero-desktop {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        z-index: 1;
+    }
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- Google Fonts -->
+<link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+
+<div class="ut-le-tram-custom-design">
+
+    <!-- Hero Slider Desktop -->
+    <section class="hero-desktop desktop-only">
+        <div class="slider">
+            <!-- Slide 1: Dưa Mắm -->
+            <div class="slide active">
+                <div class="slide-bg"
+                    style="background-image: url('https://utletram.vn/wp-content/uploads/2025/12/Gemini_Generated_Image_bark27bark27bark-scaled.png');">
+                </div>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Dưa Mắm <span class="text-accent">Gia Truyền</span></h2>
+                        <p class="slide-desc">Hương vị đậm đà, giòn ngon khó cưỡng. Món quà quê dân dã từ Đồng Tháp.</p>
+                        <div class="slide-btn-wrapper">
+                            <a href="https://utletram.vn/product-category/dua-mam/" class="btn btn-primary">Mua Ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Dưa Mắm Chay -->
+            <div class="slide">
+                <div class="slide-bg"
+                    style="background-image: url('https://utletram.vn/wp-content/uploads/2025/12/Gemini_Generated_Image_79cqxl79cqxl79cq-scaled.png');">
+                </div>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Dưa Mắm <span class="text-accent">Chay</span></h2>
+                        <p class="slide-desc">Thơm ngon, thanh đạm, chuẩn vị chay. Lựa chọn hoàn hảo cho bữa cơm thanh
+                            tịnh.</p>
+                        <div class="slide-btn-wrapper">
+                            <a href="https://utletram.vn/product/hu-dua-mam-chay-550g/" class="btn btn-primary">Mua
+                                Ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Muối Chấm -->
+            <div class="slide">
+                <div class="slide-bg"
+                    style="background-image: url('https://utletram.vn/wp-content/uploads/2025/12/Gemini_Generated_Image_j99jabj99jabj99j-scaled.png');">
+                </div>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Muối Chấm <span class="text-accent">Ngon</span></h2>
+                        <p class="slide-desc">Cay nồng, đậm đà, chấm gì cũng ngon. Bí quyết cho món ăn thêm trọn vị.</p>
+                        <div class="slide-btn-wrapper">
+                            <a href="https://utletram.vn/product-category/muoi-cham/" class="btn btn-primary">Khám
+                                Phá</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slider-controls">
+            <button class="prev-slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="next-slide"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </section>
+
+    <!-- Hero Slider Mobile -->
+    <section class="hero-mobile mobile-only">
+        <div class="slider">
+            <!-- Slide 1: Dưa Mắm -->
+            <div class="slide active">
+                <div class="slide-bg"
+                    style="background-image: url('https://utletram.vn/wp-content/uploads/2025/12/Gemini_Generated_Image_bark27bark27bark-scaled.png');">
+                </div>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Dưa Mắm <span class="text-accent">Gia Truyền</span></h2>
+                        <p class="slide-desc">Hương vị đậm đà, giòn ngon khó cưỡng.</p>
+                        <div class="slide-btn-wrapper">
+                            <a href="https://utletram.vn/product-category/dua-mam/" class="btn btn-primary">Mua Ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Dưa Mắm Chay -->
+            <div class="slide">
+                <div class="slide-bg"
+                    style="background-image: url('https://utletram.vn/wp-content/uploads/2025/12/Gemini_Generated_Image_79cqxl79cqxl79cq-scaled.png');">
+                </div>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Dưa Mắm <span class="text-accent">Chay</span></h2>
+                        <p class="slide-desc">Thơm ngon, thanh đạm, chuẩn vị chay.</p>
+                        <div class="slide-btn-wrapper">
+                            <a href="https://utletram.vn/product/hu-dua-mam-chay-550g/" class="btn btn-primary">Mua
+                                Ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Muối Chấm -->
+            <div class="slide">
+                <div class="slide-bg"
+                    style="background-image: url('https://utletram.vn/wp-content/uploads/2025/12/Gemini_Generated_Image_j99jabj99jabj99j-scaled.png');">
+                </div>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Muối Chấm <span class="text-accent">Ngon</span></h2>
+                        <p class="slide-desc">Cay nồng, đậm đà, chấm gì cũng ngon.</p>
+                        <div class="slide-btn-wrapper">
+                            <a href="https://utletram.vn/product-category/muoi-cham/" class="btn btn-primary">Khám
+                                Phá</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- No controls for mobile, swipe only -->
+    </section>
+
+    <!-- Categories -->
+    <section class="section categories">
+        <div class="container">
+            <div class="category-grid">
+                <div class="category-item fade-in-up">
+                    <div class="category-image">
+                        <img src="https://utletram.vn/wp-content/uploads/2025/11/generated-image-collection-1-5.png"
+                            alt="Dưa Mắm Gia Truyền">
+                    </div>
+                    <div class="category-info">
+                        <h3>Dưa Mắm Gia Truyền</h3>
+                    </div>
+                </div>
+                <div class="category-item fade-in-up delay-100">
+                    <div class="category-image">
+                        <img src="https://utletram.vn/wp-content/uploads/2025/11/generated-image-collection-1-6.png"
+                            alt="Muối Chấm Ngon">
+                    </div>
+                    <div class="category-info">
+                        <h3>Muối Chấm Ngon</h3>
+                    </div>
+                </div>
+                <div class="category-item fade-in-up delay-200">
+                    <div class="category-image">
+                        <img src="https://utletram.vn/wp-content/uploads/2025/11/generated-image-collection-1-8.png"
+                            alt="Dưa Mắm Chay">
+                    </div>
+                    <div class="category-info">
+                        <h3>Dưa Mắm Chay</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature 1: Dua Mam -->
+    <section class="section feature-section alt-bg">
+        <div class="container">
+            <div class="feature-row">
+                <div class="feature-image fade-in-left">
+                    <img src="https://utletram.vn/wp-content/uploads/2025/11/DUA-MAM-UT-LE-TRAM-756x1200.jpg"
+                        alt="Dưa Mắm Út Lê Trâm">
+                </div>
+                <div class="feature-content fade-in-right">
+                    <h2 class="section-title">Dưa Mắm – Út Lê Trâm</h2>
+                    <div class="divider"></div>
+                    <p>Giữa nhịp sống hiện đại, <strong>Dưa Mắm Út Lê Trâm</strong> vẫn giữ trọn nét mộc mạc, dân dã của
+                        ẩm thực Miền Tây. Từ những trái dưa gang non, giòn ngọt, được ủ cùng mắm cá, tỏi, ớt và gia vị
+                        truyền thống, từng miếng dưa thấm đẫm hương vị quê nhà – vừa giòn tự nhiên, vừa mặn mà khó quên.
+                    </p>
+                    <p>Sản phẩm được chế biến thủ công tại <strong>Đồng Tháp</strong>, đảm bảo an toàn, tươi sạch và
+                        chuẩn vị Miền Tây Nam Bộ.</p>
+                    <p class="highlight-text">🎁 Dưa Mắm Út Lê Trâm – Món quà đậm đà hương vị quê hương, thích hợp cho
+                        bữa cơm gia đình hoặc làm quà biếu trong các dịp lễ, Tết.</p>
+                    <a href="https://utletram.vn/products/" class="btn btn-primary">Xem Thêm</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature 2: Muoi Cham -->
+    <section class="section feature-section">
+        <div class="container">
+            <div class="feature-row reverse">
+                <div class="feature-content fade-in-left">
+                    <h2 class="section-title">Muối Chấm – Út Lê Trâm</h2>
+                    <div class="divider"></div>
+                    <p>Được làm từ <strong>ớt xiêm xanh tươi</strong>, kết hợp với muối hạt sạch và gia vị truyền thống,
+                        <strong>Muối Ớt Xiêm Xanh Út Lê Trâm</strong> mang đến hương vị siêu cay – siêu đậm đà đặc trưng
+                        của miền Tây.
+                    </p>
+                    <p>Không phẩm màu độc hại, không chất bảo quản – từng hạt muối được rang, xay và trộn thủ công để
+                        giữ trọn vị cay nồng quyện hương chanh ớt, khiến món trái cây, hải sản hay thịt nướng thêm hấp
+                        dẫn gấp bội.</p>
+                    <p class="highlight-text">🎁 Muối Út Lê Trâm – Loại 1 – Siêu cay, ăn là ghiền, ăn là nhớ mãi!</p>
+                    <p>📞 Liên hệ đặt hàng: <strong>0902 434 268 – 0961 022 879 (Út Trâm)</strong></p>
+                    <a href="https://utletram.vn/products/" class="btn btn-primary">Xem Thêm</a>
+                </div>
+                <div class="feature-image fade-in-right">
+                    <img src="https://utletram.vn/wp-content/uploads/2025/11/MUOI-UT-LE-TRAM-793x1200.jpg"
+                        alt="Muối Chấm Út Lê Trâm">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="section products-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
+                <div class="divider center"></div>
+            </div>
+            <div class="product-grid">
+                <!-- Product 1 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://utletram.vn/wp-content/uploads/2025/11/Gemini_Generated_Image_515d7z515d7z515d-800x800.png"
+                            alt="Dưa mắm 350g">
+                        <div class="product-overlay">
+                            <button class="btn-icon"><i class="fas fa-shopping-cart"></i></button>
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-title">Dưa mắm 350g</h3>
+                        <a href="https://utletram.vn/product/dua-mam-350g/" class="btn-link">Chi tiết <i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <!-- Product 2 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://utletram.vn/wp-content/uploads/2025/11/Gemini_Generated_Image_phhns2phhns2phhn-800x800.png"
+                            alt="Hũ Dưa mắm 550g">
+                        <div class="product-overlay">
+                            <button class="btn-icon"><i class="fas fa-shopping-cart"></i></button>
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-title">Hũ Dưa mắm 550g</h3>
+                        <a href="https://utletram.vn/product/hu-dua-mam-550g/" class="btn-link">Chi tiết <i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <!-- Product 3 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://utletram.vn/wp-content/uploads/2025/11/Gemini_Generated_Image_8iokt98iokt98iok-800x800.png"
+                            alt="Hũ Dưa mắm Chay 550g">
+                        <div class="product-overlay">
+                            <button class="btn-icon"><i class="fas fa-shopping-cart"></i></button>
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-title">Hũ Dưa mắm Chay 550g</h3>
+                        <a href="https://utletram.vn/product/hu-dua-mam-chay-550g/" class="btn-link">Chi tiết <i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <!-- Product 4 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://utletram.vn/wp-content/uploads/2025/11/Gemini_Generated_Image_9j2r4a9j2r4a9j2r-800x800.png"
+                            alt="Hũ Muối Chấm Ngon">
+                        <div class="product-overlay">
+                            <button class="btn-icon"><i class="fas fa-shopping-cart"></i></button>
+                            <button class="btn-icon"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-title">Hũ Muối Chấm Ngon</h3>
+                        <a href="https://utletram.vn/product/hu-muoi-cham-ngon/" class="btn-link">Chi tiết <i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">4+</span>
+                    <span class="stat-label">Triệu Lượt Mua</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">130k</span>
+                    <span class="stat-label">Khách Hàng Tin Dùng</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">10</span>
+                    <span class="stat-label">Điểm Chất Lượng</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Hero Slider - Multi-instance support
+        const container = document.querySelector('.ut-le-tram-custom-design');
+        if (!container) return;
+
+        const heroSections = container.querySelectorAll('.hero-desktop, .hero-mobile');
+
+        heroSections.forEach(hero => {
+            const slides = hero.querySelectorAll('.slide');
+            const nextBtn = hero.querySelector('.next-slide');
+            const prevBtn = hero.querySelector('.prev-slide');
+            const slider = hero.querySelector('.slider');
+
+            if (!slides.length) return;
+
+            let currentSlide = 0;
+            const slideInterval = 5000;
+            let slideTimer;
+
+            function showSlide(index) {
+                slides.forEach(slide => slide.classList.remove('active'));
+                currentSlide = (index + slides.length) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }
+
+            function nextSlide() {
+                showSlide(currentSlide + 1);
+            }
+
+            function prevSlide() {
+                showSlide(currentSlide - 1);
+            }
+
+            function startSlideTimer() {
+                stopSlideTimer();
+                slideTimer = setInterval(nextSlide, slideInterval);
+            }
+
+            function stopSlideTimer() {
+                if (slideTimer) clearInterval(slideTimer);
+            }
+
+            if (nextBtn && prevBtn) {
+                nextBtn.addEventListener('click', () => {
+                    nextSlide();
+                    startSlideTimer();
+                });
+
+                prevBtn.addEventListener('click', () => {
+                    prevSlide();
+                    startSlideTimer();
+                });
+            }
+
+            // Start timer
+            startSlideTimer();
+
+            // Touch Swipe
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            if (slider) {
+                slider.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                    stopSlideTimer();
+                }, { passive: true });
+
+                slider.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                    startSlideTimer();
+                }, { passive: true });
+            }
+
+            function handleSwipe() {
+                if (touchEndX < touchStartX - 50) {
+                    nextSlide();
+                }
+                if (touchEndX > touchStartX + 50) {
+                    prevSlide();
+                }
+            }
+        });
+
+        // Scroll Animations
+        const animatedElements = container.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right');
+        const observerOptions = {
+            threshold: 0.2
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        animatedElements.forEach(el => {
+            el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+
+        // Stats Counter
+        const statsSection = container.querySelector('.stats-section');
+        const statNumbers = container.querySelectorAll('.stat-number');
+        let started = false;
+
+        const statsObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !started) {
+                statNumbers.forEach(num => startCount(num));
+                started = true;
+            }
+        });
+
+        if (statsSection) {
+            statsObserver.observe(statsSection);
+        }
+
+        function startCount(el) {
+            const target = parseInt(el.innerText.replace(/\D/g, ''));
+            const suffix = el.innerText.replace(/[0-9]/g, '');
+            let count = 0;
+            const duration = 2000;
+            const increment = target / (duration / 16);
+
+            const updateCount = () => {
+                count += increment;
+                if (count < target) {
+                    el.innerText = Math.ceil(count) + suffix;
+                    requestAnimationFrame(updateCount);
+                } else {
+                    el.innerText = target + suffix;
+                }
+            };
+            updateCount();
+        }
+
+        // Mobile Product Auto-Scroll
+        const productGrid = container.querySelector('.product-grid');
+        if (window.innerWidth <= 480 && productGrid) {
+            let scrollAmount = 0;
+            const scrollStep = 1;
+            const scrollDelay = 20;
+            let scrollInterval;
+            let isScrolling = false;
+
+            function autoScroll() {
+                if (!isScrolling) {
+                    productGrid.scrollLeft += scrollStep;
+                    // Reset if reached end
+                    if (productGrid.scrollLeft >= productGrid.scrollWidth - productGrid.clientWidth) {
+                        productGrid.scrollLeft = 0;
+                    }
+                }
+            }
+
+            // Start auto scroll
+            scrollInterval = setInterval(autoScroll, scrollDelay);
+
+            // Pause on touch
+            productGrid.addEventListener('touchstart', () => {
+                isScrolling = true;
+            });
+
+            productGrid.addEventListener('touchend', () => {
+                setTimeout(() => {
+                    isScrolling = false;
+                }, 2000); // Resume after 2s
+            });
+        }
+    });
+</script>

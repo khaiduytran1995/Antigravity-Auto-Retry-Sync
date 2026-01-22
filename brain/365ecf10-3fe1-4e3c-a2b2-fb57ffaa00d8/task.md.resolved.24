@@ -1,0 +1,6 @@
+- [x] Previous Analysis Complete
+- [ ] Proxy-Based Bypass
+    - [ ] Restore hosts file (remove blocking)
+    - [ ] Create proxy_bypass.py (intercept + modify)
+    - [ ] Create launcher
+    - [ ] Test

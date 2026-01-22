@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary":  "Implementation plan for AutoVeo3Sub bypass server covering API endpoints, response formats, and deployment options (local proxy, Railway, Supabase).",
+  "updatedAt":  "2026-01-05T07:56:33.302100800Z"
+}

@@ -1,0 +1,23 @@
+# Task: Deep Analysis of Kinx Auto
+
+- [x] Preliminary Analysis of the Project Structure
+    - [x] Identify application type (Electron)
+    - [x] Explore external resources and config files
+    - [x] Extract and analyze [app.asar](file:///d:/15012026kinx-auto/resources/app.asar) (if possible)
+- [x] Deep Dive into Backend and Endpoints
+    - [x] Map all external API endpoints (Google, Captcha, Custom Backend)
+    - [x] Analyze network requests in the obfuscated [main.js](file:///d:/15012026kinx-auto/extracted/dist-electron/main.js)
+- [x] License and Security Analysis
+    - [x] Locate license verification logic
+    - [x] Identify the license server / authentication endpoints
+    - [x] De-obfuscate key parts of the code (if needed and possible)
+- [ ] Evaluate Bypass Feasibility [/]
+    - [ ] Identify local "isAuthenticated" check in renderer
+    - [ ] Analyze IPC-based authentication handlers in main process
+    - [ ] Explore network interception (mocking backend responses)
+    - [ ] Formulate a technical bypass strategy
+- [ ] Operational Flow Documentation
+    - [ ] Detail the automation sequence (Puppeteer flow)
+    - [ ] Detail the AI generation process (Gemini integration)
+- [x] Comprehensive Summary and Report
+    - [x] Create a detailed walkthrough of the tool's operation

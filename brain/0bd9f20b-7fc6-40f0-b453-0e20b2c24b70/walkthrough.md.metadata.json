@@ -1,0 +1,6 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Updated walkthrough document detailing the \"Root Mode\" bypass enhancements, including Golden Token injection and WebSocket registration spoofing, to address image generation failures.",
+  "updatedAt":  "2026-01-11T14:23:02.176358500Z",
+  "version":  "16"
+}

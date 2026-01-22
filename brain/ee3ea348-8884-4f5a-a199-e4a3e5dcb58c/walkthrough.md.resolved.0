@@ -1,0 +1,56 @@
+# Walkthrough: Deep Analysis of Kinx Auto
+
+Tôi đã tiến hành phân tích sâu "tận gốc rễ" của ứng dụng **Kinx Auto** (còn gọi là **Veo Auto**). Dưới đây là báo cáo chi tiết về cơ chế hoạt động, công nghệ và các thành phần cốt lõi của công cụ này.
+
+## 🌟 Tổng quan về Ứng dụng
+**Kinx Auto** là một giải pháp tự động hóa video dựa trên AI toàn diện, được xây dựng trên nền tảng **Electron**. Mục tiêu chính của nó là tạo video, chỉnh sửa và tự động hóa các tác vụ trình duyệt sử dụng mô hình trí tuệ nhân tạo của Google (Gemini).
+
+## 🛠️ Nền tảng Công nghệ (Stack)
+- **Frontend**: React.js (v19.1.1) - Giao diện hiện đại, phản hồi nhanh.
+- **Backend (Main Process)**: Node.js / Electron - Xử lý logic nặng và tương tác hệ thống.
+- **AI Integration**: `@google/generative-ai` - Sử dụng các mô hình Gemini để tạo nội dung (hình ảnh, video).
+- **Trình duyệt Tự động**: `puppeteer` & `puppeteer-extra-plugin-stealth` - Giả lập người dùng thật để vượt qua các cơ chế chống bot.
+- **Xử lý Video**: `fluent-ffmpeg` & `ffmpeg` - Công cụ mạnh mẽ để cắt, ghép, trích xuất khung hình và upscale video.
+- **Giải mã Captcha**: Tích hợp dịch vụ **OMO Captcha** để tự động giải quyết các thử thách bot.
+
+## 🔍 Phân tích các Tính năng Cốt lõi
+
+### 1. Hệ thống AI Video Generation (Gemini)
+Ứng dụng tích hợp sâu với Gemini API để:
+- Tạo video từ mô tả (Prompts).
+- Tạo hình ảnh AI.
+- Quản lý API Keys trực tiếp trên ứng dụng.
+- Cơ chế "Polling" để theo dõi trạng thái tạo video từ cloud của Google.
+
+### 2. Video Processing Engine
+Dựa trên FFmpeg, công cụ này cho phép:
+- **Tạo video từ khung hình (Frames)**: Ghép các hình ảnh đơn lẻ thành video hoàn chỉnh.
+- **Merge/Cut Video**: Ghép nhiều video hoặc cắt nhỏ video theo yêu cầu.
+- **Extract Frames**: Trích xuất ảnh từ video để xử lý hoặc tạo nội dung mới.
+- **Upscale**: Nâng cao chất lượng video.
+
+### 3. Browser Automation
+Sử dụng Puppeteer với plugin Stealth, ứng dụng có khả năng:
+- Tự động đăng nhập, tương tác với các trang web (có thể là social media hoặc các nền tảng video).
+- Quản lý Cookie để duy trì phiên đăng nhập.
+- Ghi lại log trình duyệt để debug.
+
+### 4. Captcha Solving
+Ứng dụng có module quản lý captcha mạnh mẽ:
+- Tự động phát hiện và gửi captcha đến dịch vụ OMO.
+- API Key được lưu trữ tại [omocaptcha_key.txt](file:///d:/15012026kinx-auto/omocaptcha_key.txt).
+
+## 📁 Cấu trúc Tệp tin Quan trọng
+- `Kinx Auto.exe`: Tệp thực thi chính.
+- [resources/app.asar](file:///d:/15012026kinx-auto/resources/app.asar): Chứa toàn bộ mã nguồn JavaScript đã được đóng gói (754MB).
+- [dist-electron/main.js](file:///d:/15012026kinx-auto/extracted/dist-electron/main.js): Trái tim xử lý logic của ứng dụng (đã được obfuscate để bảo mật).
+- [dist/assets/index-DLxlB05E.js](file:///d:/15012026kinx-auto/extracted/dist/assets/index-DLxlB05E.js): Toàn bộ logic giao diện người dùng.
+- [ffmpeg.exe](file:///d:/15012026kinx-auto/ffmpeg.exe): Công cụ xử lý video đi kèm.
+
+## 🛡️ Bảo mật và Cấu hình
+- Ứng dụng sử dụng cơ chế bảo mật mã nguồn (obfuscation) để tránh bị copy logic.
+- Dữ liệu cấu hình như API keys và captcha keys được lưu trong các file [.txt](file:///d:/15012026kinx-auto/omocaptcha_key.txt) hoặc thông qua giao diện ứng dụng.
+- Có hệ thống tự động cập nhật tích hợp qua GitHub (`KinX-ai/H2Book`).
+
+## 💡 Kết luận
+Kinx Auto là một công cụ cực kỳ mạnh mẽ cho những ai làm content creator hoặc tự động hóa video. Nó kết hợp sức mạnh của AI hiện đại nhất hiện nay với khả năng xử lý video truyền thống và tự động hóa trình duyệt một cách mượt mà.

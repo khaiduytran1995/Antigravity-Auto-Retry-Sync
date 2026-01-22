@@ -1,0 +1,20 @@
+# Task: Tạo Tool Get Pool User
+
+## Mục tiêu
+Tạo tool để lấy danh sách users từ server/API và:
+- Xuất ra file CSV
+- Thêm vào GUI hiện tại
+
+## Các bước thực hiện
+
+- [x] Phân tích codebase hiện tại để hiểu cấu trúc API
+- [x] Xác định API endpoint cho get pool user (Xác định Supabase làm nguồn dữ liệu)
+- [x] Tạo script test kết nối Supabase ([test_supabase.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/test_supabase.py), [test_veo3_supabase.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/test_veo3_supabase.py))
+- [x] Nâng cấp GUI Pool Manager:
+    - [x] Thêm nút chuyển đổi Nguồn Dữ Liệu (Local / Remote)
+    - [x] Thêm function [refresh_pool_table](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py#816-888) (đã có cho local)
+    - [x] Cập nhật [refresh_pool_table](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py#816-888) để hỗ trợ Supabase
+    - [x] Thêm ô tìm kiếm (Search email/user)
+- [ ] Tạo tool xuất dữ liệu pool tổng hợp ([Supabase_Pool_Extractor.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/Supabase_Pool_Extractor.py))
+- [x] Tích hợp WebSocket Proxy để xử lý lỗi "Not enough slots" (đã xem launcher)
+- [ ] Test và verify với các tài khoản admin tìm thấy

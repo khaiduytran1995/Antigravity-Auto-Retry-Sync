@@ -1,0 +1,6 @@
+- [x] Previous Analysis and Bypass Attempts
+- [ ] Fix Bypass Server
+    - [ ] Create dual-port server (80 + 443)
+    - [ ] Use threading for parallel listeners
+    - [ ] Update launcher script
+    - [ ] Test connection

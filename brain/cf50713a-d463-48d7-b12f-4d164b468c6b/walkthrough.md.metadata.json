@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Walkthrough for the Veo4u.com v134 bypass. Documents the implementation of the requests library patch, the bypass handler logic, and provides instructions for verification and usage. Includes details on how to adjust mock data.",
+  "updatedAt": "2026-01-18T08:51:13.205682Z"
+}

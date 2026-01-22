@@ -1,0 +1,7 @@
+- [x] Previous Analysis (All Complete)
+- [x] Comprehensive Bypass
+    - [x] Create SSL cert generator script
+    - [x] Create HTTPS bypass server
+    - [x] Create Admin launcher (modifies hosts + runs server)
+    - [x] Create Restore script
+    - [x] Provide instructions to user

@@ -1,0 +1,6 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary":  "Implementation plan to unify API usage across components, allowing for Supabase-free local development and better integration with Gemini direct APIs.",
+  "updatedAt":  "2026-01-04T06:46:42.090318400Z",
+  "version":  "2"
+}

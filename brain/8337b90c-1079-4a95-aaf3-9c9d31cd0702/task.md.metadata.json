@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_TASK",
+  "summary":  "Task checklist tracking the AutoVeo3 rebuild project with custom Vercel/Supabase server. Covers 5 phases: preparation, server setup, code modification, EXE build, and verification.",
+  "updatedAt":  "2025-12-30T17:12:57.231026100Z"
+}

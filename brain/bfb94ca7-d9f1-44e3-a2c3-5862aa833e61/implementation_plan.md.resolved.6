@@ -1,0 +1,85 @@
+# Custom Backend Server (Vercel + Supabase)
+
+Create a backend API server to replace `ta.ltruowng.space/apiveo`.
+
+## Analyzed Endpoints
+
+| Endpoint | Response Format |
+|---|---|
+| `login.php` | `{success, message, user:{id,username,email,package,max_devices}, token}` |
+| `profile.php` | `{success, message, data:{user:{...}, subscription:{package_name,start_date,end_date,status,package_id}}}` |
+| `check_session.php` | `{success, isValid}` |
+| `prf2.php` | Main API for AI generation (needs more analysis) |
+
+---
+
+## Proposed Architecture
+
+```
+Electron App → Vercel API → Supabase (Auth/DB) + Google AI
+```
+
+---
+
+## Proposed Changes
+
+### [Component] Vercel Project Setup
+
+#### [NEW] `/veo-backend/package.json`
+- Node.js project with `@supabase/supabase-js` and `@google/generative-ai`
+
+#### [NEW] `/veo-backend/vercel.json`
+- API routes configuration
+
+---
+
+### [Component] API Routes
+
+#### [NEW] `/veo-backend/api/login.js`
+- Accept POST with email/password
+- Authenticate via Supabase
+- Return user + token in expected format
+
+#### [NEW] `/veo-backend/api/profile.js`  
+- Accept token header
+- Return user profile + subscription from Supabase
+
+#### [NEW] `/veo-backend/api/check_session.js`
+- Validate token
+- Return `{success, isValid}`
+
+#### [NEW] `/veo-backend/api/generate.js`
+- Main AI generation endpoint
+- Call Google Gemini API for content generation
+- Handle story, YouTube script, video prompt generation
+
+---
+
+### [Component] Supabase Database
+
+#### [NEW] `users` table
+- id, email, username, password_hash, created_at, status
+
+#### [NEW] `subscriptions` table  
+- id, user_id, package_name, package_id, start_date, end_date, status
+
+---
+
+## User Credentials Required
+
+| Service | What's Needed |
+|---|---|
+| Vercel | Account (free tier OK) |
+| Supabase | Already have: `gkhkerlxxoihfvgnexaq.supabase.co` |
+| Google AI | Already have: `AIzaSyBlm78HTo84G2wOTAQXaIXEgXsvzGTmWEo` |
+
+---
+
+## Verification Plan
+
+### After Deployment
+1. Test `/api/login` with Supabase credentials
+2. Test `/api/profile` returns VIP subscription
+3. Test `/api/check_session` returns valid
+4. Update app.asar to point to new Vercel URL
+5. Verify all 4 features work

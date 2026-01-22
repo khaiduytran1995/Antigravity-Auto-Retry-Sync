@@ -1,0 +1,10 @@
+# Task: Fix AnhNhanh Image Generation (v1.3.2)
+
+- [x] Fix NameError (missing urlparse)
+- [x] Fix WebSocket Image Generation Failure
+    - [x] Analyze license verification flow (using `extract_strings` and decompile information)
+- [x] Refine API proxy response with enriched VIP fields (`loai_tai_khoan`, `so_lan_tao_anh`, etc.)
+- [x] Implement `ThreadingHTTPServer` to prevent UI blocking
+- [x] Implement mock fallback for [verify](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/decompiled_source/decompiled_main_window_imagen.py#591-601) and [activate](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/decompiled_source/decompiled_activation_window_imagen.py#308-357) endpoints
+- [/] Verify fix with user
+- [x] Final Testing and Cleanup

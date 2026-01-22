@@ -1,0 +1,12 @@
+# Task: Analyze License Verification Mechanism
+
+- [x] Research license verification logic in extracted components
+    - [x] Search for the error string "Định dạng License Key không hợp lệ" in binaries
+    - [x] Identify the function responsible for generating the Machine ID
+    - [x] Analyze the API call to `dinhrinmkt.top` for license validation
+- [x] Create Bypass Solution
+    - [x] Develop `ULTIMATE_BYPASS.py` (Hosts redirect + HTTPS Server + ENV override)
+    - [x] Verify successful login on local machine
+- [ ] Address Portability
+    - [ ] Explain Python/Dependency requirements for other machines
+    - [ ] (Optional) Compile bypass to EXE for portable use

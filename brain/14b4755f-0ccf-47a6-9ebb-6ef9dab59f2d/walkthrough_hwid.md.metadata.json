@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Walkthrough for HWID locking implementation and Video generation fix. \n- Implemented machine-specific account locking (HWID Locking).\n- Updated `main.js`, `preload.js`, and `index.html` to support HWID binding.\n- Fixed 404 error in video generation by updating the API endpoint in `licenseManager.js`.",
+  "updatedAt": "2026-01-14T11:49:43.227328600Z"
+}

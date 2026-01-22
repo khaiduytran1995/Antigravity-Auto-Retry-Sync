@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Step-by-step guide to complete VeoForge bypass setup including:\n- Supabase database setup with SQL schema\n- Adding anon key to patched code\n- Running the bypassed application\n- Adding Veo3 accounts and API keys",
+  "updatedAt": "2026-01-18T07:29:39.453833300Z"
+}

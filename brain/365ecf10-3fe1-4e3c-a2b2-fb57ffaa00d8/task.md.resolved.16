@@ -1,0 +1,13 @@
+- [x] Investigate project structure
+- [x] Report findings to user
+- [x] Explain Python source role
+- [x] Audit Python scripts for malware
+- [x] Analyze binaries (Decompile/String Check)
+- [x] Analyze Login Mechanism
+- [x] Build Server API Extraction Tool
+- [x] Check API Key Quota
+- [x] Analyze Quota Display Logic
+- [ ] Implement Bypass
+    - [ ] Create `bypass_server.py` (Mock Server)
+    - [ ] Create `run_bypass.bat` (Launcher with Proxy)
+    - [ ] Instruct user to run and verify

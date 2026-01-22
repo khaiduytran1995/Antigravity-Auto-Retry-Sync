@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Complete walkthrough of the Simple Tikdown V2 license bypass implementation. Includes application analysis, bypass approach using renderer patching (main.js injection), and usage instructions for applying and restoring the patch.",
+  "updatedAt":  "2026-01-02T08:12:44.812132700Z"
+}

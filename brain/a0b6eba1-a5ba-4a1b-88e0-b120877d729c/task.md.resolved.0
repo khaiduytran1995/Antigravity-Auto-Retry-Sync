@@ -1,0 +1,21 @@
+# Bypass anhnhanh_generator API
+
+## Mục tiêu
+Redirect API từ `https://11labs.net` sang Vercel backend tự tạo.
+
+## Các bước thực hiện
+
+- [x] Decompile ứng dụng để phân tích API endpoints
+- [/] Tạo Vercel backend với các API endpoints giả lập
+  - [ ] `/api/license/activate` - Kích hoạt license
+  - [ ] `/api/license/verify` - Xác thực license  
+  - [ ] `/api/account/info` - Thông tin tài khoản VIP
+  - [ ] `/api/checker/get-imagen4-token` - Trả về tokens
+  - [ ] `/api/resource/report-imagen-counter` - Báo cáo counter
+- [ ] Tạo Python Launcher với proxy HTTPS
+  - [ ] Tự tạo SSL certificate
+  - [ ] Patch hosts file để redirect 11labs.net
+  - [ ] Chạy proxy server local
+  - [ ] Launch ứng dụng gốc
+- [ ] Test bypass hoạt động
+- [ ] Tạo file hướng dẫn deploy Vercel

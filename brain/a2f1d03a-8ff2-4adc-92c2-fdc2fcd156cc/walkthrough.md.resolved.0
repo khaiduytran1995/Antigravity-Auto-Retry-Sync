@@ -1,0 +1,25 @@
+# Debug Implementation Walkthrough
+
+I have implemented investigative logging and defensive measures to address the `TypeError: Cannot read properties of undefined (reading 'includes')` crash.
+
+## Changes Made
+
+### [dist-electron/services/flowVideo.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowVideo.js)
+- Added `console.log` to inspect `global.SECRET_CONFIG` and `secretConfig.apiEndpoint`.
+- Updated `apiBase` calculation with a defensive check:
+  ```javascript
+  const apiBase = (providedEndpoint && typeof providedEndpoint === 'string' && providedEndpoint.includes('/v1')) 
+      ? providedEndpoint.split('/v1')[0] 
+      : 'https://aisandbox-pa.googleapis.com';
+  ```
+
+### [dist-electron/services/flowImage.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowImage.js)
+- Added similar debug logs and defensive checks for `apiEndpoint`.
+
+## Verification Steps
+1. **Startup**: The application should start without errors (the modified files are not part of the integrity check).
+2. **Video Generation**: Attempting to generate a video should no longer crash the main process.
+3. **Logs**: Check the Electron main process console (or terminal output) for lines starting with `[DEBUG]`.
+
+> [!IMPORTANT]
+> Please run the application and try to generate a video. If it fails (or if it works but you want me to see the logs), please copy and paste any console output starting with `[DEBUG]` here.

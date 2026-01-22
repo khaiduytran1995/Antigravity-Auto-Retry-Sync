@@ -1,0 +1,18 @@
+# Tasks
+
+- [x] Initial Research & Deobfuscation
+- [x] V1-V4 Patch Attempts (UI Level)
+- [x] Implement "Enterprise Max Tier" with "Dedicated Server" functionality
+[x] Integrate custom Supabase login (V1 & V2)
+[x] Rebrand "Kinx Auto" to "Ultimate Auto"
+[x] Fix Sidebar logo ("VEO VIP")
+[x] Add QR code to User Info section
+[x] Override "truong22" and email in UI
+[x] Hide "Register" link from login page
+[/] Debug and fix feature failures after Supabase integration
+    [x] Remove heavy Supabase V2 interceptor
+    [/] Implement Safe Supabase V3 (Transparent Hook)
+    [ ] Verify "Clone video Beta" and other features
+    - [ ] Verify Cookie Management priority
+    - [ ] Verify generate tools no longer prompt for payment
+- [ ] Final Cleanup

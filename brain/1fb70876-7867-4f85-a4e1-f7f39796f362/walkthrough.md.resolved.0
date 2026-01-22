@@ -1,0 +1,61 @@
+# Phân tích Cơ chế Vận hành Extension Whisk Pro
+
+Chào bạn! Dưới đây là báo cáo chi tiết về cơ chế vận hành, server, frontend, backend và các endpoint của extension này dựa trên việc phân tích mã nguồn.
+
+## 1. Kiến trúc Tổng quan
+Extension này (tên là **Whisk Pro**) được xây dựng trên nền tảng **Chrome Extension Manifest V3 (MV3)**. Nó hoạt động như một công cụ hỗ trợ và mở rộng tính năng cho các nền tảng AI phổ biến.
+
+### Cơ chế chính:
+- **Background Service Worker ([background.js](file:///c:/Users/hp/Downloads/lcpkplaadgbcfhoacgaddlcfkccoiepg/5.2.6_0/background.js))**: Đóng vai trò là "bộ não" chạy ngầm, quản lý xác thực (auth), bản quyền (license) và đánh chặn các yêu cầu mạng.
+- **Content Scripts ([flow.js](file:///c:/Users/hp/Downloads/lcpkplaadgbcfhoacgaddlcfkccoiepg/5.2.6_0/flow.js))**: Được tiêm (inject) vào các trang web mục tiêu (ChatGPT, Google Labs, Leonardo.ai...) để thay đổi giao diện và thêm tính năng.
+- **UI (Popup/Side Panel)**: Giao diện người dùng chính nằm ở Side Panel (bảng điều khiển bên cạnh) hoặc Popup khi bấm vào biểu tượng extension.
+
+---
+
+## 2. Hệ thống Backend & Endpoints
+Extension kết nối với các cụm server chính sau:
+
+### Server chính (Application Backend)
+- **Cụm 1**: `https://tools.1nutnhan.com`
+  - Quản lý dữ liệu ứng dụng, các tính năng chính và luồng xử lý (flow).
+- **Cụm 2**: `https://mtips5s-key-vercel.vercel.app/`
+  - Chuyên trách quản lý **License Key** và xác thực người dùng thông qua mã khóa.
+
+### Các Endpoint quan trọng trong mã nguồn:
+- `/auth/login-by-key`: Đăng nhập bằng mã Key.
+- `/license/verify`: Xác minh bản quyền định kỳ.
+- `/api/auth-by-key`: Lấy thông tin xác thực qua Key Code.
+- Đánh chặn `https://aisandbox-pa.googleapis.com/v1/video:batchAsyncGenerateVideoText`: Để bắt (capture) `recaptchaToken` phục vụ việc tạo video trên Google Labs.
+
+---
+
+## 3. Các thành phần Frontend
+- **Giao diện quản lý**: Sử dụng [popup.js](file:///c:/Users/hp/Downloads/lcpkplaadgbcfhoacgaddlcfkccoiepg/5.2.6_0/popup.js) (được đóng gói từ Vue hoặc React) để hiển thị trong [side_panel.html](file:///c:/Users/hp/Downloads/lcpkplaadgbcfhoacgaddlcfkccoiepg/5.2.6_0/side_panel.html). Tại đây người dùng có thể cài đặt, nhập Key và theo dõi trạng thái.
+- **Giao diện nhúng (In-page UI)**: [flow.js](file:///c:/Users/hp/Downloads/lcpkplaadgbcfhoacgaddlcfkccoiepg/5.2.6_0/flow.js) sẽ tạo các nút bấm, modal (cửa sổ phụ) ngay trên giao diện của:
+  - **ChatGPT**: Thêm bộ công cụ "Cutter" (cắt ghép), xử lý SRT (phụ đề), tích hợp ElevenLabs.
+  - **Google Labs / AI Studio**: Hỗ trợ quy trình tạo Video (ITV Factory).
+  - **Leonardo.ai / CapCut (Dreamina)**: Tối ưu hóa luồng làm việc.
+
+---
+
+## 4. Các tính năng cốt lõi (Core Mechanisms)
+
+### a. Quản lý Xác thực & Bản quyền
+- Sử dụng mô hình **JWT (JSON Web Token)** để duy trì phiên làm việc.
+- Có cơ chế tự động làm mới Token (`refreshAccessToken`) và kiểm tra bản quyền định kỳ qua Alarm của Chrome.
+- Định danh thiết bị bằng `deviceId` (UUID ngẫu nhiên lưu trong Local Storage).
+
+### b. Đánh chặn & Điều hướng Mạng (Network Interception)
+- **API Block Manager**: Sử dụng `declarativeNetRequest` để chặn các yêu cầu mạng không mong muốn (quảng cáo, tracker hoặc giới hạn của trang gốc).
+- **Cookie Capture**: Có khả năng tự động lấy cookie phiên (`__Secure-next-auth.session-token`) từ các tab đang hoạt động để phục vụ các yêu cầu API bên ngoài.
+- **Recaptcha Capture**: Tự động "bắt" token reCAPTCHA khi người dùng thao tác trên Google Labs để dùng cho các tác vụ tự động hóa.
+
+### c. Quản lý Tệp tin
+- **File Download Manager**: Tự động hóa việc tải xuống video/hình ảnh đã tạo với khả năng đặt tên tệp thông minh và xử lý dữ liệu dạng Blob/DataURL.
+
+---
+
+## 5. Kết luận
+Đây là một extension **nâng cao (Advanced)**, không chỉ đơn thuần thay đổi giao diện mà còn can thiệp sâu vào luồng dữ liệu của các trang web AI. Nó kết hợp giữa việc **chiếm quyền điều khiển API (API Hooking)** và **tự động hóa phiên làm việc (Session Automation)** để mang lại những tính năng mà trang gốc không có (hoặc bị giới hạn).
+
+**Cảnh báo an toàn**: Extension có quyền truy cập vào Cookie và Token của bạn trên các trang AI mạnh mẽ, vì vậy hãy đảm bảo bạn tin tưởng nhà phát triển (`1nutnhan.com`).

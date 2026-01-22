@@ -1,0 +1,9 @@
+# AutoVeo3Sub Server Analysis
+
+## Tasks
+- [/] Find and explore AutoVeo3Sub.exe
+- [ ] Extract PyInstaller contents (if not already extracted)
+- [ ] Analyze Python source code for server communication
+- [ ] Identify API endpoints and server URLs
+- [ ] Document license/authentication mechanism
+- [ ] Create summary report

@@ -1,0 +1,33 @@
+# Task: Debugging "includes" error and Lag in Veo Automation
+
+- [x] Analyze `flowVideo.js` and identify the crash point.
+- [x] Investigate `licenseManager.js` and identify the bypass logic.
+- [x] Check `main.js` and `main_fixed.js` for initialization and integrity checks.
+- [x] Debug the `SECRET_CONFIG` issue.
+    - [x] Create implementation plan (approved).
+    - [x] Add robust fallbacks and detailed logs to `flowVideo.js`.
+    - [x] Add robust fallbacks and detailed logs to `flowImage.js`.
+    - [x] Add robust fallbacks and detailed logs to `flowImageUpscale.js`.
+- [x] Resolve Lag and Timeout issues (Execution).
+    - [x] Implement Serial reCAPTCHA queue in `tokenManager.js`.
+    - [x] Optimize hardware simulation in `tokenManager.js`.
+    - [x] Finalize logging and fallbacks in `flowVideo.js`.
+- [x] Final verification and walkthrough creation.
+- [x] Implement persistent file logging for troubleshooting.
+- [x] Fix cross-account interference typo and improve reCAPTCHA trust scores.
+- [x] Add random human-like delays (3-8s) to avoid bot detection.
+- [x] Add 60-second recovery cooldown to prevent infinite retry loops.
+- [x] Phase: Thorough Stabilization & "Zero-Fail" Session Management
+    - [x] Implement Synchronous Multi-Call Guard in `tokenManager.js`.
+    - [x] Add Graceful `ERR_ABORTED` handling for navigations.
+    - [x] Implement Progressive Backoff (60s -> 300s) for recovery.
+    - [x] Refine reCAPTCHA "Humanity" script and wait logic.
+- [x] Phase: Atomic Shield & Error-Aware Polling
+    - [x] Implement Atomic Sync Locking (Immediate set).
+    - [x] Refactor `mimicApiCall` to strictly reject during recovery.
+    - [x] Add 3s Settling Delay post-recovery.
+    - [x] Update `flowVideo`/`flowImage` to handle RECOVERY_IN_PROGRESS errors.
+- [/] Phase: Refined Task Isolation (5s/30s Rule)
+    - [ ] Update `TokenManager` with `lastStartTime` and `lastFinishTime`.
+    - [ ] Implement Smart Overlap: 30s max wait for running, 5s wait for success.
+    - [ ] Ensure `flowVideo` and `flowImage` use the refined lock.

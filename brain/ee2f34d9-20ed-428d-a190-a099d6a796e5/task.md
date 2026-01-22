@@ -1,0 +1,21 @@
+# Kinx Auto API Bypass Tasks
+
+## Phase 1: Analysis & Capture
+- [x] Decompile và phân tích code obfuscated
+- [x] Tìm API endpoint (prf2.php trên tainguyenweb.com)
+- [x] Phân tích response format từ code
+- [x] Tạo mitmproxy script (kinx_bypass_v2.py)
+- [x] Tạo script bypass V3 (KINX_BYPASS_V3.py) - Environment/Hosts injection
+
+## Phase 2: Bypass Implementation
+- [ ] Test với Kinx Auto application
+
+## Phase 3: Cleanup & Restoration
+- [x] Tạo script disable proxy và restore hosts
+- [x] Kill process bypass
+- [ ] Test với Kinx Auto application
+- [ ] Verify VIP features unlocked
+
+## Phase 3: Verification
+- [ ] Test đầy đủ các tính năng
+- [ ] Document kết quả

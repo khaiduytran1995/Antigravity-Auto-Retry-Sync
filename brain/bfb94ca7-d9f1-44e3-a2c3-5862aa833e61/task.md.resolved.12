@@ -1,0 +1,14 @@
+# Tasks
+
+- [x] Initial Research & Deobfuscation
+- [x] V1-V4 Patch Attempts (UI Level)
+- [ ] Implement V5 Hybrid Bypass (Feature Unlock + Cookie Priority) [/]
+    - [ ] Patch main.js with enhanced hybrid interceptor
+    - [ ] Unlock all renderer features (isPro: true, disabled: false)
+    - [ ] Suppress Payment Modal
+    - [ ] Implement Cookie Management prioritization
+- [ ] Verify V5 functionality
+    - [ ] Check Sidebar is fully unlocked
+    - [ ] Verify Cookie Management priority
+    - [ ] Verify generate tools no longer prompt for payment
+- [ ] Final Cleanup

@@ -1,0 +1,48 @@
+# Research Report: Veo Automation (v1.2.1)
+
+This report provides a deep-dive analysis into the origin, operating mechanism, and core features of the **Veo Automation** tool.
+
+## 1. Origin & Purpose
+- **Developer**: Thien Hanh Media.
+- **Primary Goal**: To automate and streamline the use of **Google VideoFX (Flow)**—an advanced AI video generation tool from Google Labs.
+- **Target Platform**: [Google Labs Flow](https://labs.google/fx/vi/tools/flow).
+
+## 2. Operating Mechanism
+
+### Core Architecture
+The tool is built using the **Electron** framework, allowing it to combine a local user interface with powerful browser-based automation capabilities.
+
+### Advanced Stealth Automation
+To avoid detection as a bot by Google, the tool employs a sophisticated "Stealth Mode":
+- **CDP Injection**: It uses the Chrome DevTools Protocol (CDP) to inject scripts into the browser *before* any page content loads.
+- **Signature Spoofing**: It modifies browser signatures including `navigator.webdriver` (set to false), `hardwareConcurrency`, `deviceMemory`, and WebGL renderer information (Intel Iris Xe Graphics spoofing).
+- **User-Agent Cleaning**: Automatically removes Electron and App-specific tags from the User-Agent to match a standard Chrome installation.
+
+### Token & Session Management
+The heart of the tool is its **Token Management System**:
+- **Automatic Harvesting**: It hooks into Google's reCAPTCHA system and intercepts network requests to capture `Authorization Bearer` tokens, `Cookies`, and `Session IDs` automatically as the user interacts with the browser.
+- **Token Warehouse**: A centralized in-memory store that manages tokens for multiple Google accounts. It implements a "least-used" leasing strategy to balance the load across accounts.
+- **Automated Recovery**: If a session expires (401 error) or is blocked (403/429 error), the tool can automatically attempt to re-login and recover the session using stored credentials.
+
+### API Integration
+Veo Automation interfaces directly with Google's internal APIs:
+- **Endpoints**: Uses `aisandbox-pa.googleapis.com` for video generation, upscaling, and status polling.
+- **CORS Bypass**: Implements custom header manipulation to satisfy browser security constraints while communicating with Google's cross-site APIs.
+
+### Media Processing
+- **FFmpeg Integration**: Uses FFmpeg for:
+  - Video merging and concatenation.
+  - High-quality video upscaling (1080p).
+  - Extracting frames for use as AI reference images.
+
+## 3. Key Components
+| Component | Function |
+|-----------|----------|
+| [licenseManager.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/licenseManager.js) | Verifies product license via Google Apps Script. |
+| [tokenManager.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/tokenManager.js) | Core stealth browser and credential harvesting logic. |
+| [TokenWarehouse.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/TokenWarehouse.js) | Manages and distributes active tokens. |
+| [flowVideo.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/flowVideo.js) | Implementation of Google VideoFX API calls. |
+| [videoMerge.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/videoMerge.js) | FFmpeg-based video processing utility. |
+
+## 4. Technical Summary
+Veo Automation is a highly sophisticated wrapper for Google's latest video AI models. It successfully bypasses complex bot detection and automates human-like interaction to enable high-volume, automated video production.

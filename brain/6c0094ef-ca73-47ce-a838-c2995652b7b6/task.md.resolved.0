@@ -1,0 +1,27 @@
+# Task: Thêm UI Login với Bypass Integration cho SimpleYTB
+
+## Current Task
+- [/] Planning Login UI Integration
+  - [x] Phân tích cấu trúc bypass hiện tại
+  - [x] Tìm biến `currentLicenseValid` và cách nó được set
+  - [ ] Viết implementation plan
+  - [ ] Request user review
+
+## Implementation Tasks
+- [ ] Tạo Login Launcher Python (như đã làm trước đây)
+  - [ ] UI đăng nhập với Supabase authentication
+  - [ ] Kiểm tra HWID để giới hạn số máy
+  - [ ] Hiệu ứng visual đẹp (shooting stars, animations)
+  
+- [ ] Tích hợp Bypass với Login
+  - [ ] Khi đăng nhập thành công → Set `currentLicenseValid = true`
+  - [ ] Khi đăng nhập thất bại → Giữ `currentLicenseValid = false` (bản thường)
+  
+- [ ] Đóng gói thành EXE
+  - [ ] Build launcher với PyInstaller
+  - [ ] Test trên máy khác
+
+## Notes
+- Bypass hiện tại: `currentLicenseValid = true` được set cứng tại line 2890 trong renderer.js
+- Backend: [ytb-backend.exe](file:///c:/Users/hp/AppData/Local/Programs/SimpleYTB/resources/backend/ytb-backend.exe) chạy trên port 18100
+- Cần tạo launcher riêng để kiểm tra login trước khi chạy app

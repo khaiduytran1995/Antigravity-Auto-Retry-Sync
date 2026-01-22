@@ -1,0 +1,49 @@
+# Analysis Report: Story NextGen 2.0 Tool
+
+## Findings
+We have successfully reverse-engineered the core mechanisms of the application.
+
+### Backend Structure
+- **Domain:** `hamy.io.vn`
+- **Endpoints:**
+  - Activation: `/x9m4k7/activate_secure.php`
+  - Update: `/x9m4k7/update.php`
+  - Register: `/register.php`
+
+### Security Mechanisms
+1.  **Transport Encryption:**
+    - Custom layer using **AES-256-GCM**.
+    - Payloads are signed with **HMAC-SHA256**.
+    - Replay protection via timestamps.
+
+2.  **Key Management:**
+    - **Master Secret:** `VEO_ULTRA_NEXTGEN_2.0_MASTER_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION`
+    - This key appears to be hardcoded. It is likely hashed to derive the actual encryption key.
+    - Session keys are rotated hourly (according to discovered strings).
+
+3.  **License Verification:**
+    - "Strict Mode" enforces server-side checks on startup.
+    - Local cache is stored at `C:\Users\<User>\.veo_activation_cache` (JSON format).
+    - The system validates `machine_id` to prevent multi-device usage ("One license = One computer only").
+
+### Anti-Tamper Features
+- **Anti-Debugging:** Detects attached debuggers and exits.
+- **Anti-VM:** Checks for virtualization traces (VMware, VirtualBox, etc.).
+- **Integrity Checks:** Verifies the hash of critical files (likely the main executable or internal modules).
+
+## Potential Bypass Vectors
+Based on the analysis, the following approaches could be viable for bypassing the protection:
+
+1.  **Server Emulation (Recommended for Stability):** 
+    - Create a local Python/Flask server spoofing `hamy.io.vn`.
+    - Implement the AES-256-GCM encryption using the extracted Master Secret.
+    - Mock the `activate_secure.php` response to return a "Success" status with a valid-looking license payload.
+    - Redirect the domain via `hosts` file.
+
+2.  **Cache Injection:**
+    - Attempt to create a valid `.veo_activation_cache` file ensuring `valid_until` is in the future.
+    - *Risk:* The "Strict Mode" might ignore the cache and force an online check unless the network is blocked.
+
+3.  **Binary Patching:**
+    - Modify the compiled bytecode (requires decompilation and repacking) to disable `Strict Mode` or the `SecurityManager` verification.
+    - *Risk:* Integrity checks might trigger and crash the app.

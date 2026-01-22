@@ -1,0 +1,12 @@
+# Task Checklist
+
+- [x] Fix License Verification Stuck Issue
+- [x] Fix WebSocket Image Generation Failure
+    - [x] Analyze license verification flow
+    - [x] Refine API proxy response with enriched VIP fields
+    - [x] Fix `AttributeError` ('list' object has no update) in injection logic
+    - [x] Implement emergency fallback for VIP injection
+    - [x] Expand host redirection to cover `anhnhanh.com` and `chichbong.me` subdomains
+    - [x] Update SSL certificate SANs for expanded domain list
+- [/] Verification with user
+- [ ] Final Testing and Cleanup

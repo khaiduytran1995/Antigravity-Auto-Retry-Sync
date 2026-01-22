@@ -1,0 +1,15 @@
+# Task Checklist - Debugging VIP Status and Black Screen
+
+- [ ] Analyze app source for more robust VIP bypass points
+    - [x] Search for `localStorage.getItem('currentUser')`
+    - [x] Search for `JSON.parse(localStorage.getItem(`
+    - [ ] Look for functions that validate the subscription status
+- [/] Investigate potential overwriting of `currentUser`
+    - [x] Check if backend calls are forced on startup
+- [/] Debug the "Black Screen" (Loading Spinner)
+    - [ ] Identify which API endpoint the app is stuck on
+    - [/] Implement Robust VIP Bypass (localStorage patch) in [index-DLxlB05E.js](file:///d:/15012026kinx-auto/resources/app_debug/dist/assets/index-DLxlB05E.js)
+- [ ] Add detailed logging to Render backend [server.js](file:///d:/15012026kinx-auto/veo-backend/server.js)
+- [ ] Repack `app.asar` and verify VIP status
+- [ ] Verify fix with user
+

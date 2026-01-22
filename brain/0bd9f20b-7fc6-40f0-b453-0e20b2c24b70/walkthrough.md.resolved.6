@@ -1,0 +1,34 @@
+# Account Creation Fixes Walkthrough
+
+I have fixed the issue where account creation was failing in `FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py`.
+
+## Changes Made
+
+### 1. Missing Brand Field
+Added the required `"brand": "anhnhanh"` field to the registration API request. Without this, the server would reject the request as invalid.
+
+### 2. DNS Redirection Logic
+Implemented a local DNS patch inside the [register](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py#70-124) method. This ensures that the script always connects to the real server IP for registration, even if your [hosts](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/VEO3_BYPASS_FINAL.py#258-267) file is currently redirected to `127.0.0.1` from a previous bypass session.
+
+## Verification
+
+You can verify the fix by following these steps:
+1.  Run `FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py`.
+2.  Click **"Tạo 1 Tài Khoản Mới"**.
+3.  Check the log area; you should see `[*] Registering ...` followed by `[+] SUCCESS: ...`.
+4.  The new account will appear in the list above.
+
+## Code Detail
+
+The registration logic now looks like this:
+```python
+# Patch DNS locally for this request to bypass hosts file
+original_getaddrinfo = socket.getaddrinfo
+def patched_getaddrinfo(host, port, *args, **kwargs):
+    if host == "11labs.net" and TARGET_IP:
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, '', (TARGET_IP, port))]
+    return original_getaddrinfo(host, port, *args, **kwargs)
+
+socket.getaddrinfo = patched_getaddrinfo
+# ... httpx request with "brand": "anhnhanh" ...
+```

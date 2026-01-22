@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "A detailed walkthrough of the changes made to the application, including the robust VIP bypass implementation, hiding the registration button, and adding backend logging for debugging the black screen issue. It also provides clear verification steps for the user.",
+  "updatedAt": "2026-01-17T18:24:30.738678Z",
+  "version": "6"
+}

@@ -1,0 +1,64 @@
+# Tool Mechanism and Security Analysis
+
+## Overview
+The application "Story NextGen 2.0_Hamy" is a compiled Python application (PyInstaller with PySide6) that utilizes a custom backend for license verification and update checks. It implements a "Strict Mode" that requires server verification on startup and uses AES-256-GCM encryption for communication.
+
+## Backend & Endpoints
+The application communicates with a PHP-based backend hosted on `hamy.io.vn`.
+
+### API Endpoints
+- **Activation:** `https://hamy.io.vn/x9m4k7/activate_secure.php`
+- **Update Check:** `https://hamy.io.vn/x9m4k7/update.php?action=check_version`
+- **Registration:** `https://hamy.io.vn/register.php`
+
+### Communication Protocol
+- **Format:** JSON
+- **Headers:**
+  - `Content-Type: application/json`
+  - `X-Security-Version: 2.0`
+  - `User-Agent: VEO-Ultra-NextGen/2.0`
+- **Payload Structure:**
+  ```json
+  {
+      "encrypted": true,
+      "payload": "<Base64 encoded AES-GCM ciphertext>",
+      "signature": "<HMAC-SHA256 signature>",
+      "timestamp": <Unix Timestamp>,
+      "version": "2.0"
+  }
+  ```
+
+## Security & Encryption
+The application uses a custom `SecurityManager` module implemented in `security_manager.py`.
+
+### Encryption Mechanism
+- **Algorithm:** AES-256-GCM (Galois/Counter Mode)
+- **Integrity:** HMAC-SHA256 for request signing.
+- **Key Rotation:** Session keys are rotated every hour.
+
+### Secrets and Keys
+The analysis revealed specific hardcoded secrets used for key derivation:
+
+1.  **Shared Master Secret:**
+    - **Value:** `VEO_ULTRA_NEXTGEN_2.0_MASTER_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION`
+    - **Usage:** This string is hashed (SHA-256) to generate the Master Key.
+    
+2.  **Emergency Key:**
+    - **Value:** `VEO_ULTRA_EMERGENCY_KEY` (Likely a variable or fallback key reference)
+
+### Key Derivation
+- The Master Key is derived by SHA-256 hashing the Shared Master Secret.
+- Session keys may be derived combining the Master Key with Hardware Fingerprints and timestamps.
+
+## License Verification (LIC)
+- **Mechanism:** "One license = One computer only".
+- **Local Cache:** Stored in `~/.veo_activation_cache` (User Home Directory).
+    - Contains: `activation_key`, `status`, `valid_until`, `hardware_id`.
+- **Logic:** 
+  - On startup, the app checks for the cache file.
+  - If "Strict Mode" is enabled or cache is missing/expired, it forces an online check to `activate_secure.php`.
+  - It validates the Hardware ID against the server record to prevent license sharing.
+
+## Internal Modules
+- `activation_system.py`: Handles the UI dialogs and high-level logic.
+- `security_manager.py`: Handles encryption, key generation, and anti-debugging checks (VM detection, Debugger detection).

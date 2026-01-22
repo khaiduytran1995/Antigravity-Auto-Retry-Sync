@@ -1,0 +1,7 @@
+# Task: Analyze and Patch Veo Automation
+
+- [ ] Analyze project structure and dependencies [/]
+- [ ] Investigate licensing and token logic in `dist-electron/services` [ ]
+- [ ] Identify bypass opportunities or fixes based on previous work [ ]
+- [ ] Implement necessary patches [ ]
+- [ ] Verify functionality [ ]

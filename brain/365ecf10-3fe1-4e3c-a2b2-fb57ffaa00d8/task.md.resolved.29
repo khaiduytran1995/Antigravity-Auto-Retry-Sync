@@ -1,0 +1,8 @@
+- [x] Analysis Complete
+- [x] Bypass V7 (based on v6 pattern)
+    - [x] Real server IP: 45.252.251.51
+    - [x] Hosts file redirect
+    - [x] Direct IP connection
+    - [x] Modify VIP + HWID in response
+    - [x] Keep real API keys
+    - [ ] User testing

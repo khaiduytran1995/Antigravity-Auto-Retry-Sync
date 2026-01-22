@@ -1,0 +1,45 @@
+# Proposing Unified Direct API Integration
+
+This plan aims to unify how AI services are called across the application by integrating the "Direct API" approach (bypassing Supabase Edge Functions) into all major features. This will simplify local development and allow for easier rotation of Gemini API keys.
+
+## User Review Required
+
+> [!IMPORTANT]
+> This change will shift the primary API calling logic from Supabase Edge Functions to direct client-side calls to Google's Gemini APIs. While this simplifies development, it exposes the API structure in the client (though API keys are already handled via user input or rotation).
+
+## Proposed Changes
+
+### [Services]
+
+#### [MODIFY] [geminiDirect.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/services/geminiDirect.ts)
+- Add a generic `callGeminiTextDirectly` function to handle text-only prompts (needed for Storyboard generation).
+- Export a configuration to toggle between Direct and Supabase modes.
+
+#### [MODIFY] [geminiImageDirect.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/services/geminiImageDirect.ts)
+- Refine model selection to prioritize `gemini-2.0-flash-exp` for best results.
+
+---
+
+### [Components & Hooks]
+
+#### [MODIFY] [VirtualTryOn.tsx](file:///c:/Users/hp/Downloads/fashiond-main/src/components/VirtualTryOn.tsx)
+- Integrate [callGeminiImageDirect](file:///c:/Users/hp/Downloads/fashiond-main/src/services/geminiImageDirect.ts#58-171) to allow processing without Supabase Edge Functions.
+
+#### [MODIFY] [useStoryboardGenerator.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/hooks/useStoryboardGenerator.ts)
+- Integrate `callGeminiTextDirectly` to support local generation.
+
+#### [MODIFY] [ApiKeySettings.tsx](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx)
+- Add a toggle for "Direct API Mode" vs "Supabase Mode".
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- No automated test suite exists. I will perform manual verification of the API calls.
+
+### Manual Verification
+1. **API Toggle**: Verify that switching between Direct and Supabase modes works in the Settings.
+2. **Fashion Analysis**: Verify that "AI Phân tích" still works (existing direct integration).
+3. **Virtual Try-On**: Verify that "Virtual Try-On" works in Direct mode without calling Supabase.
+4. **Storyboard**: Verify that "Cinema AI Director" works in Direct mode.

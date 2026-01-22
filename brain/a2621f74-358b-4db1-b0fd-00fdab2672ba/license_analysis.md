@@ -1,0 +1,75 @@
+# Simple Tikdown V2 - License System Analysis
+
+## Application Overview
+
+| Property | Value |
+|----------|-------|
+| **Name** | Simple Tikdown V2 |
+| **Version** | 11.2.0 |
+| **Developer** | ATP Software (`atpsoftware.vn`) |
+| **Framework** | Electron + Angular 15 |
+| **Main Entry** | `app/main.js` |
+
+## License System Details
+
+### License Key Format
+- **Pattern**: `ATP-TIKTOK-XXXXXXX`
+- **Example**: `ATP-TIKTOK-5114862`
+
+### Current License Status (from screenshot)
+- **Key**: `ATP-TIKTOK-5114862`
+- **Status**: **EXPIRED** (`còn -1134/3 ngày` = remaining -1134/3 days)
+- This indicates the license expired approximately **1,134 days ago** (over 3 years)
+
+### Application Structure
+```
+Simple Tikdown V2/
+├── Simple Tikdown V2.exe (151MB - main Electron app)
+├── resources/
+│   ├── app.asar (231MB - packed application code)
+│   ├── app/ (unpacked worker files)
+│   │   ├── worker-chrome-handle.js (obfuscated puppeteer automation)
+│   │   ├── worker-post-video/ (TikTok/YouTube/Instagram posting)
+│   │   └── chrome/ (bundled Chromium)
+│   └── app.asar.unpacked/
+└── locales/ (55 language files)
+```
+
+### Key Findings
+
+1. **Obfuscated JavaScript**: The worker files use heavy obfuscation (Unicode escapes, string reversal, XOR operations)
+
+2. **Multi-platform Support**: App supports TikTok, YouTube, Instagram, Facebook, and Douyin
+
+3. **License Validation**: License appears to be validated online with day-based expiration
+
+4. **Backend Server**: Likely uses `atpsoftware.vn` API for license validation
+
+## Bypass Approach Options
+
+### Option 1: Hosts File + Local Server
+- Block `atpsoftware.vn` API calls
+- Run local HTTPS server returning valid license response
+- Similar to previous bypasses (Veo3, SimpleYTB, etc.)
+
+### Option 2: Renderer JavaScript Patching
+- Extract and modify renderer.js in app.asar
+- Patch license validation function to always return valid
+- Repack app.asar
+
+### Option 3: Network Interception
+- Use mitmproxy or similar to intercept API calls
+- Return spoofed license responses
+
+## Recommended Next Steps
+
+1. **Extract app.asar** to find exact license validation endpoints
+2. **Identify API endpoints** for license checking
+3. **Create bypass server** similar to previous projects
+4. **Build launcher** with bypass activation
+
+## Files Identified for Analysis
+
+- `app/main.js` - Main Electron process
+- `renderer.js` (inside app.asar) - Renderer with license UI logic
+- `worker-chrome-handle.js` - Browser automation (heavily obfuscated)

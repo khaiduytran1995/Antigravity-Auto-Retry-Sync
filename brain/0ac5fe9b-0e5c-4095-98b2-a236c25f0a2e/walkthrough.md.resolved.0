@@ -1,0 +1,222 @@
+# 🔍 Phân Tích LVC_Veo3_Automation v1.2.47
+
+![Application Analysis](file:///C:/Users/hp/.gemini/antigravity/brain/0ac5fe9b-0e5c-4095-98b2-a236c25f0a2e/uploaded_image_1767531391353.png)
+
+---
+
+## 📊 Thông Tin Cơ Bản
+
+| Thuộc tính | Giá trị |
+|------------|---------|
+| **Tên ứng dụng** | LVC_Veo3_Automation |
+| **Phiên bản** | 1.2.47 |
+| **Kích thước** | ~155 MB |
+| **Python Version** | 3.13 |
+| **Packer** | PyInstaller 2.1+ |
+| **UI Framework** | PyQt5 |
+| **Browser Engine** | Playwright (Chromium) |
+
+---
+
+## 🏗️ Kiến Trúc Ứng Dụng
+
+```mermaid
+graph TB
+    subgraph "LVC_Veo3_Automation.exe"
+        A[run.pyc<br/>Entry Point] --> B[src/main.pyc]
+        B --> C[src/core]
+        B --> D[src/ui]
+        B --> E[src/workers]
+    end
+    
+    subgraph "Core Modules"
+        C --> C1[api.pyc<br/>108KB]
+        C --> C2[browser_controller.pyc<br/>285KB]
+        C --> C3[license_client.pyc<br/>17KB]
+        C --> C4[config.pyc<br/>27KB]
+        C --> C5[recaptcha_service.pyc<br/>116KB]
+        C --> C6[sora_api_client.pyc<br/>42KB]
+    end
+    
+    subgraph "External Services"
+        C1 --> S1["aisandbox-pa.googleapis.com<br/>Google Labs API"]
+        C3 --> S2["tool.lvcmedia.vn<br/>License Server"]
+        C6 --> S3["savesora.com<br/>Video Download"]
+    end
+```
+
+---
+
+## 🌐 API Endpoints & Servers
+
+### 1. Google Labs AI Sandbox (Video Generation)
+| Endpoint | Chức năng |
+|----------|-----------|
+| `https://aisandbox-pa.googleapis.com` | Base API URL |
+| `/v1/video:batchAsyncGenerateVideoText` | Text-to-Video |
+| `/v1/video:batchAsyncGenerateVideoStartImage` | Image-to-Video |
+| `/v1/video:batchAsyncGenerateVideoStartAndEndImage` | 2-Image-to-Video |
+| `/v1/video:batchAsyncGenerateVideoReferenceImages` | Reference Images |
+| `/v1/video:batchCheckAsyncVideoGenerationStatus` | Check Status |
+| `https://labs.google/fx/api/auth/session` | Authentication |
+| `https://labs.google/fx/api/trpc/project.createProject` | Create Project |
+
+### 2. LVC Media License Server
+| Endpoint | Chức năng |
+|----------|-----------|
+| `https://tool.lvcmedia.vn` | License Validation |
+| `https://cdn.lvcmedia.vn` | CDN Resources |
+
+### 3. SaveSora (Video Download)
+| Endpoint | Chức năng |
+|----------|-----------|
+| `https://savesora.com/api/download-video-new` | Download Video |
+| `https://savesora.com/api/proxy-download` | Proxy Download |
+
+---
+
+## 🎬 Veo 3.1 Models Supported
+
+### Text-to-Video Models
+| Model ID | Chế độ |
+|----------|--------|
+| `veo_3_1_t2v_fast_ultra_relaxed` | Landscape (Default) |
+| `veo_3_1_t2v_fast_portrait_ultra_relaxed` | Portrait (Default) |
+| `veo_3_1_t2v_fast_ultra` | Landscape Fast |
+| `veo_3_1_t2v` | Landscape Standard |
+| `veo_2_1_fast_d_15_t2v` | Veo 2.1 |
+| `veo_3_0_t2v` / `veo_2_0_t2v` | Legacy |
+
+### Image-to-Video Models
+| Model ID | Chế độ |
+|----------|--------|
+| `veo_3_1_i2v_s_fast_ultra_relaxed` | Landscape (Default) |
+| `veo_3_1_i2v_s_fast_portrait_ultra` | Portrait (Default) |
+| `veo_3_1_i2v_s_fast_ultra_fl` | Two-Image Mode |
+| `veo_3_0_r2v_fast_ultra_relaxed` | Reference Images |
+
+---
+
+## 🔐 Hệ Thống License & Bảo Mật
+
+### Device Fingerprinting (HWID)
+```mermaid
+graph LR
+    A[CPU ID] --> H[SHA256 Hash]
+    B[Machine ID] --> H
+    C[Hostname] --> H
+    D[UUID] --> H
+    H --> F[Device ID]
+```
+
+**Thu thập thông tin:**
+- **Windows**: `wmic cpu get ProcessorId`, Registry Machine ID
+- **Linux**: `/proc/cpuinfo`, Machine ID
+- **macOS**: `system_profiler SPHardwareDataType`
+
+### License Client Flow
+1. Collect device info (OS, CPU, hostname)
+2. Generate device ID (SHA256 hash)
+3. Send to `https://tool.lvcmedia.vn`
+4. Verify license với **ECDSA Public Key**
+
+### Public Key (ECDSA)
+```
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJx8qnXlgMd8T/ZU7INSPf
+YDWIEcSlzpsoZ983zM8bCW6erzZN6ISiF5T/cDLV6fEP/vtlOaH6w4B5VpjSug
+-----END PUBLIC KEY-----
+```
+
+---
+
+## 🤖 Browser Automation
+
+### Playwright Integration
+- **Browser**: Chromium (bundled in `browser133` folder)
+- **User Agent**: Chrome 142.0
+- **Features**:
+  - Auto login Google
+  - Cookie management
+  - reCAPTCHA solving
+  - IP detection via `api.ipify.org`
+
+### URLs Accessed
+- `https://labs.google/fx/vi/tools/flow` - Main Flow Editor
+- `https://accounts.google.com/signin` - Google Login
+- `https://accounts.google.com/CheckCookie` - Cookie Verification
+
+---
+
+## 📁 Cấu Trúc Files
+
+```
+D:\LVC_Veo3_Automation_v1.2.47\
+├── LVC_Veo3_Automation.exe     (155 MB - Main executable)
+├── lvc_update.exe              (44 MB - Auto updater)
+├── ffmpeg.exe / ffplay.exe / ffprobe.exe (Video processing)
+├── logo.ico / logo.png
+├── browser133\                 (Chromium browser)
+├── playwright-browsers\        (Playwright runtime)
+├── cookies\                    (Google cookies storage)
+├── profiles\                   (Browser profiles)
+└── data\
+    ├── settings.json           (App configuration)
+    ├── selected_tokens.json    (API tokens)
+    ├── cookies\                (Session cookies)
+    ├── generated\              (AI generated images)
+    ├── videos\                 (Output videos)
+    ├── subtitles\              (Subtitle files)
+    └── logs\                   (Application logs)
+```
+
+---
+
+## ⚙️ Dependencies (Extracted)
+
+| Package | Purpose |
+|---------|---------|
+| **PyQt5** | GUI Framework |
+| **Playwright** | Browser Automation |
+| **Selenium** | Alternative Browser Control |
+| **curl_cffi** | HTTP Client (TLS Fingerprint) |
+| **cryptography** | License Encryption (Fernet, HKDF, ECDSA) |
+| **opencv-python (cv2)** | Image Processing |
+| **numpy** | Numerical Operations |
+| **psutil** | System Info |
+| **pydivert** | Network Traffic |
+| **websockets** | WebSocket Communication |
+
+---
+
+## 🔑 Key Findings
+
+> [!IMPORTANT]
+> ### Project ID cố định
+> `c26e7b99-142e-4161-b201-cc205e5aa76e`
+
+> [!NOTE]
+> ### Tính năng chính
+> 1. **Text-to-Video**: Tạo video từ prompt text
+> 2. **Image-to-Video**: Tạo video từ 1-3 hình ảnh
+> 3. **Multi-threading**: Hỗ trợ 5 threads đồng thời
+> 4. **Auto reCAPTCHA**: Tự động solve captcha
+> 5. **Gemini API**: Tích hợp để enhance prompts
+
+> [!WARNING]
+> ### Bảo mật
+> - License validation qua ECDSA signature
+> - Device fingerprinting (HWID binding)
+> - Encrypted bytecode (một số modules)
+
+---
+
+## 📈 Kết Luận
+
+**LVC_Veo3_Automation** là một công cụ tự động hóa việc tạo video AI sử dụng **Google Labs Veo 3.1**. Ứng dụng:
+
+1. **Automation**: Tự động login Google, manage cookies, solve reCAPTCHA
+2. **Multi-model**: Hỗ trợ nhiều models Veo (3.1, 3.0, 2.1, 2.0)
+3. **License Protected**: Sử dụng ECDSA + HWID binding
+4. **Video Processing**: Tích hợp FFmpeg để xử lý video
+5. **SaveSora**: Download video từ Sora về local

@@ -1,0 +1,38 @@
+# Zero-Fail Session Management Walkthrough
+
+I have implemented a comprehensive stabilization layer to prevent the persistent recovery loops and 403 Forbidden errors.
+
+## Core Stabilization Improvements
+
+### 1. Synchronous Multi-Call Guard (Shield) 🛡️
+- **Problem**: Overlapping recovery calls caused navigations to abort (`ERR_ABORTED`).
+- **Fix**: Account-level locks now ensure **exactly one** recovery process can exist. Any simultaneous calls are blocked or unified immediately.
+
+### 2. Progressive Cooldown (Anti-Ban) ⏸️
+- **Problem**: Rapid retry loops after a failure flagged the account as bot activity.
+- **Fix**: If recovery fails, a **progressive cooldown** is applied:
+    - 1st failure: **60 seconds** pause.
+    - 2nd failure: **180 seconds** pause.
+    - 3rd+ failure: **300 seconds** (5 mins) pause.
+- **Result**: Protects your account from being banned while letting the system stabilize.
+
+### 3. Robust "Zero-Abort" Navigation 🚢
+- **Problem**: Redirects or network spikes caused the login page to crash with `ERR_ABORTED`.
+- **Fix**: The system now gracefully handles aborted navigations during login, allowing the session capture to continue if the page is still active.
+
+### 4. Service-Level Backoff ✅
+- **Problem**: Generation tasks (Video/Image) would spam the logs with "Failed to fetch" while an account was cooling down.
+- **Fix**: Both `flowVideo` and `flowImage` now check the account status **before** starting, skipping tasks with clear "Skip: Cooldown" logs.
+
+## Logs to Look For:
+- `⛔ mimicApiCall WAITING for shared recovery lock...` (Account is busy logging in).
+- `⏸️ Progressive Cooldown (Failures: 2). Wait 142s.` (Account is resting after failure).
+- `[flowVideo Account 1] Skip: Account in cooldown (45s remaining)` (Skipping task to avoid spam).
+
+## Verification Steps:
+1. **Restart the app.**
+2. **Trigger a batch of 20+ videos.**
+3. If an account fails (403), verify it **pauses naturally** instead of loop-crashing.
+4. Verify the other account continues to work independently.
+
+If you still see "Failed to fetch" loops, please send me the new `veo_debug_logs.txt`.

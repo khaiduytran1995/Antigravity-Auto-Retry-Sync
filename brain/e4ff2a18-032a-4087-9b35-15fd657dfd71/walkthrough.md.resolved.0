@@ -1,0 +1,3994 @@
+# Walkthrough: Chuyển Fashion AI Studio sang Google AI Studio API
+
+## Tổng quan
+Đã cập nhật Fashion AI Studio website để sử dụng **Google AI Studio API miễn phí** thay vì dịch vụ có phí (Lovable API Gateway).
+
+---
+
+## Các thay đổi đã thực hiện
+
+### Edge Functions (Supabase)
+
+#### [generate-storyboard/index.ts](file:///c:/Users/hp/Downloads/fashiond-main/supabase/functions/generate-storyboard/index.ts)
+- Thêm hỗ trợ Google AI keys với key rotation
+- Gọi trực tiếp `generativelanguage.googleapis.com` với model `gemini-2.0-flash-exp`
+- Fallback về Lovable API nếu không có Google AI keys
+- Nhận `userApiKeys` từ request body
+
+```diff:index.ts
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const SYSTEM_PROMPT = `Bạn là một đạo diễn AI chuyên nghiệp, chuyên gia về điện ảnh Hollywood với kinh nghiệm từ các bộ phim như Avatar, Blade Runner 2049, Inception. 
+
+Nhiệm vụ của bạn là tạo storyboard chuyên nghiệp cho video được tạo bằng Google VEO3.
+
+QUAN TRỌNG - GIỚI HẠN VEO3:
+- Mỗi video clip VEO3 tối đa 8 giây
+- Cần mô tả Start Frame và End Frame cho mỗi cảnh để đảm bảo sự liền mạch
+- End Frame của cảnh trước PHẢI khớp với Start Frame của cảnh sau
+
+YÊU CẦU CHẤT LƯỢNG:
+1. Prompt phải cực kỳ chi tiết, mô tả rõ ràng về:
+   - Góc camera, chuyển động camera
+   - Ánh sáng, màu sắc, color grading
+   - Bối cảnh, nhân vật, trang phục
+   - Cảm xúc, mood của cảnh
+   
+2. Đảm bảo tính liền mạch:
+   - Các cảnh phải kết nối logic về mặt nội dung
+   - Lời thoại phải tự nhiên, phù hợp ngữ cảnh
+   - Chuyển cảnh phải mượt mà
+
+3. Phong cách Hollywood:
+   - Sử dụng kỹ thuật quay phim chuyên nghiệp
+   - Color grading điện ảnh
+   - Ánh sáng dramatic
+   - Composition theo rule of thirds
+
+Trả về JSON với format:
+{
+  "title": "Tên dự án",
+  "synopsis": "Tóm tắt nội dung (2-3 câu)",
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "title": "Tên cảnh ngắn gọn",
+      "duration": 8,
+      "startFrame": "Mô tả chi tiết khung hình đầu tiên",
+      "endFrame": "Mô tả chi tiết khung hình cuối cùng (phải khớp với startFrame cảnh tiếp theo)",
+      "visualPrompt": "Prompt đầy đủ cho VEO3 - phải bao gồm: camera movement, lighting, mood, subject, action, style. Viết bằng tiếng Anh.",
+      "cameraMovement": "Mô tả chuyển động camera",
+      "dialogue": "Lời thoại (nếu có)",
+      "narration": "Lời dẫn (nếu có)",
+      "soundDesign": "Mô tả âm thanh, nhạc nền",
+      "transition": "Cách chuyển sang cảnh tiếp theo",
+      "mood": "Mood/cảm xúc của cảnh",
+      "lighting": "Mô tả ánh sáng",
+      "colorGrade": "Color grading style"
+    }
+  ]
+}`;
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { idea, duration, genre, style, additionalNotes, includeStartEnd } = await req.json();
+    
+    console.log('Generating storyboard:', { idea, duration, genre, style, includeStartEnd });
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
+    }
+
+    // Calculate number of scenes (8 seconds per VEO3 clip)
+    const totalSeconds = duration * 60;
+    const sceneCount = Math.ceil(totalSeconds / 8);
+
+    const genreMap: Record<string, string> = {
+      'advertisement': 'quảng cáo thương mại',
+      'short_film': 'phim ngắn nghệ thuật',
+      'review': 'video review sản phẩm',
+      'fashion': 'video thời trang lookbook',
+      'cinema': 'phim điện ảnh Hollywood',
+      'series': 'phim truyền hình dài tập',
+      'documentary': 'phim tài liệu',
+      'music_video': 'MV ca nhạc'
+    };
+
+    const userPrompt = `Tạo storyboard cho ${genreMap[genre] || genre}:
+
+Ý TƯỞNG: ${idea}
+
+THỜI LƯỢNG: ${duration} phút (${sceneCount} cảnh, mỗi cảnh tối đa 8 giây)
+
+${style ? `PHONG CÁCH: ${style}` : ''}
+${additionalNotes ? `GHI CHÚ: ${additionalNotes}` : ''}
+
+${includeStartEnd ? 'BẮT BUỘC: Tạo Start Frame và End Frame cho mỗi cảnh để đảm bảo liền mạch.' : ''}
+
+Yêu cầu:
+1. Tạo đúng ${sceneCount} cảnh
+2. Visual prompt phải viết bằng tiếng Anh, cực kỳ chi tiết cho VEO3
+3. Đảm bảo câu chuyện liền mạch, hấp dẫn từ đầu đến cuối
+4. Mỗi prompt phải bao gồm: cinematic quality, camera movement, lighting, mood
+5. End Frame của mỗi cảnh phải tự nhiên kết nối với Start Frame cảnh sau`;
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt }
+        ],
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('AI Gateway error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Đã vượt quá giới hạn request. Vui lòng thử lại sau.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'Cần nạp thêm credits. Vào Settings -> Workspace -> Usage để nạp.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      throw new Error(`AI Gateway error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    
+    console.log('AI response received, parsing...');
+
+    let storyboard;
+    try {
+      storyboard = JSON.parse(content);
+    } catch (e) {
+      console.error('Failed to parse AI response:', content);
+      throw new Error('Failed to parse AI response');
+    }
+
+    // Add IDs and ensure proper structure
+    const result = {
+      id: `storyboard-${Date.now()}`,
+      title: storyboard.title || 'Untitled Project',
+      genre,
+      totalDuration: totalSeconds,
+      synopsis: storyboard.synopsis || '',
+      scenes: (storyboard.scenes || []).map((scene: any, index: number) => ({
+        id: `scene-${index + 1}`,
+        sceneNumber: scene.sceneNumber || index + 1,
+        title: scene.title || `Scene ${index + 1}`,
+        duration: Math.min(scene.duration || 8, 8),
+        startFrame: includeStartEnd ? scene.startFrame : undefined,
+        endFrame: includeStartEnd ? scene.endFrame : undefined,
+        visualPrompt: scene.visualPrompt || '',
+        cameraMovement: scene.cameraMovement || '',
+        dialogue: scene.dialogue || '',
+        narration: scene.narration || '',
+        soundDesign: scene.soundDesign || '',
+        transition: scene.transition || 'Cut',
+        mood: scene.mood || '',
+        lighting: scene.lighting || '',
+        colorGrade: scene.colorGrade || '',
+      })),
+      createdAt: new Date().toISOString(),
+    };
+
+    console.log('Storyboard generated successfully with', result.scenes.length, 'scenes');
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi tạo storyboard';
+    console.error('Error in generate-storyboard:', errorMessage);
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
+===
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Parse Google AI keys from environment variable
+function getGoogleAIKeys(): string[] {
+  const keysString = Deno.env.get('GOOGLE_AI_KEYS');
+  if (!keysString) return [];
+  
+  try {
+    const parsed = JSON.parse(keysString);
+    if (Array.isArray(parsed)) return parsed;
+    return [parsed];
+  } catch {
+    return keysString
+      .split(/[\n,]/)
+      .map(k => k.trim())
+      .filter(k => k.length > 0 && k.startsWith('AIza'));
+  }
+}
+
+// Merge user-provided keys with system keys (user keys take priority)
+function mergeApiKeys(userKeys: string[] = [], systemKeys: string[] = []): string[] {
+  const uniqueKeys = new Set<string>();
+  
+  for (const key of userKeys) {
+    if (key && key.startsWith('AIza')) {
+      uniqueKeys.add(key);
+    }
+  }
+  
+  for (const key of systemKeys) {
+    if (key && key.startsWith('AIza')) {
+      uniqueKeys.add(key);
+    }
+  }
+  
+  return Array.from(uniqueKeys);
+}
+
+// Track failed keys for this session
+const failedKeys = new Set<string>();
+
+function getRandomKey(keys: string[]): string | null {
+  const availableKeys = keys.filter(k => !failedKeys.has(k));
+  if (availableKeys.length === 0) {
+    failedKeys.clear();
+    if (keys.length === 0) return null;
+    return keys[Math.floor(Math.random() * keys.length)];
+  }
+  return availableKeys[Math.floor(Math.random() * availableKeys.length)];
+}
+
+const SYSTEM_PROMPT = `Bạn là một đạo diễn AI chuyên nghiệp, chuyên gia về điện ảnh Hollywood với kinh nghiệm từ các bộ phim như Avatar, Blade Runner 2049, Inception. 
+
+Nhiệm vụ của bạn là tạo storyboard chuyên nghiệp cho video được tạo bằng Google VEO3.
+
+QUAN TRỌNG - GIỚI HẠN VEO3:
+- Mỗi video clip VEO3 tối đa 8 giây
+- Cần mô tả Start Frame và End Frame cho mỗi cảnh để đảm bảo sự liền mạch
+- End Frame của cảnh trước PHẢI khớp với Start Frame của cảnh sau
+
+YÊU CẦU CHẤT LƯỢNG:
+1. Prompt phải cực kỳ chi tiết, mô tả rõ ràng về:
+   - Góc camera, chuyển động camera
+   - Ánh sáng, màu sắc, color grading
+   - Bối cảnh, nhân vật, trang phục
+   - Cảm xúc, mood của cảnh
+   
+2. Đảm bảo tính liền mạch:
+   - Các cảnh phải kết nối logic về mặt nội dung
+   - Lời thoại phải tự nhiên, phù hợp ngữ cảnh
+   - Chuyển cảnh phải mượt mà
+
+3. Phong cách Hollywood:
+   - Sử dụng kỹ thuật quay phim chuyên nghiệp
+   - Color grading điện ảnh
+   - Ánh sáng dramatic
+   - Composition theo rule of thirds
+
+Trả về JSON với format:
+{
+  "title": "Tên dự án",
+  "synopsis": "Tóm tắt nội dung (2-3 câu)",
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "title": "Tên cảnh ngắn gọn",
+      "duration": 8,
+      "startFrame": "Mô tả chi tiết khung hình đầu tiên",
+      "endFrame": "Mô tả chi tiết khung hình cuối cùng (phải khớp với startFrame cảnh tiếp theo)",
+      "visualPrompt": "Prompt đầy đủ cho VEO3 - phải bao gồm: camera movement, lighting, mood, subject, action, style. Viết bằng tiếng Anh.",
+      "cameraMovement": "Mô tả chuyển động camera",
+      "dialogue": "Lời thoại (nếu có)",
+      "narration": "Lời dẫn (nếu có)",
+      "soundDesign": "Mô tả âm thanh, nhạc nền",
+      "transition": "Cách chuyển sang cảnh tiếp theo",
+      "mood": "Mood/cảm xúc của cảnh",
+      "lighting": "Mô tả ánh sáng",
+      "colorGrade": "Color grading style"
+    }
+  ]
+}`;
+
+// Call Google Gemini API with key rotation
+async function callGeminiWithRotation(
+  keys: string[],
+  userPrompt: string,
+  maxRetries: number = 5
+): Promise<{ success: boolean; content?: string; error?: string }> {
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const apiKey = getRandomKey(keys);
+    if (!apiKey) {
+      return { success: false, error: 'Không có API key khả dụng' };
+    }
+
+    console.log(`Attempt ${attempt + 1}/${maxRetries} with key ending in ...${apiKey.slice(-4)}`);
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: `${SYSTEM_PROMPT}\n\n${userPrompt}` }
+              ],
+            }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+            },
+          }),
+        },
+      );
+
+      console.log(`Response status: ${response.status}`);
+
+      if (response.status === 429 || response.status === 403) {
+        console.log(`Key ...${apiKey.slice(-4)} hit rate limit/quota, trying next key`);
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      if (response.status === 400) {
+        const errorText = await response.text();
+        console.error('Bad request:', errorText);
+        
+        if (errorText.includes('API key not valid') || errorText.includes('API key expired')) {
+          failedKeys.add(apiKey);
+          continue;
+        }
+        
+        return { success: false, error: `Request error: ${errorText}` };
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API error:', response.status, errorText);
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (content) {
+        return { success: true, content };
+      }
+
+      console.log('No content in response');
+      continue;
+
+    } catch (error) {
+      console.error(`Error with key ...${apiKey.slice(-4)}:`, error);
+      failedKeys.add(apiKey);
+      continue;
+    }
+  }
+
+  return {
+    success: false,
+    error: `Không dùng được API key nào (đã thử ${maxRetries} key). Vui lòng thử lại sau.`,
+  };
+}
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { idea, duration, genre, style, additionalNotes, includeStartEnd, userApiKeys } = await req.json();
+    
+    console.log('Generating storyboard:', { idea, duration, genre, style, includeStartEnd });
+    console.log('User API keys provided:', userApiKeys?.length || 0);
+
+    // Calculate number of scenes (8 seconds per VEO3 clip)
+    const totalSeconds = duration * 60;
+    const sceneCount = Math.ceil(totalSeconds / 8);
+
+    const genreMap: Record<string, string> = {
+      'advertisement': 'quảng cáo thương mại',
+      'short_film': 'phim ngắn nghệ thuật',
+      'review': 'video review sản phẩm',
+      'fashion': 'video thời trang lookbook',
+      'cinema': 'phim điện ảnh Hollywood',
+      'series': 'phim truyền hình dài tập',
+      'documentary': 'phim tài liệu',
+      'music_video': 'MV ca nhạc'
+    };
+
+    const userPrompt = `Tạo storyboard cho ${genreMap[genre] || genre}:
+
+Ý TƯỞNG: ${idea}
+
+THỜI LƯỢNG: ${duration} phút (${sceneCount} cảnh, mỗi cảnh tối đa 8 giây)
+
+${style ? `PHONG CÁCH: ${style}` : ''}
+${additionalNotes ? `GHI CHÚ: ${additionalNotes}` : ''}
+
+${includeStartEnd ? 'BẮT BUỘC: Tạo Start Frame và End Frame cho mỗi cảnh để đảm bảo liền mạch.' : ''}
+
+Yêu cầu:
+1. Tạo đúng ${sceneCount} cảnh
+2. Visual prompt phải viết bằng tiếng Anh, cực kỳ chi tiết cho VEO3
+3. Đảm bảo câu chuyện liền mạch, hấp dẫn từ đầu đến cuối
+4. Mỗi prompt phải bao gồm: cinematic quality, camera movement, lighting, mood
+5. End Frame của mỗi cảnh phải tự nhiên kết nối với Start Frame cảnh sau`;
+
+    // Get Google AI keys - merge user keys with system keys
+    const systemKeys = getGoogleAIKeys();
+    const allKeys = mergeApiKeys(userApiKeys || [], systemKeys);
+    console.log(`Total API keys available: ${allKeys.length} (${userApiKeys?.length || 0} user + ${systemKeys.length} system)`);
+
+    let content: string | undefined;
+
+    // Try Google AI first if keys available
+    if (allKeys.length > 0) {
+      const result = await callGeminiWithRotation(allKeys, userPrompt, Math.min(allKeys.length, 5));
+      if (result.success && result.content) {
+        content = result.content;
+      } else {
+        console.log('Google AI failed, falling back to Lovable API:', result.error);
+      }
+    }
+
+    // Fallback to Lovable API if Google AI failed or no keys
+    if (!content) {
+      const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+      if (!LOVABLE_API_KEY) {
+        throw new Error('Không có API key nào khả dụng. Vui lòng thêm Google AI API key trong Settings.');
+      }
+
+      console.log('Using Lovable API fallback...');
+
+      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: userPrompt }
+          ],
+          response_format: { type: 'json_object' }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('AI Gateway error:', response.status, errorText);
+        
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: 'Đã vượt quá giới hạn request. Vui lòng thử lại sau.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: 'Cần thêm Google AI API key trong Settings để tiếp tục.' }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        throw new Error(`AI Gateway error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      content = data.choices?.[0]?.message?.content;
+    }
+
+    if (!content) {
+      throw new Error('Không nhận được phản hồi từ AI');
+    }
+    
+    console.log('AI response received, parsing...');
+
+    let storyboard;
+    try {
+      storyboard = JSON.parse(content);
+    } catch (e) {
+      console.error('Failed to parse AI response:', content);
+      throw new Error('Failed to parse AI response');
+    }
+
+    // Add IDs and ensure proper structure
+    const result = {
+      id: `storyboard-${Date.now()}`,
+      title: storyboard.title || 'Untitled Project',
+      genre,
+      totalDuration: totalSeconds,
+      synopsis: storyboard.synopsis || '',
+      scenes: (storyboard.scenes || []).map((scene: any, index: number) => ({
+        id: `scene-${index + 1}`,
+        sceneNumber: scene.sceneNumber || index + 1,
+        title: scene.title || `Scene ${index + 1}`,
+        duration: Math.min(scene.duration || 8, 8),
+        startFrame: includeStartEnd ? scene.startFrame : undefined,
+        endFrame: includeStartEnd ? scene.endFrame : undefined,
+        visualPrompt: scene.visualPrompt || '',
+        cameraMovement: scene.cameraMovement || '',
+        dialogue: scene.dialogue || '',
+        narration: scene.narration || '',
+        soundDesign: scene.soundDesign || '',
+        transition: scene.transition || 'Cut',
+        mood: scene.mood || '',
+        lighting: scene.lighting || '',
+        colorGrade: scene.colorGrade || '',
+      })),
+      createdAt: new Date().toISOString(),
+    };
+
+    console.log('Storyboard generated successfully with', result.scenes.length, 'scenes');
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi tạo storyboard';
+    console.error('Error in generate-storyboard:', errorMessage);
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
+
+```
+
+---
+
+#### [analyze-fashion/index.ts](file:///c:/Users/hp/Downloads/fashiond-main/supabase/functions/analyze-fashion/index.ts)
+- Thêm hỗ trợ Google AI keys với key rotation cho vision model
+- Nhận `userApiKeys` từ request body
+- Fallback về Lovable API nếu không có keys
+
+```diff:index.ts
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const SYSTEM_PROMPT = `Bạn là chuyên gia thời trang AI hàng đầu với kiến thức sâu rộng về:
+- Phong cách thời trang quốc tế và Việt Nam
+- Phối màu, chất liệu, kiểu dáng
+- Xu hướng thời trang hiện đại
+- Phân tích outfit và đưa ra gợi ý cải thiện
+
+Khi phân tích hình ảnh thời trang, hãy:
+1. MÔ TẢ CHI TIẾT: Liệt kê từng item trang phục (áo, quần, giày, phụ kiện...)
+2. PHONG CÁCH: Xác định phong cách (casual, formal, streetwear, elegant, bohemian...)
+3. PHỐI MÀU: Đánh giá sự hài hòa màu sắc
+4. ĐIỂM MẠNH: Những gì đã làm tốt trong outfit
+5. GỢI Ý CẢI THIỆN: Đề xuất thay đổi để nâng cấp outfit
+6. OCCASIONS: Outfit này phù hợp với dịp nào
+7. ĐIỂM ĐÁNH GIÁ: Cho điểm từ 1-10
+
+Trả lời bằng tiếng Việt, chi tiết và hữu ích.`;
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { imageBase64, prompt } = await req.json();
+
+    if (!imageBase64) {
+      return new Response(
+        JSON.stringify({ error: "Image is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    console.log("Analyzing fashion image...");
+
+    const userPrompt = prompt || "Hãy phân tích chi tiết outfit trong hình ảnh này.";
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: userPrompt },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageBase64.startsWith("data:") ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`,
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Credits required. Please add funds to continue." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
+      throw new Error(`AI gateway error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const analysis = data.choices?.[0]?.message?.content;
+
+    if (!analysis) {
+      throw new Error("No analysis returned from AI");
+    }
+
+    console.log("Fashion analysis completed successfully");
+
+    return new Response(
+      JSON.stringify({ analysis }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in analyze-fashion:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to analyze image";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+===
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// Parse Google AI keys from environment variable
+function getGoogleAIKeys(): string[] {
+  const keysString = Deno.env.get('GOOGLE_AI_KEYS');
+  if (!keysString) return [];
+  
+  try {
+    const parsed = JSON.parse(keysString);
+    if (Array.isArray(parsed)) return parsed;
+    return [parsed];
+  } catch {
+    return keysString
+      .split(/[\n,]/)
+      .map(k => k.trim())
+      .filter(k => k.length > 0 && k.startsWith('AIza'));
+  }
+}
+
+// Merge user-provided keys with system keys (user keys take priority)
+function mergeApiKeys(userKeys: string[] = [], systemKeys: string[] = []): string[] {
+  const uniqueKeys = new Set<string>();
+  
+  for (const key of userKeys) {
+    if (key && key.startsWith('AIza')) {
+      uniqueKeys.add(key);
+    }
+  }
+  
+  for (const key of systemKeys) {
+    if (key && key.startsWith('AIza')) {
+      uniqueKeys.add(key);
+    }
+  }
+  
+  return Array.from(uniqueKeys);
+}
+
+// Track failed keys for this session
+const failedKeys = new Set<string>();
+
+function getRandomKey(keys: string[]): string | null {
+  const availableKeys = keys.filter(k => !failedKeys.has(k));
+  if (availableKeys.length === 0) {
+    failedKeys.clear();
+    if (keys.length === 0) return null;
+    return keys[Math.floor(Math.random() * keys.length)];
+  }
+  return availableKeys[Math.floor(Math.random() * availableKeys.length)];
+}
+
+const SYSTEM_PROMPT = `Bạn là chuyên gia thời trang AI hàng đầu với kiến thức sâu rộng về:
+- Phong cách thời trang quốc tế và Việt Nam
+- Phối màu, chất liệu, kiểu dáng
+- Xu hướng thời trang hiện đại
+- Phân tích outfit và đưa ra gợi ý cải thiện
+
+Khi phân tích hình ảnh thời trang, hãy:
+1. MÔ TẢ CHI TIẾT: Liệt kê từng item trang phục (áo, quần, giày, phụ kiện...)
+2. PHONG CÁCH: Xác định phong cách (casual, formal, streetwear, elegant, bohemian...)
+3. PHỐI MÀU: Đánh giá sự hài hòa màu sắc
+4. ĐIỂM MẠNH: Những gì đã làm tốt trong outfit
+5. GỢI Ý CẢI THIỆN: Đề xuất thay đổi để nâng cấp outfit
+6. OCCASIONS: Outfit này phù hợp với dịp nào
+7. ĐIỂM ĐÁNH GIÁ: Cho điểm từ 1-10
+
+Trả lời bằng tiếng Việt, chi tiết và hữu ích.`;
+
+// Call Google Gemini API with key rotation for vision
+async function callGeminiVisionWithRotation(
+  keys: string[],
+  imageBase64: string,
+  prompt: string,
+  maxRetries: number = 5
+): Promise<{ success: boolean; content?: string; error?: string }> {
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const apiKey = getRandomKey(keys);
+    if (!apiKey) {
+      return { success: false, error: 'Không có API key khả dụng' };
+    }
+
+    console.log(`Attempt ${attempt + 1}/${maxRetries} with key ending in ...${apiKey.slice(-4)}`);
+
+    try {
+      // Extract base64 data without prefix
+      const base64Data = imageBase64.includes(',') 
+        ? imageBase64.split(',')[1] 
+        : imageBase64;
+      
+      // Determine mime type
+      let mimeType = 'image/jpeg';
+      if (imageBase64.includes('data:image/png')) mimeType = 'image/png';
+      else if (imageBase64.includes('data:image/webp')) mimeType = 'image/webp';
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: `${SYSTEM_PROMPT}\n\n${prompt}` },
+                {
+                  inlineData: {
+                    mimeType: mimeType,
+                    data: base64Data,
+                  },
+                },
+              ],
+            }],
+          }),
+        },
+      );
+
+      console.log(`Response status: ${response.status}`);
+
+      if (response.status === 429 || response.status === 403) {
+        console.log(`Key ...${apiKey.slice(-4)} hit rate limit/quota, trying next key`);
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      if (response.status === 400) {
+        const errorText = await response.text();
+        console.error('Bad request:', errorText);
+        
+        if (errorText.includes('SAFETY') || errorText.includes('blocked')) {
+          return { success: false, error: 'Ảnh bị chặn bởi bộ lọc an toàn của AI' };
+        }
+        
+        if (errorText.includes('API key not valid') || errorText.includes('API key expired')) {
+          failedKeys.add(apiKey);
+          continue;
+        }
+        
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API error:', response.status, errorText);
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (content) {
+        return { success: true, content };
+      }
+
+      console.log('No content in response');
+      continue;
+
+    } catch (error) {
+      console.error(`Error with key ...${apiKey.slice(-4)}:`, error);
+      failedKeys.add(apiKey);
+      continue;
+    }
+  }
+
+  return {
+    success: false,
+    error: `Không dùng được API key nào (đã thử ${maxRetries} key). Vui lòng thử lại sau.`,
+  };
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { imageBase64, prompt, userApiKeys } = await req.json();
+
+    if (!imageBase64) {
+      return new Response(
+        JSON.stringify({ error: "Image is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Analyzing fashion image...");
+    console.log("User API keys provided:", userApiKeys?.length || 0);
+
+    const userPrompt = prompt || "Hãy phân tích chi tiết outfit trong hình ảnh này.";
+
+    // Get Google AI keys - merge user keys with system keys
+    const systemKeys = getGoogleAIKeys();
+    const allKeys = mergeApiKeys(userApiKeys || [], systemKeys);
+    console.log(`Total API keys available: ${allKeys.length} (${userApiKeys?.length || 0} user + ${systemKeys.length} system)`);
+
+    let analysis: string | undefined;
+
+    // Try Google AI first if keys available
+    if (allKeys.length > 0) {
+      const result = await callGeminiVisionWithRotation(allKeys, imageBase64, userPrompt, Math.min(allKeys.length, 5));
+      if (result.success && result.content) {
+        analysis = result.content;
+      } else {
+        console.log('Google AI failed, falling back to Lovable API:', result.error);
+      }
+    }
+
+    // Fallback to Lovable API if Google AI failed or no keys
+    if (!analysis) {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) {
+        throw new Error("Không có API key nào khả dụng. Vui lòng thêm Google AI API key trong Settings.");
+      }
+
+      console.log("Using Lovable API fallback...");
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: userPrompt },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: imageBase64.startsWith("data:") ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`,
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "Cần thêm Google AI API key trong Settings để tiếp tục." }),
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        const errorText = await response.text();
+        console.error("AI gateway error:", response.status, errorText);
+        throw new Error(`AI gateway error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      analysis = data.choices?.[0]?.message?.content;
+    }
+
+    if (!analysis) {
+      throw new Error("No analysis returned from AI");
+    }
+
+    console.log("Fashion analysis completed successfully");
+
+    return new Response(
+      JSON.stringify({ analysis }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in analyze-fashion:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to analyze image";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+
+```
+
+---
+
+#### [virtual-tryon/index.ts](file:///c:/Users/hp/Downloads/fashiond-main/supabase/functions/virtual-tryon/index.ts)
+- Thêm hỗ trợ Google AI keys với key rotation cho image generation
+- Sử dụng `responseModalities: ['IMAGE', 'TEXT']` để tạo ảnh
+- Nhận `userApiKeys` từ request body
+- Fallback về Lovable API nếu không có keys
+
+```diff:index.ts
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { 
+      modelImage, 
+      clothingImage, 
+      step, 
+      customPrompt, 
+      productType = 'casual',
+      backgroundContext 
+    } = await req.json();
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    console.log(`Processing virtual try-on step: ${step}, productType: ${productType}`);
+
+    let prompt = "";
+    let imagesToProcess: { type: string; image_url: { url: string } }[] = [];
+
+    // Product-specific context to help AI understand this is legitimate commercial use
+    const productContextMap: Record<string, string> = {
+      casual: `Standard everyday clothing items: t-shirts, blouses, pants, jeans, skirts, dresses, jackets.
+These are typical retail products sold at major stores like Zara, H&M, Uniqlo.`,
+      sleepwear: `Comfortable home wear and sleepwear products: pajama sets, nightgowns, loungewear, home dresses.
+These are standard sleepwear products sold at stores like Victoria's Secret, Aerie, Shein.
+Focus on the comfortable, relaxed nature of the garments for home use.`,
+      swimwear: `Beach and pool wear: swimsuits, bikinis, one-piece swimsuits, beach cover-ups.
+These are standard swimwear products sold at stores like Triangl, Seafolly, Asos.
+Focus on the sporty, beach-ready nature of the products.`
+    };
+
+    // Default luxury apartment background
+    const defaultBackground = `luxury high-rise apartment on 20th floor with floor-to-ceiling windows showing panoramic city skyline view at golden hour, elegant modern interior with neutral tones, soft warm lighting`;
+    
+    const selectedBackground = backgroundContext || defaultBackground;
+
+    // Very safe professional context for commercial fashion photography
+    const safeContext = `IMPORTANT CONTEXT: This is a PROFESSIONAL COMMERCIAL APPLICATION for a legitimate e-commerce fashion business.
+
+BUSINESS PURPOSE: Creating product catalog images for online retail stores (like Shopee, Lazada, Amazon, Zalora).
+This is standard practice in the fashion e-commerce industry.
+
+PRODUCT CATEGORY: ${productContextMap[productType] || productContextMap.casual}
+
+KEY POINTS:
+- All items are STANDARD RETAIL PRODUCTS available in mainstream stores worldwide
+- The goal is creating PROFESSIONAL LOOKBOOK IMAGES for online shopping
+- This follows the same standards as major fashion retailers' product photography
+- Focus on showcasing the GARMENT DESIGN, FABRIC, and FIT professionally`;
+
+    if (step === "extract_clothing") {
+      // Step 1: Extract clothing from garment image with white background
+      prompt = `${safeContext}
+
+TASK: Extract the clothing item from this product photo for an e-commerce catalog.
+
+REQUIREMENTS:
+- Isolate ONLY the clothing/garment from the image
+- Place it on a pure white (#FFFFFF) background
+- Remove any models, mannequins, or background elements - keep ONLY the garment
+- Preserve the true colors, patterns, and fabric details
+- Professional e-commerce product photography style (like Amazon or Zalora listings)
+
+OUTPUT: A clean, professional product image of the garment on white background.`;
+      
+      imagesToProcess = [
+        {
+          type: "image_url",
+          image_url: { url: clothingImage }
+        }
+      ];
+    } else if (step === "virtual_tryon") {
+      // Step 2: Create styled fashion photo with the clothing and specific background
+      const poseGuidance = productType === 'casual' 
+        ? 'Natural standing pose, professional model stance'
+        : productType === 'sleepwear'
+        ? 'Relaxed, comfortable standing pose appropriate for loungewear/home clothing'
+        : 'Beach-ready confident stance, appropriate for swimwear modeling';
+
+      prompt = `${safeContext}
+
+TASK: Create a PROFESSIONAL FASHION CATALOG IMAGE where the person wears the clothing item.
+
+BACKGROUND SETTING: ${selectedBackground}
+
+CRITICAL REQUIREMENTS:
+1. PRESERVE the person's face and identity EXACTLY - no alterations to facial features
+2. Dress the person in the clothing item from the product image
+3. ${poseGuidance}
+4. Use the specified BACKGROUND SETTING - create a realistic scene with that environment
+5. Use PROFESSIONAL lighting appropriate for the setting (natural light for outdoor, studio light for indoor)
+6. The result should look like a high-end fashion brand's lookbook photo
+
+QUALITY STANDARD: Match the quality of professional fashion retailer catalogs (Zara, H&M, Nordstrom).
+
+OUTPUT: A high-quality, professional fashion photography image suitable for e-commerce product pages with the specified background.`;
+      
+      imagesToProcess = [
+        {
+          type: "image_url", 
+          image_url: { url: modelImage }
+        },
+        {
+          type: "image_url",
+          image_url: { url: clothingImage }
+        }
+      ];
+    } else if (step === "generate_angles") {
+      // Step 3: Generate different angle views for product showcase
+      const angleDescriptions = [
+        "front view, full body, professional lighting, clean composition",
+        "three-quarter view from the left, showing garment silhouette and fit details",
+        "three-quarter view from the right, lifestyle setting with soft natural light",
+        "editorial style shot with artistic composition, fashion magazine quality"
+      ];
+      
+      const angleIndex = customPrompt ? parseInt(customPrompt) : 0;
+      
+      prompt = `${safeContext}
+
+TASK: Create an ALTERNATIVE ANGLE of this fashion photo for a product gallery.
+
+BACKGROUND SETTING: ${selectedBackground}
+
+REQUESTED VIEW: ${angleDescriptions[angleIndex]}
+
+CRITICAL REQUIREMENTS:
+- PRESERVE the person's face and identity EXACTLY
+- KEEP the same clothing/outfit
+- CHANGE ONLY: camera angle and composition as specified
+- MAINTAIN the same background environment
+- Result should complement the main product image in a gallery
+
+OUTPUT: A professional fashion photo from the specified angle, suitable for a product detail page gallery.`;
+      
+      imagesToProcess = [
+        {
+          type: "image_url",
+          image_url: { url: modelImage }
+        }
+      ];
+    }
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              ...imagesToProcess
+            ],
+          },
+        ],
+        modalities: ["image", "text"]
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Credits required. Please add funds to continue." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
+      throw new Error(`AI gateway error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("AI response structure:", JSON.stringify({
+      hasChoices: !!data.choices,
+      choicesLength: data.choices?.length,
+      hasMessage: !!data.choices?.[0]?.message,
+      hasImages: !!data.choices?.[0]?.message?.images,
+      imagesLength: data.choices?.[0]?.message?.images?.length,
+      textContent: data.choices?.[0]?.message?.content?.substring(0, 200)
+    }));
+
+    const message = data.choices?.[0]?.message;
+    const generatedImages = message?.images || [];
+    const textContent = message?.content || "";
+
+    // If AI refused to generate, include the reason in error
+    if (generatedImages.length === 0) {
+      console.error("No images in response. AI text response:", textContent);
+      
+      // Check if AI gave a refusal reason
+      if (textContent.toLowerCase().includes("cannot") || 
+          textContent.toLowerCase().includes("unable") ||
+          textContent.toLowerCase().includes("sorry") ||
+          textContent.toLowerCase().includes("không thể")) {
+        throw new Error(`AI không thể tạo ảnh: ${textContent.substring(0, 200)}`);
+      }
+      
+      throw new Error("Không thể tạo ảnh. Vui lòng thử lại với ảnh khác.");
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        images: generatedImages.map((img: any) => img.image_url?.url),
+        message: textContent
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in virtual-tryon:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to process image";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+===
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// Parse Google AI keys from environment variable
+function getGoogleAIKeys(): string[] {
+  const keysString = Deno.env.get('GOOGLE_AI_KEYS');
+  if (!keysString) return [];
+  
+  try {
+    const parsed = JSON.parse(keysString);
+    if (Array.isArray(parsed)) return parsed;
+    return [parsed];
+  } catch {
+    return keysString
+      .split(/[\n,]/)
+      .map(k => k.trim())
+      .filter(k => k.length > 0 && k.startsWith('AIza'));
+  }
+}
+
+// Merge user-provided keys with system keys (user keys take priority)
+function mergeApiKeys(userKeys: string[] = [], systemKeys: string[] = []): string[] {
+  const uniqueKeys = new Set<string>();
+  
+  for (const key of userKeys) {
+    if (key && key.startsWith('AIza')) {
+      uniqueKeys.add(key);
+    }
+  }
+  
+  for (const key of systemKeys) {
+    if (key && key.startsWith('AIza')) {
+      uniqueKeys.add(key);
+    }
+  }
+  
+  return Array.from(uniqueKeys);
+}
+
+// Track failed keys for this session
+const failedKeys = new Set<string>();
+
+function getRandomKey(keys: string[]): string | null {
+  const availableKeys = keys.filter(k => !failedKeys.has(k));
+  if (availableKeys.length === 0) {
+    failedKeys.clear();
+    if (keys.length === 0) return null;
+    return keys[Math.floor(Math.random() * keys.length)];
+  }
+  return availableKeys[Math.floor(Math.random() * availableKeys.length)];
+}
+
+// Call Google Gemini API with key rotation for image generation
+async function callGeminiImageWithRotation(
+  keys: string[],
+  prompt: string,
+  images: string[],
+  maxRetries: number = 5
+): Promise<{ success: boolean; imageUrls?: string[]; textContent?: string; error?: string }> {
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const apiKey = getRandomKey(keys);
+    if (!apiKey) {
+      return { success: false, error: 'Không có API key khả dụng' };
+    }
+
+    console.log(`Attempt ${attempt + 1}/${maxRetries} with key ending in ...${apiKey.slice(-4)}`);
+
+    try {
+      const parts: any[] = [{ text: prompt }];
+      
+      // Add images to parts
+      for (const imageBase64 of images) {
+        const base64Data = imageBase64.includes(',') 
+          ? imageBase64.split(',')[1] 
+          : imageBase64;
+        
+        let mimeType = 'image/jpeg';
+        if (imageBase64.includes('data:image/png')) mimeType = 'image/png';
+        else if (imageBase64.includes('data:image/webp')) mimeType = 'image/webp';
+
+        parts.push({
+          inlineData: {
+            mimeType: mimeType,
+            data: base64Data,
+          },
+        });
+      }
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: {
+              responseModalities: ['IMAGE', 'TEXT'],
+            },
+          }),
+        },
+      );
+
+      console.log(`Response status: ${response.status}`);
+
+      if (response.status === 429 || response.status === 403) {
+        console.log(`Key ...${apiKey.slice(-4)} hit rate limit/quota, trying next key`);
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      if (response.status === 400) {
+        const errorText = await response.text();
+        console.error('Bad request:', errorText);
+        
+        if (errorText.includes('SAFETY') || errorText.includes('blocked')) {
+          return { success: false, error: 'Ảnh bị chặn bởi bộ lọc an toàn của AI' };
+        }
+        
+        if (errorText.includes('API key not valid') || errorText.includes('API key expired')) {
+          failedKeys.add(apiKey);
+          continue;
+        }
+        
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API error:', response.status, errorText);
+        failedKeys.add(apiKey);
+        continue;
+      }
+
+      const data = await response.json();
+      const responseParts = data.candidates?.[0]?.content?.parts;
+      
+      if (!responseParts || responseParts.length === 0) {
+        console.log('No parts in response');
+        continue;
+      }
+
+      const imageUrls: string[] = [];
+      let textContent = '';
+
+      for (const part of responseParts) {
+        if (part.inlineData?.data) {
+          const imageUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+          imageUrls.push(imageUrl);
+        }
+        if (part.text) {
+          textContent += part.text;
+        }
+      }
+
+      if (imageUrls.length > 0) {
+        return { success: true, imageUrls, textContent };
+      }
+
+      // No images but got text - might be refusal
+      if (textContent) {
+        console.log('Got text response instead of image:', textContent);
+        return { success: false, error: textContent, textContent };
+      }
+
+      console.log('No image or text in response');
+      continue;
+
+    } catch (error) {
+      console.error(`Error with key ...${apiKey.slice(-4)}:`, error);
+      failedKeys.add(apiKey);
+      continue;
+    }
+  }
+
+  return {
+    success: false,
+    error: `Không dùng được API key nào (đã thử ${maxRetries} key). Vui lòng thử lại sau.`,
+  };
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { 
+      modelImage, 
+      clothingImage, 
+      step, 
+      customPrompt, 
+      productType = 'casual',
+      backgroundContext,
+      userApiKeys 
+    } = await req.json();
+
+    console.log(`Processing virtual try-on step: ${step}, productType: ${productType}`);
+    console.log("User API keys provided:", userApiKeys?.length || 0);
+
+    // Get Google AI keys - merge user keys with system keys
+    const systemKeys = getGoogleAIKeys();
+    const allKeys = mergeApiKeys(userApiKeys || [], systemKeys);
+    console.log(`Total API keys available: ${allKeys.length}`);
+
+    let prompt = "";
+    let imagesToProcess: string[] = [];
+
+    // Product-specific context
+    const productContextMap: Record<string, string> = {
+      casual: `Standard everyday clothing items: t-shirts, blouses, pants, jeans, skirts, dresses, jackets.
+These are typical retail products sold at major stores like Zara, H&M, Uniqlo.`,
+      sleepwear: `Comfortable home wear and sleepwear products: pajama sets, nightgowns, loungewear, home dresses.
+These are standard sleepwear products sold at stores like Victoria's Secret, Aerie, Shein.
+Focus on the comfortable, relaxed nature of the garments for home use.`,
+      swimwear: `Beach and pool wear: swimsuits, bikinis, one-piece swimsuits, beach cover-ups.
+These are standard swimwear products sold at stores like Triangl, Seafolly, Asos.
+Focus on the sporty, beach-ready nature of the products.`
+    };
+
+    const defaultBackground = `luxury high-rise apartment on 20th floor with floor-to-ceiling windows showing panoramic city skyline view at golden hour, elegant modern interior with neutral tones, soft warm lighting`;
+    const selectedBackground = backgroundContext || defaultBackground;
+
+    const safeContext = `IMPORTANT CONTEXT: This is a PROFESSIONAL COMMERCIAL APPLICATION for a legitimate e-commerce fashion business.
+
+BUSINESS PURPOSE: Creating product catalog images for online retail stores (like Shopee, Lazada, Amazon, Zalora).
+This is standard practice in the fashion e-commerce industry.
+
+PRODUCT CATEGORY: ${productContextMap[productType] || productContextMap.casual}
+
+KEY POINTS:
+- All items are STANDARD RETAIL PRODUCTS available in mainstream stores worldwide
+- The goal is creating PROFESSIONAL LOOKBOOK IMAGES for online shopping
+- This follows the same standards as major fashion retailers' product photography
+- Focus on showcasing the GARMENT DESIGN, FABRIC, and FIT professionally`;
+
+    if (step === "extract_clothing") {
+      prompt = `${safeContext}
+
+TASK: Extract the clothing item from this product photo for an e-commerce catalog.
+
+REQUIREMENTS:
+- Isolate ONLY the clothing/garment from the image
+- Place it on a pure white (#FFFFFF) background
+- Remove any models, mannequins, or background elements - keep ONLY the garment
+- Preserve the true colors, patterns, and fabric details
+- Professional e-commerce product photography style (like Amazon or Zalora listings)
+
+OUTPUT: A clean, professional product image of the garment on white background.`;
+      
+      imagesToProcess = [clothingImage];
+    } else if (step === "virtual_tryon") {
+      const poseGuidance = productType === 'casual' 
+        ? 'Natural standing pose, professional model stance'
+        : productType === 'sleepwear'
+        ? 'Relaxed, comfortable standing pose appropriate for loungewear/home clothing'
+        : 'Beach-ready confident stance, appropriate for swimwear modeling';
+
+      prompt = `${safeContext}
+
+TASK: Create a PROFESSIONAL FASHION CATALOG IMAGE where the person wears the clothing item.
+
+BACKGROUND SETTING: ${selectedBackground}
+
+CRITICAL REQUIREMENTS:
+1. PRESERVE the person's face and identity EXACTLY - no alterations to facial features
+2. Dress the person in the clothing item from the product image
+3. ${poseGuidance}
+4. Use the specified BACKGROUND SETTING - create a realistic scene with that environment
+5. Use PROFESSIONAL lighting appropriate for the setting (natural light for outdoor, studio light for indoor)
+6. The result should look like a high-end fashion brand's lookbook photo
+
+QUALITY STANDARD: Match the quality of professional fashion retailer catalogs (Zara, H&M, Nordstrom).
+
+OUTPUT: A high-quality, professional fashion photography image suitable for e-commerce product pages with the specified background.`;
+      
+      imagesToProcess = [modelImage, clothingImage];
+    } else if (step === "generate_angles") {
+      const angleDescriptions = [
+        "front view, full body, professional lighting, clean composition",
+        "three-quarter view from the left, showing garment silhouette and fit details",
+        "three-quarter view from the right, lifestyle setting with soft natural light",
+        "editorial style shot with artistic composition, fashion magazine quality"
+      ];
+      
+      const angleIndex = customPrompt ? parseInt(customPrompt) : 0;
+      
+      prompt = `${safeContext}
+
+TASK: Create an ALTERNATIVE ANGLE of this fashion photo for a product gallery.
+
+BACKGROUND SETTING: ${selectedBackground}
+
+REQUESTED VIEW: ${angleDescriptions[angleIndex]}
+
+CRITICAL REQUIREMENTS:
+- PRESERVE the person's face and identity EXACTLY
+- KEEP the same clothing/outfit
+- CHANGE ONLY: camera angle and composition as specified
+- MAINTAIN the same background environment
+- Result should complement the main product image in a gallery
+
+OUTPUT: A professional fashion photo from the specified angle, suitable for a product detail page gallery.`;
+      
+      imagesToProcess = [modelImage];
+    }
+
+    // Try Google AI first if keys available
+    if (allKeys.length > 0) {
+      const result = await callGeminiImageWithRotation(allKeys, prompt, imagesToProcess, Math.min(allKeys.length, 5));
+      
+      if (result.success && result.imageUrls && result.imageUrls.length > 0) {
+        return new Response(
+          JSON.stringify({ 
+            images: result.imageUrls,
+            message: result.textContent || ''
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      console.log('Google AI failed:', result.error);
+      
+      // If Google AI gave a refusal, return the error
+      if (result.error && (result.error.includes('không thể') || result.error.includes('cannot') || result.error.includes('unable'))) {
+        throw new Error(`AI không thể tạo ảnh: ${result.error.substring(0, 200)}`);
+      }
+    }
+
+    // Fallback to Lovable API
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("Không có API key nào khả dụng. Vui lòng thêm Google AI API key trong Settings.");
+    }
+
+    console.log("Using Lovable API fallback...");
+
+    const messageContent: any[] = [{ type: "text", text: prompt }];
+    for (const img of imagesToProcess) {
+      messageContent.push({
+        type: "image_url",
+        image_url: { url: img }
+      });
+    }
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image-preview",
+        messages: [
+          {
+            role: "user",
+            content: messageContent,
+          },
+        ],
+        modalities: ["image", "text"]
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Cần thêm Google AI API key trong Settings để tiếp tục." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
+      throw new Error(`AI gateway error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("AI response structure:", JSON.stringify({
+      hasChoices: !!data.choices,
+      choicesLength: data.choices?.length,
+      hasMessage: !!data.choices?.[0]?.message,
+      hasImages: !!data.choices?.[0]?.message?.images,
+      imagesLength: data.choices?.[0]?.message?.images?.length,
+      textContent: data.choices?.[0]?.message?.content?.substring(0, 200)
+    }));
+
+    const message = data.choices?.[0]?.message;
+    const generatedImages = message?.images || [];
+    const textContent = message?.content || "";
+
+    if (generatedImages.length === 0) {
+      console.error("No images in response. AI text response:", textContent);
+      
+      if (textContent.toLowerCase().includes("cannot") || 
+          textContent.toLowerCase().includes("unable") ||
+          textContent.toLowerCase().includes("sorry") ||
+          textContent.toLowerCase().includes("không thể")) {
+        throw new Error(`AI không thể tạo ảnh: ${textContent.substring(0, 200)}`);
+      }
+      
+      throw new Error("Không thể tạo ảnh. Vui lòng thử lại với ảnh khác.");
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        images: generatedImages.map((img: any) => img.image_url?.url),
+        message: textContent
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in virtual-tryon:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to process image";
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+
+```
+
+---
+
+### Frontend Components
+
+#### [useStoryboardGenerator.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/hooks/useStoryboardGenerator.ts)
+- Import [getUserApiKeys](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx#261-276) từ [ApiKeySettings](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx#13-260)
+- Gửi `userApiKeys` trong request body
+
+```diff:useStoryboardGenerator.ts
+import { useState } from 'react';
+import { Storyboard, GenerationRequest } from '@/types/storyboard';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+export function useStoryboardGenerator() {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+
+  const generate = async (request: GenerationRequest) => {
+    if (!request.idea.trim()) {
+      toast.error('Vui lòng nhập ý tưởng của bạn');
+      return;
+    }
+
+    setIsGenerating(true);
+    
+    try {
+      console.log('Calling AI to generate storyboard...', request);
+      
+      const { data, error } = await supabase.functions.invoke('generate-storyboard', {
+        body: {
+          idea: request.idea,
+          duration: request.duration,
+          genre: request.genre,
+          style: request.style,
+          additionalNotes: request.additionalNotes,
+          includeStartEnd: request.includeStartEnd ?? true,
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Có lỗi khi gọi AI');
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Convert createdAt string to Date
+      const result: Storyboard = {
+        ...data,
+        createdAt: new Date(data.createdAt),
+      };
+
+      setStoryboard(result);
+      toast.success(`Storyboard "${result.title}" đã được tạo với ${result.scenes.length} cảnh!`);
+      
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Có lỗi xảy ra khi tạo storyboard';
+      console.error('Generation error:', message);
+      
+      if (message.includes('429') || message.includes('rate limit')) {
+        toast.error('Đã vượt quá giới hạn. Vui lòng thử lại sau vài phút.');
+      } else if (message.includes('402')) {
+        toast.error('Cần nạp thêm credits để tiếp tục sử dụng AI.');
+      } else {
+        toast.error(message);
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const reset = () => {
+    setStoryboard(null);
+  };
+
+  return {
+    isGenerating,
+    storyboard,
+    generate,
+    reset,
+  };
+}
+===
+import { useState } from 'react';
+import { Storyboard, GenerationRequest } from '@/types/storyboard';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { getUserApiKeys } from '@/components/ApiKeySettings';
+
+export function useStoryboardGenerator() {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+
+  const generate = async (request: GenerationRequest) => {
+    if (!request.idea.trim()) {
+      toast.error('Vui lòng nhập ý tưởng của bạn');
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      console.log('Calling AI to generate storyboard...', request);
+
+      const { data, error } = await supabase.functions.invoke('generate-storyboard', {
+        body: {
+          idea: request.idea,
+          duration: request.duration,
+          genre: request.genre,
+          style: request.style,
+          additionalNotes: request.additionalNotes,
+          includeStartEnd: request.includeStartEnd ?? true,
+          userApiKeys: getUserApiKeys(),
+        }
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Có lỗi khi gọi AI');
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Convert createdAt string to Date
+      const result: Storyboard = {
+        ...data,
+        createdAt: new Date(data.createdAt),
+      };
+
+      setStoryboard(result);
+      toast.success(`Storyboard "${result.title}" đã được tạo với ${result.scenes.length} cảnh!`);
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Có lỗi xảy ra khi tạo storyboard';
+      console.error('Generation error:', message);
+
+      if (message.includes('429') || message.includes('rate limit')) {
+        toast.error('Đã vượt quá giới hạn. Vui lòng thử lại sau vài phút.');
+      } else if (message.includes('402')) {
+        toast.error('Cần nạp thêm credits để tiếp tục sử dụng AI.');
+      } else {
+        toast.error(message);
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const reset = () => {
+    setStoryboard(null);
+  };
+
+  return {
+    isGenerating,
+    storyboard,
+    generate,
+    reset,
+  };
+}
+```
+
+---
+
+#### [FashionImageAnalyzer.tsx](file:///c:/Users/hp/Downloads/fashiond-main/src/components/FashionImageAnalyzer.tsx)
+- Import [getUserApiKeys](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx#261-276) từ [ApiKeySettings](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx#13-260)
+- Gửi `userApiKeys` trong request body
+
+```diff:FashionImageAnalyzer.tsx
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { 
+  Upload, 
+  Camera, 
+  Sparkles, 
+  X, 
+  Image as ImageIcon,
+  Loader2,
+  Star,
+  Palette,
+  Shirt,
+  Lightbulb,
+  CheckCircle2
+} from 'lucide-react';
+
+interface FashionImageAnalyzerProps {
+  onAnalysisComplete?: (analysis: string) => void;
+}
+
+export function FashionImageAnalyzer({ onAnalysisComplete }: FashionImageAnalyzerProps) {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Ảnh quá lớn. Vui lòng chọn ảnh dưới 10MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string);
+        setAnalysis(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string);
+        setAnalysis(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setAnalysis(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const analyzeImage = async () => {
+    if (!selectedImage) return;
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-fashion', {
+        body: { 
+          imageBase64: selectedImage,
+          prompt: customPrompt || undefined
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setAnalysis(data.analysis);
+      onAnalysisComplete?.(data.analysis);
+      toast.success('Phân tích hoàn tất!');
+    } catch (error: any) {
+      console.error('Analysis error:', error);
+      toast.error(error.message || 'Không thể phân tích ảnh. Vui lòng thử lại.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const parseAnalysis = (text: string) => {
+    const sections: { icon: React.ReactNode; title: string; content: string }[] = [];
+    
+    // Simple parsing - look for numbered sections or key phrases
+    const lines = text.split('\n');
+    let currentSection = '';
+    
+    lines.forEach(line => {
+      if (line.includes('MÔ TẢ') || line.includes('1.')) {
+        if (currentSection) sections.push({ icon: <Shirt className="h-4 w-4" />, title: 'Mô tả', content: currentSection });
+        currentSection = line;
+      } else if (line.includes('PHONG CÁCH') || line.includes('2.')) {
+        if (currentSection) sections.push({ icon: <Shirt className="h-4 w-4" />, title: 'Mô tả', content: currentSection });
+        currentSection = line;
+      } else {
+        currentSection += '\n' + line;
+      }
+    });
+
+    return text; // Return full text for now, with styling applied
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Upload Area */}
+      <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        className={cn(
+          "relative border-2 border-dashed rounded-2xl transition-all duration-300",
+          selectedImage 
+            ? "border-gold/50 bg-gold/5" 
+            : "border-border/50 hover:border-gold/30 hover:bg-secondary/30"
+        )}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        {selectedImage ? (
+          <div className="relative p-4">
+            <button
+              onClick={removeImage}
+              className="absolute top-6 right-6 z-10 p-2 rounded-full bg-background/80 hover:bg-destructive/20 border border-border/50 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <img
+              src={selectedImage}
+              alt="Fashion preview"
+              className="w-full max-h-[400px] object-contain rounded-xl"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full p-12 flex flex-col items-center gap-4 text-center"
+          >
+            <div className="w-20 h-20 rounded-2xl bg-gold/10 flex items-center justify-center">
+              <Upload className="h-10 w-10 text-gold" />
+            </div>
+            <div>
+              <p className="text-lg font-medium text-foreground">
+                Tải ảnh thời trang lên
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Kéo thả hoặc click để chọn ảnh (max 10MB)
+              </p>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <span className="px-3 py-1 rounded-full bg-secondary/50 text-xs text-muted-foreground">
+                JPG
+              </span>
+              <span className="px-3 py-1 rounded-full bg-secondary/50 text-xs text-muted-foreground">
+                PNG
+              </span>
+              <span className="px-3 py-1 rounded-full bg-secondary/50 text-xs text-muted-foreground">
+                WEBP
+              </span>
+            </div>
+          </button>
+        )}
+      </div>
+
+      {/* Custom Prompt */}
+      {selectedImage && (
+        <div className="space-y-3 animate-fade-up">
+          <label className="text-sm font-medium text-foreground flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-gold" />
+            Yêu cầu phân tích (tùy chọn)
+          </label>
+          <Textarea
+            placeholder="Ví dụ: Gợi ý cách phối đồ cho đi dự tiệc, hoặc outfit này phù hợp với thời tiết nào?"
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            className="min-h-[80px] bg-secondary/30 border-border/50 focus:border-gold/50 resize-none"
+          />
+        </div>
+      )}
+
+      {/* Analyze Button */}
+      {selectedImage && !analysis && (
+        <Button
+          onClick={analyzeImage}
+          disabled={isAnalyzing}
+          className="w-full bg-gold hover:bg-gold/90 text-background"
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              Đang phân tích...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-5 w-5 mr-2" />
+              Phân tích với AI Fashion Expert
+            </>
+          )}
+        </Button>
+      )}
+
+      {/* Analysis Result */}
+      {analysis && (
+        <Card className="p-6 bg-gradient-to-br from-gold/5 to-transparent border-gold/20 animate-fade-up">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-gold" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-semibold text-foreground">
+                Kết quả phân tích
+              </h3>
+              <p className="text-sm text-muted-foreground">AI Fashion Expert</p>
+            </div>
+          </div>
+
+          <ScrollArea className="max-h-[400px] pr-4">
+            <div className="prose prose-sm prose-invert max-w-none">
+              {analysis.split('\n').map((line, i) => {
+                // Style different sections
+                if (line.includes('MÔ TẢ') || line.includes('PHONG CÁCH') || 
+                    line.includes('PHỐI MÀU') || line.includes('ĐIỂM MẠNH') ||
+                    line.includes('GỢI Ý') || line.includes('OCCASIONS') ||
+                    line.includes('ĐIỂM ĐÁNH GIÁ') || line.match(/^\d+\./)) {
+                  return (
+                    <h4 key={i} className="text-gold font-semibold mt-4 mb-2 flex items-center gap-2">
+                      {line.includes('ĐIỂM') || line.includes('đánh giá') ? (
+                        <Star className="h-4 w-4" />
+                      ) : line.includes('MÀU') ? (
+                        <Palette className="h-4 w-4" />
+                      ) : line.includes('MẠNH') || line.includes('tốt') ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <Shirt className="h-4 w-4" />
+                      )}
+                      {line}
+                    </h4>
+                  );
+                }
+                if (line.trim() === '') return <br key={i} />;
+                return (
+                  <p key={i} className="text-muted-foreground leading-relaxed mb-2">
+                    {line}
+                  </p>
+                );
+              })}
+            </div>
+          </ScrollArea>
+
+          <div className="mt-4 pt-4 border-t border-border/50 flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setAnalysis(null)}
+              className="flex-1"
+            >
+              Phân tích lại
+            </Button>
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(analysis);
+                toast.success('Đã copy kết quả!');
+              }}
+              className="flex-1 bg-gold hover:bg-gold/90 text-background"
+            >
+              Copy kết quả
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Tips */}
+      {!selectedImage && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TipCard
+            icon={<Camera className="h-5 w-5" />}
+            title="Ảnh rõ nét"
+            description="Chọn ảnh có ánh sáng tốt, hiển thị đầy đủ trang phục"
+          />
+          <TipCard
+            icon={<Shirt className="h-5 w-5" />}
+            title="Full outfit"
+            description="Ảnh toàn thân sẽ cho phân tích chính xác nhất"
+          />
+          <TipCard
+            icon={<Palette className="h-5 w-5" />}
+            title="Chi tiết màu"
+            description="Màu sắc thực tế giúp AI đánh giá phối màu tốt hơn"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TipCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
+      <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold mb-3">
+        {icon}
+      </div>
+      <h4 className="font-medium text-foreground text-sm">{title}</h4>
+      <p className="text-xs text-muted-foreground mt-1">{description}</p>
+    </div>
+  );
+}
+===
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { getUserApiKeys } from './ApiKeySettings';
+import {
+  Upload,
+  Camera,
+  Sparkles,
+  X,
+  Image as ImageIcon,
+  Loader2,
+  Star,
+  Palette,
+  Shirt,
+  Lightbulb,
+  CheckCircle2
+} from 'lucide-react';
+
+interface FashionImageAnalyzerProps {
+  onAnalysisComplete?: (analysis: string) => void;
+}
+
+export function FashionImageAnalyzer({ onAnalysisComplete }: FashionImageAnalyzerProps) {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Ảnh quá lớn. Vui lòng chọn ảnh dưới 10MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string);
+        setAnalysis(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImage(e.target?.result as string);
+        setAnalysis(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setAnalysis(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const analyzeImage = async () => {
+    if (!selectedImage) return;
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-fashion', {
+        body: {
+          imageBase64: selectedImage,
+          prompt: customPrompt || undefined,
+          userApiKeys: getUserApiKeys(),
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setAnalysis(data.analysis);
+      onAnalysisComplete?.(data.analysis);
+      toast.success('Phân tích hoàn tất!');
+    } catch (error: any) {
+      console.error('Analysis error:', error);
+      toast.error(error.message || 'Không thể phân tích ảnh. Vui lòng thử lại.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const parseAnalysis = (text: string) => {
+    const sections: { icon: React.ReactNode; title: string; content: string }[] = [];
+
+    // Simple parsing - look for numbered sections or key phrases
+    const lines = text.split('\n');
+    let currentSection = '';
+
+    lines.forEach(line => {
+      if (line.includes('MÔ TẢ') || line.includes('1.')) {
+        if (currentSection) sections.push({ icon: <Shirt className="h-4 w-4" />, title: 'Mô tả', content: currentSection });
+        currentSection = line;
+      } else if (line.includes('PHONG CÁCH') || line.includes('2.')) {
+        if (currentSection) sections.push({ icon: <Shirt className="h-4 w-4" />, title: 'Mô tả', content: currentSection });
+        currentSection = line;
+      } else {
+        currentSection += '\n' + line;
+      }
+    });
+
+    return text; // Return full text for now, with styling applied
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Upload Area */}
+      <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        className={cn(
+          "relative border-2 border-dashed rounded-2xl transition-all duration-300",
+          selectedImage
+            ? "border-gold/50 bg-gold/5"
+            : "border-border/50 hover:border-gold/30 hover:bg-secondary/30"
+        )}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        {selectedImage ? (
+          <div className="relative p-4">
+            <button
+              onClick={removeImage}
+              className="absolute top-6 right-6 z-10 p-2 rounded-full bg-background/80 hover:bg-destructive/20 border border-border/50 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <img
+              src={selectedImage}
+              alt="Fashion preview"
+              className="w-full max-h-[400px] object-contain rounded-xl"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full p-12 flex flex-col items-center gap-4 text-center"
+          >
+            <div className="w-20 h-20 rounded-2xl bg-gold/10 flex items-center justify-center">
+              <Upload className="h-10 w-10 text-gold" />
+            </div>
+            <div>
+              <p className="text-lg font-medium text-foreground">
+                Tải ảnh thời trang lên
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Kéo thả hoặc click để chọn ảnh (max 10MB)
+              </p>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <span className="px-3 py-1 rounded-full bg-secondary/50 text-xs text-muted-foreground">
+                JPG
+              </span>
+              <span className="px-3 py-1 rounded-full bg-secondary/50 text-xs text-muted-foreground">
+                PNG
+              </span>
+              <span className="px-3 py-1 rounded-full bg-secondary/50 text-xs text-muted-foreground">
+                WEBP
+              </span>
+            </div>
+          </button>
+        )}
+      </div>
+
+      {/* Custom Prompt */}
+      {selectedImage && (
+        <div className="space-y-3 animate-fade-up">
+          <label className="text-sm font-medium text-foreground flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-gold" />
+            Yêu cầu phân tích (tùy chọn)
+          </label>
+          <Textarea
+            placeholder="Ví dụ: Gợi ý cách phối đồ cho đi dự tiệc, hoặc outfit này phù hợp với thời tiết nào?"
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            className="min-h-[80px] bg-secondary/30 border-border/50 focus:border-gold/50 resize-none"
+          />
+        </div>
+      )}
+
+      {/* Analyze Button */}
+      {selectedImage && !analysis && (
+        <Button
+          onClick={analyzeImage}
+          disabled={isAnalyzing}
+          className="w-full bg-gold hover:bg-gold/90 text-background"
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              Đang phân tích...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-5 w-5 mr-2" />
+              Phân tích với AI Fashion Expert
+            </>
+          )}
+        </Button>
+      )}
+
+      {/* Analysis Result */}
+      {analysis && (
+        <Card className="p-6 bg-gradient-to-br from-gold/5 to-transparent border-gold/20 animate-fade-up">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-gold" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-semibold text-foreground">
+                Kết quả phân tích
+              </h3>
+              <p className="text-sm text-muted-foreground">AI Fashion Expert</p>
+            </div>
+          </div>
+
+          <ScrollArea className="max-h-[400px] pr-4">
+            <div className="prose prose-sm prose-invert max-w-none">
+              {analysis.split('\n').map((line, i) => {
+                // Style different sections
+                if (line.includes('MÔ TẢ') || line.includes('PHONG CÁCH') ||
+                  line.includes('PHỐI MÀU') || line.includes('ĐIỂM MẠNH') ||
+                  line.includes('GỢI Ý') || line.includes('OCCASIONS') ||
+                  line.includes('ĐIỂM ĐÁNH GIÁ') || line.match(/^\d+\./)) {
+                  return (
+                    <h4 key={i} className="text-gold font-semibold mt-4 mb-2 flex items-center gap-2">
+                      {line.includes('ĐIỂM') || line.includes('đánh giá') ? (
+                        <Star className="h-4 w-4" />
+                      ) : line.includes('MÀU') ? (
+                        <Palette className="h-4 w-4" />
+                      ) : line.includes('MẠNH') || line.includes('tốt') ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <Shirt className="h-4 w-4" />
+                      )}
+                      {line}
+                    </h4>
+                  );
+                }
+                if (line.trim() === '') return <br key={i} />;
+                return (
+                  <p key={i} className="text-muted-foreground leading-relaxed mb-2">
+                    {line}
+                  </p>
+                );
+              })}
+            </div>
+          </ScrollArea>
+
+          <div className="mt-4 pt-4 border-t border-border/50 flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setAnalysis(null)}
+              className="flex-1"
+            >
+              Phân tích lại
+            </Button>
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(analysis);
+                toast.success('Đã copy kết quả!');
+              }}
+              className="flex-1 bg-gold hover:bg-gold/90 text-background"
+            >
+              Copy kết quả
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Tips */}
+      {!selectedImage && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TipCard
+            icon={<Camera className="h-5 w-5" />}
+            title="Ảnh rõ nét"
+            description="Chọn ảnh có ánh sáng tốt, hiển thị đầy đủ trang phục"
+          />
+          <TipCard
+            icon={<Shirt className="h-5 w-5" />}
+            title="Full outfit"
+            description="Ảnh toàn thân sẽ cho phân tích chính xác nhất"
+          />
+          <TipCard
+            icon={<Palette className="h-5 w-5" />}
+            title="Chi tiết màu"
+            description="Màu sắc thực tế giúp AI đánh giá phối màu tốt hơn"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TipCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
+      <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold mb-3">
+        {icon}
+      </div>
+      <h4 className="font-medium text-foreground text-sm">{title}</h4>
+      <p className="text-xs text-muted-foreground mt-1">{description}</p>
+    </div>
+  );
+}
+```
+
+---
+
+#### [VirtualTryOn.tsx](file:///c:/Users/hp/Downloads/fashiond-main/src/components/VirtualTryOn.tsx)
+- Import [getUserApiKeys](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx#261-276) từ [ApiKeySettings](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx#13-260)
+- Gửi `userApiKeys` trong tất cả virtual-tryon requests
+
+```diff:VirtualTryOn.tsx
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { 
+  Upload, 
+  User, 
+  Shirt,
+  Sparkles, 
+  X, 
+  Loader2,
+  ArrowRight,
+  Download,
+  RotateCcw,
+  Image as ImageIcon,
+  CheckCircle2,
+  Scissors,
+  Wand2,
+  Plus,
+  Building2,
+  AlertCircle
+} from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type ProductType = 'casual' | 'sleepwear' | 'swimwear';
+
+const productTypeLabels: Record<ProductType, string> = {
+  casual: 'Đồ thường (Áo, quần, váy...)',
+  sleepwear: 'Đồ ngủ / Đồ mặc nhà',
+  swimwear: 'Đồ bơi / Bikini',
+};
+
+type BackgroundType = 'luxury_apartment' | 'studio' | 'outdoor_cafe' | 'beach' | 'shopping_mall' | 'garden' | 'custom';
+
+const backgroundOptions: Record<BackgroundType, { label: string; prompt: string }> = {
+  luxury_apartment: {
+    label: 'Căn hộ cao cấp (mặc định)',
+    prompt: 'luxury high-rise apartment on 20th floor with floor-to-ceiling windows showing panoramic city skyline view at golden hour, elegant modern interior with neutral tones, soft warm lighting'
+  },
+  studio: {
+    label: 'Studio chuyên nghiệp',
+    prompt: 'professional photography studio with soft diffused lighting, clean neutral gray or white backdrop, fashion editorial style'
+  },
+  outdoor_cafe: {
+    label: 'Quán cafe ngoài trời',
+    prompt: 'trendy outdoor European-style cafe terrace with greenery, warm afternoon sunlight, urban lifestyle aesthetic'
+  },
+  beach: {
+    label: 'Bãi biển',
+    prompt: 'beautiful tropical beach with crystal clear water and white sand, golden hour lighting, vacation resort atmosphere'
+  },
+  shopping_mall: {
+    label: 'Trung tâm thương mại',
+    prompt: 'modern luxury shopping mall interior, bright ambient lighting, upscale retail environment'
+  },
+  garden: {
+    label: 'Vườn hoa',
+    prompt: 'beautiful flower garden with blooming roses and greenery, soft natural daylight, romantic atmosphere'
+  },
+  custom: {
+    label: 'Tùy chỉnh...',
+    prompt: ''
+  }
+};
+
+interface ClothingItem {
+  id: string;
+  image: string;
+  status: 'pending' | 'processing' | 'success' | 'error';
+  error?: string;
+  results?: string[];
+}
+
+interface VirtualTryOnProps {
+  onComplete?: (images: string[]) => void;
+}
+
+type Step = 'upload' | 'processing' | 'complete';
+
+export function VirtualTryOn({ onComplete }: VirtualTryOnProps) {
+  const [modelImage, setModelImage] = useState<string | null>(null);
+  const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
+  const [currentStep, setCurrentStep] = useState<Step>('upload');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentProcessingIndex, setCurrentProcessingIndex] = useState(0);
+  const [productType, setProductType] = useState<ProductType>('casual');
+  const [backgroundType, setBackgroundType] = useState<BackgroundType>('luxury_apartment');
+  const [customBackground, setCustomBackground] = useState('');
+  
+  const modelInputRef = useRef<HTMLInputElement>(null);
+  const clothingInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (
+    event: React.ChangeEvent<HTMLInputElement>, 
+    setImage: (img: string | null) => void
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Ảnh quá lớn. Vui lòng chọn ảnh dưới 10MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClothingFilesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} quá lớn. Bỏ qua.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newItem: ClothingItem = {
+          id: crypto.randomUUID(),
+          image: e.target?.result as string,
+          status: 'pending'
+        };
+        setClothingItems(prev => [...prev, newItem]);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    // Reset input
+    event.target.value = '';
+  };
+
+  const removeClothingItem = (id: string) => {
+    setClothingItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const processStep = async (step: string, payload: any) => {
+    const { data, error } = await supabase.functions.invoke('virtual-tryon', {
+      body: payload
+    });
+
+    if (error) {
+      let message = error.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+      try {
+        const maybeJson = await (error as any)?.context?.json?.();
+        if (maybeJson?.error) message = String(maybeJson.error);
+      } catch {
+        // ignore
+      }
+      throw new Error(`${step}: ${message}`);
+    }
+
+    if ((data as any)?.error) throw new Error(String((data as any).error));
+
+    return data;
+  };
+
+  const getBackgroundPrompt = (): string => {
+    if (backgroundType === 'custom' && customBackground.trim()) {
+      return customBackground.trim();
+    }
+    return backgroundOptions[backgroundType].prompt;
+  };
+
+  const processClothingItem = async (item: ClothingItem, index: number): Promise<ClothingItem> => {
+    const backgroundPrompt = getBackgroundPrompt();
+    
+    try {
+      // Step 1: Extract clothing
+      const extractResult = await processStep('extract_clothing', {
+        clothingImage: item.image,
+        step: 'extract_clothing',
+        productType
+      });
+      
+      if (!extractResult.images?.[0]) {
+        throw new Error('Không tách được trang phục');
+      }
+
+      // Step 2: Virtual try-on with background
+      const tryonResult = await processStep('virtual_tryon', {
+        modelImage,
+        clothingImage: extractResult.images[0],
+        step: 'virtual_tryon',
+        customPrompt: backgroundPrompt,
+        productType,
+        backgroundContext: backgroundPrompt
+      });
+
+      const mainTryOnImage = tryonResult.images?.[0];
+      if (!mainTryOnImage) {
+        throw new Error('Không tạo được ảnh. Có thể do bộ lọc nội dung AI.');
+      }
+
+      const allImages: string[] = [mainTryOnImage];
+      
+      // Step 3: Generate 3 more angles
+      for (let i = 0; i < 3; i++) {
+        try {
+          const angleResult = await processStep('generate_angles', {
+            modelImage: mainTryOnImage,
+            step: 'generate_angles',
+            customPrompt: String(i + 1),
+            productType,
+            backgroundContext: backgroundPrompt
+          });
+          
+          if (angleResult.images?.[0]) {
+            allImages.push(angleResult.images[0]);
+          }
+        } catch (angleError) {
+          console.error(`Error generating angle ${i + 1}:`, angleError);
+        }
+      }
+
+      return {
+        ...item,
+        status: 'success',
+        results: allImages.filter(Boolean)
+      };
+    } catch (error: any) {
+      console.error(`Error processing item ${index}:`, error);
+      return {
+        ...item,
+        status: 'error',
+        error: error.message || 'Lỗi không xác định'
+      };
+    }
+  };
+
+  const startBatchProcess = async () => {
+    if (!modelImage || clothingItems.length === 0) {
+      toast.error('Vui lòng tải lên ảnh người mẫu và ít nhất 1 trang phục');
+      return;
+    }
+
+    setIsProcessing(true);
+    setCurrentStep('processing');
+    setProgress(0);
+
+    const totalItems = clothingItems.length;
+    let successCount = 0;
+    let allResults: string[] = [];
+
+    for (let i = 0; i < totalItems; i++) {
+      setCurrentProcessingIndex(i);
+      const item = clothingItems[i];
+      
+      // Update status to processing
+      setClothingItems(prev => prev.map((ci, idx) => 
+        idx === i ? { ...ci, status: 'processing' } : ci
+      ));
+
+      toast.info(`Đang xử lý trang phục ${i + 1}/${totalItems}...`);
+      
+      const result = await processClothingItem(item, i);
+      
+      // Update the item with result
+      setClothingItems(prev => prev.map((ci, idx) => 
+        idx === i ? result : ci
+      ));
+
+      if (result.status === 'success' && result.results) {
+        successCount++;
+        allResults = [...allResults, ...result.results];
+      }
+
+      setProgress(((i + 1) / totalItems) * 100);
+    }
+
+    setCurrentStep('complete');
+    setIsProcessing(false);
+
+    if (successCount === totalItems) {
+      toast.success(`Hoàn thành! Đã xử lý ${successCount} trang phục.`);
+    } else if (successCount > 0) {
+      toast.info(`Đã xử lý ${successCount}/${totalItems} trang phục. ${totalItems - successCount} bị lỗi.`);
+    } else {
+      toast.error('Tất cả trang phục đều gặp lỗi. Vui lòng thử với ảnh khác.');
+    }
+
+    onComplete?.(allResults);
+  };
+
+  const reset = () => {
+    setModelImage(null);
+    setClothingItems([]);
+    setCurrentStep('upload');
+    setProgress(0);
+    setCurrentProcessingIndex(0);
+    setProductType('casual');
+    setBackgroundType('luxury_apartment');
+    setCustomBackground('');
+  };
+
+  const downloadImage = (imageUrl: string, itemIndex: number, imgIndex: number) => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `fashion-tryon-${itemIndex + 1}-${imgIndex + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadAllImages = () => {
+    clothingItems.forEach((item, itemIndex) => {
+      if (item.status === 'success' && item.results) {
+        item.results.forEach((img, imgIndex) => {
+          setTimeout(() => {
+            downloadImage(img, itemIndex, imgIndex);
+          }, (itemIndex * 4 + imgIndex) * 300);
+        });
+      }
+    });
+    toast.info('Đang tải xuống tất cả ảnh...');
+  };
+
+  const successItems = clothingItems.filter(item => item.status === 'success');
+  const errorItems = clothingItems.filter(item => item.status === 'error');
+
+  return (
+    <div className="space-y-6">
+      {/* Progress Bar */}
+      {isProcessing && (
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">
+              Đang xử lý trang phục {currentProcessingIndex + 1}/{clothingItems.length}
+            </span>
+            <span className="text-gold font-medium">{Math.round(progress)}%</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </div>
+      )}
+
+      {/* Upload Step */}
+      {currentStep === 'upload' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Model Image Upload */}
+            <Card className="p-6 border-border/50 bg-secondary/20">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">Ảnh người mẫu / KOL</h3>
+                  <p className="text-xs text-muted-foreground">Ảnh toàn thân rõ nét</p>
+                </div>
+              </div>
+
+              <input
+                ref={modelInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileSelect(e, setModelImage)}
+                className="hidden"
+              />
+
+              {modelImage ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setModelImage(null)}
+                    className="absolute top-2 right-2 z-10 p-2 rounded-full bg-background/80 hover:bg-destructive/20 border border-border/50"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <img
+                    src={modelImage}
+                    alt="Model"
+                    className="w-full h-64 object-contain rounded-xl bg-secondary/50"
+                  />
+                </div>
+              ) : (
+                <button
+                  onClick={() => modelInputRef.current?.click()}
+                  className="w-full h-64 border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-blue-500/50 transition-colors"
+                >
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Click để tải ảnh</span>
+                </button>
+              )}
+            </Card>
+
+            {/* Multiple Clothing Upload */}
+            <Card className="p-6 border-border/50 bg-secondary/20">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+                  <Shirt className="h-5 w-5 text-gold" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">Ảnh trang phục ({clothingItems.length})</h3>
+                  <p className="text-xs text-muted-foreground">Có thể chọn nhiều ảnh cùng lúc</p>
+                </div>
+              </div>
+
+              <input
+                ref={clothingInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleClothingFilesSelect}
+                className="hidden"
+              />
+
+              {clothingItems.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                    {clothingItems.map((item) => (
+                      <div key={item.id} className="relative aspect-square">
+                        <img
+                          src={item.image}
+                          alt="Clothing"
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => removeClothingItem(item.id)}
+                          className="absolute -top-1 -right-1 p-1 rounded-full bg-destructive text-destructive-foreground"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => clothingInputRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Thêm trang phục
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => clothingInputRef.current?.click()}
+                  className="w-full h-48 border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-gold/50 transition-colors"
+                >
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Click để tải nhiều ảnh</span>
+                </button>
+              )}
+            </Card>
+          </div>
+
+          {/* Options */}
+          {modelImage && clothingItems.length > 0 && (
+            <Card className="p-4 border-border/50 bg-secondary/20 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Product Type Selector */}
+                <div>
+                  <label className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Shirt className="h-4 w-4 text-gold" />
+                    Loại sản phẩm
+                  </label>
+                  <Select value={productType} onValueChange={(v) => setProductType(v as ProductType)}>
+                    <SelectTrigger className="bg-secondary/30 border-border/50">
+                      <SelectValue placeholder="Chọn loại sản phẩm" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(productTypeLabels).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Background Selector */}
+                <div>
+                  <label className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Building2 className="h-4 w-4 text-gold" />
+                    Bối cảnh chụp
+                  </label>
+                  <Select value={backgroundType} onValueChange={(v) => setBackgroundType(v as BackgroundType)}>
+                    <SelectTrigger className="bg-secondary/30 border-border/50">
+                      <SelectValue placeholder="Chọn bối cảnh" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(backgroundOptions).map(([key, { label }]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Custom Background */}
+              {backgroundType === 'custom' && (
+                <div>
+                  <label className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-gold" />
+                    Mô tả bối cảnh tùy chỉnh
+                  </label>
+                  <Textarea
+                    placeholder="Ví dụ: Phòng khách hiện đại với cửa sổ lớn nhìn ra biển, ánh hoàng hôn..."
+                    value={customBackground}
+                    onChange={(e) => setCustomBackground(e.target.value)}
+                    className="min-h-[80px] bg-secondary/30 border-border/50 resize-none"
+                  />
+                </div>
+              )}
+
+              {productType !== 'casual' && (
+                <p className="text-xs text-amber-500">
+                  ⚠️ Với {productTypeLabels[productType].toLowerCase()}, nên dùng ảnh sản phẩm nền trắng và ảnh mẫu kín đáo.
+                </p>
+              )}
+            </Card>
+          )}
+
+          {/* Action Button */}
+          <Button
+            onClick={startBatchProcess}
+            disabled={!modelImage || clothingItems.length === 0 || isProcessing}
+            className="w-full bg-gold hover:bg-gold/90 text-background"
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            Bắt đầu xử lý {clothingItems.length} trang phục
+          </Button>
+
+          {/* Tips */}
+          {!modelImage && clothingItems.length === 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <TipCard
+                icon={<User className="h-5 w-5" />}
+                title="Ảnh người mẫu"
+                description="Chọn ảnh toàn thân, rõ mặt, đứng thẳng"
+              />
+              <TipCard
+                icon={<Shirt className="h-5 w-5" />}
+                title="Nhiều trang phục"
+                description="Tải nhiều ảnh, lỗi 1 cái sẽ skip qua cái khác"
+              />
+              <TipCard
+                icon={<Building2 className="h-5 w-5" />}
+                title="Chọn bối cảnh"
+                description="Căn hộ sang, studio, biển, quán cafe..."
+              />
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Processing Status */}
+      {currentStep === 'processing' && (
+        <div className="space-y-4">
+          <Card className="p-6 border-gold/20 bg-gold/5">
+            <div className="flex items-center gap-4">
+              <Loader2 className="h-8 w-8 text-gold animate-spin" />
+              <div>
+                <h3 className="font-medium text-foreground">
+                  Đang xử lý trang phục {currentProcessingIndex + 1}/{clothingItems.length}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Nếu trang phục nào bị lỗi, hệ thống sẽ tự động chuyển sang cái tiếp theo
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Processing Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {clothingItems.map((item, index) => (
+              <Card key={item.id} className={cn(
+                "p-2 border-border/50 relative",
+                item.status === 'processing' && "ring-2 ring-gold",
+                item.status === 'success' && "ring-2 ring-green-500",
+                item.status === 'error' && "ring-2 ring-destructive"
+              )}>
+                <img
+                  src={item.image}
+                  alt={`Clothing ${index + 1}`}
+                  className="w-full aspect-square object-cover rounded"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded">
+                  {item.status === 'pending' && (
+                    <span className="text-xs text-muted-foreground">Đang chờ</span>
+                  )}
+                  {item.status === 'processing' && (
+                    <Loader2 className="h-6 w-6 text-gold animate-spin" />
+                  )}
+                  {item.status === 'success' && (
+                    <CheckCircle2 className="h-6 w-6 text-green-500" />
+                  )}
+                  {item.status === 'error' && (
+                    <div className="text-center px-2">
+                      <AlertCircle className="h-5 w-5 text-destructive mx-auto" />
+                      <p className="text-xs text-destructive mt-1">Lỗi</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      {currentStep === 'complete' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-display font-semibold text-foreground">
+                Kết quả: {successItems.length} thành công, {errorItems.length} lỗi
+              </h3>
+            </div>
+            <div className="flex gap-2">
+              {successItems.length > 0 && (
+                <Button variant="outline" onClick={downloadAllImages} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Tải tất cả
+                </Button>
+              )}
+              <Button variant="outline" onClick={reset} className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Thử lại
+              </Button>
+            </div>
+          </div>
+
+          {/* Success Results */}
+          {successItems.map((item, itemIndex) => (
+            <Card key={item.id} className="p-4 border-border/50 bg-secondary/20">
+              <div className="flex items-center gap-3 mb-4">
+                <img
+                  src={item.image}
+                  alt="Original"
+                  className="w-12 h-12 object-cover rounded"
+                />
+                <div>
+                  <h4 className="font-medium text-foreground">Trang phục {itemIndex + 1}</h4>
+                  <p className="text-xs text-green-500">{item.results?.length || 0} ảnh</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {item.results?.map((img, imgIndex) => (
+                  <div key={imgIndex} className="relative group">
+                    <img
+                      src={img}
+                      alt={`Result ${imgIndex + 1}`}
+                      className="w-full aspect-[3/4] object-cover rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => downloadImage(img, itemIndex, imgIndex)}
+                      >
+                        <Download className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-background/80 text-xs">
+                      {imgIndex === 0 ? 'Chính' : `Góc ${imgIndex + 1}`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ))}
+
+          {/* Error Results */}
+          {errorItems.length > 0 && (
+            <Card className="p-4 border-destructive/30 bg-destructive/5">
+              <h4 className="font-medium text-destructive mb-3 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Trang phục bị lỗi ({errorItems.length})
+              </h4>
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                {errorItems.map((item) => (
+                  <div key={item.id} className="relative">
+                    <img
+                      src={item.image}
+                      alt="Failed"
+                      className="w-full aspect-square object-cover rounded opacity-50"
+                    />
+                    <p className="text-xs text-destructive mt-1 line-clamp-2">{item.error}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TipCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
+      <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold mb-3">
+        {icon}
+      </div>
+      <h4 className="font-medium text-foreground text-sm">{title}</h4>
+      <p className="text-xs text-muted-foreground mt-1">{description}</p>
+    </div>
+  );
+}
+===
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { getUserApiKeys } from './ApiKeySettings';
+import {
+  Upload,
+  User,
+  Shirt,
+  Sparkles,
+  X,
+  Loader2,
+  ArrowRight,
+  Download,
+  RotateCcw,
+  Image as ImageIcon,
+  CheckCircle2,
+  Scissors,
+  Wand2,
+  Plus,
+  Building2,
+  AlertCircle
+} from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type ProductType = 'casual' | 'sleepwear' | 'swimwear';
+
+const productTypeLabels: Record<ProductType, string> = {
+  casual: 'Đồ thường (Áo, quần, váy...)',
+  sleepwear: 'Đồ ngủ / Đồ mặc nhà',
+  swimwear: 'Đồ bơi / Bikini',
+};
+
+type BackgroundType = 'luxury_apartment' | 'studio' | 'outdoor_cafe' | 'beach' | 'shopping_mall' | 'garden' | 'custom';
+
+const backgroundOptions: Record<BackgroundType, { label: string; prompt: string }> = {
+  luxury_apartment: {
+    label: 'Căn hộ cao cấp (mặc định)',
+    prompt: 'luxury high-rise apartment on 20th floor with floor-to-ceiling windows showing panoramic city skyline view at golden hour, elegant modern interior with neutral tones, soft warm lighting'
+  },
+  studio: {
+    label: 'Studio chuyên nghiệp',
+    prompt: 'professional photography studio with soft diffused lighting, clean neutral gray or white backdrop, fashion editorial style'
+  },
+  outdoor_cafe: {
+    label: 'Quán cafe ngoài trời',
+    prompt: 'trendy outdoor European-style cafe terrace with greenery, warm afternoon sunlight, urban lifestyle aesthetic'
+  },
+  beach: {
+    label: 'Bãi biển',
+    prompt: 'beautiful tropical beach with crystal clear water and white sand, golden hour lighting, vacation resort atmosphere'
+  },
+  shopping_mall: {
+    label: 'Trung tâm thương mại',
+    prompt: 'modern luxury shopping mall interior, bright ambient lighting, upscale retail environment'
+  },
+  garden: {
+    label: 'Vườn hoa',
+    prompt: 'beautiful flower garden with blooming roses and greenery, soft natural daylight, romantic atmosphere'
+  },
+  custom: {
+    label: 'Tùy chỉnh...',
+    prompt: ''
+  }
+};
+
+interface ClothingItem {
+  id: string;
+  image: string;
+  status: 'pending' | 'processing' | 'success' | 'error';
+  error?: string;
+  results?: string[];
+}
+
+interface VirtualTryOnProps {
+  onComplete?: (images: string[]) => void;
+}
+
+type Step = 'upload' | 'processing' | 'complete';
+
+export function VirtualTryOn({ onComplete }: VirtualTryOnProps) {
+  const [modelImage, setModelImage] = useState<string | null>(null);
+  const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
+  const [currentStep, setCurrentStep] = useState<Step>('upload');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentProcessingIndex, setCurrentProcessingIndex] = useState(0);
+  const [productType, setProductType] = useState<ProductType>('casual');
+  const [backgroundType, setBackgroundType] = useState<BackgroundType>('luxury_apartment');
+  const [customBackground, setCustomBackground] = useState('');
+
+  const modelInputRef = useRef<HTMLInputElement>(null);
+  const clothingInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setImage: (img: string | null) => void
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Ảnh quá lớn. Vui lòng chọn ảnh dưới 10MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClothingFilesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} quá lớn. Bỏ qua.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newItem: ClothingItem = {
+          id: crypto.randomUUID(),
+          image: e.target?.result as string,
+          status: 'pending'
+        };
+        setClothingItems(prev => [...prev, newItem]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset input
+    event.target.value = '';
+  };
+
+  const removeClothingItem = (id: string) => {
+    setClothingItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const processStep = async (step: string, payload: any) => {
+    const { data, error } = await supabase.functions.invoke('virtual-tryon', {
+      body: {
+        ...payload,
+        userApiKeys: getUserApiKeys(),
+      }
+    });
+
+    if (error) {
+      let message = error.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+      try {
+        const maybeJson = await (error as any)?.context?.json?.();
+        if (maybeJson?.error) message = String(maybeJson.error);
+      } catch {
+        // ignore
+      }
+      throw new Error(`${step}: ${message}`);
+    }
+
+    if ((data as any)?.error) throw new Error(String((data as any).error));
+
+    return data;
+  };
+
+  const getBackgroundPrompt = (): string => {
+    if (backgroundType === 'custom' && customBackground.trim()) {
+      return customBackground.trim();
+    }
+    return backgroundOptions[backgroundType].prompt;
+  };
+
+  const processClothingItem = async (item: ClothingItem, index: number): Promise<ClothingItem> => {
+    const backgroundPrompt = getBackgroundPrompt();
+
+    try {
+      // Step 1: Extract clothing
+      const extractResult = await processStep('extract_clothing', {
+        clothingImage: item.image,
+        step: 'extract_clothing',
+        productType
+      });
+
+      if (!extractResult.images?.[0]) {
+        throw new Error('Không tách được trang phục');
+      }
+
+      // Step 2: Virtual try-on with background
+      const tryonResult = await processStep('virtual_tryon', {
+        modelImage,
+        clothingImage: extractResult.images[0],
+        step: 'virtual_tryon',
+        customPrompt: backgroundPrompt,
+        productType,
+        backgroundContext: backgroundPrompt
+      });
+
+      const mainTryOnImage = tryonResult.images?.[0];
+      if (!mainTryOnImage) {
+        throw new Error('Không tạo được ảnh. Có thể do bộ lọc nội dung AI.');
+      }
+
+      const allImages: string[] = [mainTryOnImage];
+
+      // Step 3: Generate 3 more angles
+      for (let i = 0; i < 3; i++) {
+        try {
+          const angleResult = await processStep('generate_angles', {
+            modelImage: mainTryOnImage,
+            step: 'generate_angles',
+            customPrompt: String(i + 1),
+            productType,
+            backgroundContext: backgroundPrompt
+          });
+
+          if (angleResult.images?.[0]) {
+            allImages.push(angleResult.images[0]);
+          }
+        } catch (angleError) {
+          console.error(`Error generating angle ${i + 1}:`, angleError);
+        }
+      }
+
+      return {
+        ...item,
+        status: 'success',
+        results: allImages.filter(Boolean)
+      };
+    } catch (error: any) {
+      console.error(`Error processing item ${index}:`, error);
+      return {
+        ...item,
+        status: 'error',
+        error: error.message || 'Lỗi không xác định'
+      };
+    }
+  };
+
+  const startBatchProcess = async () => {
+    if (!modelImage || clothingItems.length === 0) {
+      toast.error('Vui lòng tải lên ảnh người mẫu và ít nhất 1 trang phục');
+      return;
+    }
+
+    setIsProcessing(true);
+    setCurrentStep('processing');
+    setProgress(0);
+
+    const totalItems = clothingItems.length;
+    let successCount = 0;
+    let allResults: string[] = [];
+
+    for (let i = 0; i < totalItems; i++) {
+      setCurrentProcessingIndex(i);
+      const item = clothingItems[i];
+
+      // Update status to processing
+      setClothingItems(prev => prev.map((ci, idx) =>
+        idx === i ? { ...ci, status: 'processing' } : ci
+      ));
+
+      toast.info(`Đang xử lý trang phục ${i + 1}/${totalItems}...`);
+
+      const result = await processClothingItem(item, i);
+
+      // Update the item with result
+      setClothingItems(prev => prev.map((ci, idx) =>
+        idx === i ? result : ci
+      ));
+
+      if (result.status === 'success' && result.results) {
+        successCount++;
+        allResults = [...allResults, ...result.results];
+      }
+
+      setProgress(((i + 1) / totalItems) * 100);
+    }
+
+    setCurrentStep('complete');
+    setIsProcessing(false);
+
+    if (successCount === totalItems) {
+      toast.success(`Hoàn thành! Đã xử lý ${successCount} trang phục.`);
+    } else if (successCount > 0) {
+      toast.info(`Đã xử lý ${successCount}/${totalItems} trang phục. ${totalItems - successCount} bị lỗi.`);
+    } else {
+      toast.error('Tất cả trang phục đều gặp lỗi. Vui lòng thử với ảnh khác.');
+    }
+
+    onComplete?.(allResults);
+  };
+
+  const reset = () => {
+    setModelImage(null);
+    setClothingItems([]);
+    setCurrentStep('upload');
+    setProgress(0);
+    setCurrentProcessingIndex(0);
+    setProductType('casual');
+    setBackgroundType('luxury_apartment');
+    setCustomBackground('');
+  };
+
+  const downloadImage = (imageUrl: string, itemIndex: number, imgIndex: number) => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `fashion-tryon-${itemIndex + 1}-${imgIndex + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadAllImages = () => {
+    clothingItems.forEach((item, itemIndex) => {
+      if (item.status === 'success' && item.results) {
+        item.results.forEach((img, imgIndex) => {
+          setTimeout(() => {
+            downloadImage(img, itemIndex, imgIndex);
+          }, (itemIndex * 4 + imgIndex) * 300);
+        });
+      }
+    });
+    toast.info('Đang tải xuống tất cả ảnh...');
+  };
+
+  const successItems = clothingItems.filter(item => item.status === 'success');
+  const errorItems = clothingItems.filter(item => item.status === 'error');
+
+  return (
+    <div className="space-y-6">
+      {/* Progress Bar */}
+      {isProcessing && (
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">
+              Đang xử lý trang phục {currentProcessingIndex + 1}/{clothingItems.length}
+            </span>
+            <span className="text-gold font-medium">{Math.round(progress)}%</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </div>
+      )}
+
+      {/* Upload Step */}
+      {currentStep === 'upload' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Model Image Upload */}
+            <Card className="p-6 border-border/50 bg-secondary/20">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">Ảnh người mẫu / KOL</h3>
+                  <p className="text-xs text-muted-foreground">Ảnh toàn thân rõ nét</p>
+                </div>
+              </div>
+
+              <input
+                ref={modelInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileSelect(e, setModelImage)}
+                className="hidden"
+              />
+
+              {modelImage ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setModelImage(null)}
+                    className="absolute top-2 right-2 z-10 p-2 rounded-full bg-background/80 hover:bg-destructive/20 border border-border/50"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <img
+                    src={modelImage}
+                    alt="Model"
+                    className="w-full h-64 object-contain rounded-xl bg-secondary/50"
+                  />
+                </div>
+              ) : (
+                <button
+                  onClick={() => modelInputRef.current?.click()}
+                  className="w-full h-64 border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-blue-500/50 transition-colors"
+                >
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Click để tải ảnh</span>
+                </button>
+              )}
+            </Card>
+
+            {/* Multiple Clothing Upload */}
+            <Card className="p-6 border-border/50 bg-secondary/20">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+                  <Shirt className="h-5 w-5 text-gold" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">Ảnh trang phục ({clothingItems.length})</h3>
+                  <p className="text-xs text-muted-foreground">Có thể chọn nhiều ảnh cùng lúc</p>
+                </div>
+              </div>
+
+              <input
+                ref={clothingInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleClothingFilesSelect}
+                className="hidden"
+              />
+
+              {clothingItems.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                    {clothingItems.map((item) => (
+                      <div key={item.id} className="relative aspect-square">
+                        <img
+                          src={item.image}
+                          alt="Clothing"
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => removeClothingItem(item.id)}
+                          className="absolute -top-1 -right-1 p-1 rounded-full bg-destructive text-destructive-foreground"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => clothingInputRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Thêm trang phục
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => clothingInputRef.current?.click()}
+                  className="w-full h-48 border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-gold/50 transition-colors"
+                >
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Click để tải nhiều ảnh</span>
+                </button>
+              )}
+            </Card>
+          </div>
+
+          {/* Options */}
+          {modelImage && clothingItems.length > 0 && (
+            <Card className="p-4 border-border/50 bg-secondary/20 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Product Type Selector */}
+                <div>
+                  <label className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Shirt className="h-4 w-4 text-gold" />
+                    Loại sản phẩm
+                  </label>
+                  <Select value={productType} onValueChange={(v) => setProductType(v as ProductType)}>
+                    <SelectTrigger className="bg-secondary/30 border-border/50">
+                      <SelectValue placeholder="Chọn loại sản phẩm" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(productTypeLabels).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Background Selector */}
+                <div>
+                  <label className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Building2 className="h-4 w-4 text-gold" />
+                    Bối cảnh chụp
+                  </label>
+                  <Select value={backgroundType} onValueChange={(v) => setBackgroundType(v as BackgroundType)}>
+                    <SelectTrigger className="bg-secondary/30 border-border/50">
+                      <SelectValue placeholder="Chọn bối cảnh" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(backgroundOptions).map(([key, { label }]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Custom Background */}
+              {backgroundType === 'custom' && (
+                <div>
+                  <label className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-gold" />
+                    Mô tả bối cảnh tùy chỉnh
+                  </label>
+                  <Textarea
+                    placeholder="Ví dụ: Phòng khách hiện đại với cửa sổ lớn nhìn ra biển, ánh hoàng hôn..."
+                    value={customBackground}
+                    onChange={(e) => setCustomBackground(e.target.value)}
+                    className="min-h-[80px] bg-secondary/30 border-border/50 resize-none"
+                  />
+                </div>
+              )}
+
+              {productType !== 'casual' && (
+                <p className="text-xs text-amber-500">
+                  ⚠️ Với {productTypeLabels[productType].toLowerCase()}, nên dùng ảnh sản phẩm nền trắng và ảnh mẫu kín đáo.
+                </p>
+              )}
+            </Card>
+          )}
+
+          {/* Action Button */}
+          <Button
+            onClick={startBatchProcess}
+            disabled={!modelImage || clothingItems.length === 0 || isProcessing}
+            className="w-full bg-gold hover:bg-gold/90 text-background"
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            Bắt đầu xử lý {clothingItems.length} trang phục
+          </Button>
+
+          {/* Tips */}
+          {!modelImage && clothingItems.length === 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <TipCard
+                icon={<User className="h-5 w-5" />}
+                title="Ảnh người mẫu"
+                description="Chọn ảnh toàn thân, rõ mặt, đứng thẳng"
+              />
+              <TipCard
+                icon={<Shirt className="h-5 w-5" />}
+                title="Nhiều trang phục"
+                description="Tải nhiều ảnh, lỗi 1 cái sẽ skip qua cái khác"
+              />
+              <TipCard
+                icon={<Building2 className="h-5 w-5" />}
+                title="Chọn bối cảnh"
+                description="Căn hộ sang, studio, biển, quán cafe..."
+              />
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Processing Status */}
+      {currentStep === 'processing' && (
+        <div className="space-y-4">
+          <Card className="p-6 border-gold/20 bg-gold/5">
+            <div className="flex items-center gap-4">
+              <Loader2 className="h-8 w-8 text-gold animate-spin" />
+              <div>
+                <h3 className="font-medium text-foreground">
+                  Đang xử lý trang phục {currentProcessingIndex + 1}/{clothingItems.length}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Nếu trang phục nào bị lỗi, hệ thống sẽ tự động chuyển sang cái tiếp theo
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Processing Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {clothingItems.map((item, index) => (
+              <Card key={item.id} className={cn(
+                "p-2 border-border/50 relative",
+                item.status === 'processing' && "ring-2 ring-gold",
+                item.status === 'success' && "ring-2 ring-green-500",
+                item.status === 'error' && "ring-2 ring-destructive"
+              )}>
+                <img
+                  src={item.image}
+                  alt={`Clothing ${index + 1}`}
+                  className="w-full aspect-square object-cover rounded"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded">
+                  {item.status === 'pending' && (
+                    <span className="text-xs text-muted-foreground">Đang chờ</span>
+                  )}
+                  {item.status === 'processing' && (
+                    <Loader2 className="h-6 w-6 text-gold animate-spin" />
+                  )}
+                  {item.status === 'success' && (
+                    <CheckCircle2 className="h-6 w-6 text-green-500" />
+                  )}
+                  {item.status === 'error' && (
+                    <div className="text-center px-2">
+                      <AlertCircle className="h-5 w-5 text-destructive mx-auto" />
+                      <p className="text-xs text-destructive mt-1">Lỗi</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      {currentStep === 'complete' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-display font-semibold text-foreground">
+                Kết quả: {successItems.length} thành công, {errorItems.length} lỗi
+              </h3>
+            </div>
+            <div className="flex gap-2">
+              {successItems.length > 0 && (
+                <Button variant="outline" onClick={downloadAllImages} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Tải tất cả
+                </Button>
+              )}
+              <Button variant="outline" onClick={reset} className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Thử lại
+              </Button>
+            </div>
+          </div>
+
+          {/* Success Results */}
+          {successItems.map((item, itemIndex) => (
+            <Card key={item.id} className="p-4 border-border/50 bg-secondary/20">
+              <div className="flex items-center gap-3 mb-4">
+                <img
+                  src={item.image}
+                  alt="Original"
+                  className="w-12 h-12 object-cover rounded"
+                />
+                <div>
+                  <h4 className="font-medium text-foreground">Trang phục {itemIndex + 1}</h4>
+                  <p className="text-xs text-green-500">{item.results?.length || 0} ảnh</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {item.results?.map((img, imgIndex) => (
+                  <div key={imgIndex} className="relative group">
+                    <img
+                      src={img}
+                      alt={`Result ${imgIndex + 1}`}
+                      className="w-full aspect-[3/4] object-cover rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => downloadImage(img, itemIndex, imgIndex)}
+                      >
+                        <Download className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-background/80 text-xs">
+                      {imgIndex === 0 ? 'Chính' : `Góc ${imgIndex + 1}`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ))}
+
+          {/* Error Results */}
+          {errorItems.length > 0 && (
+            <Card className="p-4 border-destructive/30 bg-destructive/5">
+              <h4 className="font-medium text-destructive mb-3 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Trang phục bị lỗi ({errorItems.length})
+              </h4>
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                {errorItems.map((item) => (
+                  <div key={item.id} className="relative">
+                    <img
+                      src={item.image}
+                      alt="Failed"
+                      className="w-full aspect-square object-cover rounded opacity-50"
+                    />
+                    <p className="text-xs text-destructive mt-1 line-clamp-2">{item.error}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TipCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
+      <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold mb-3">
+        {icon}
+      </div>
+      <h4 className="font-medium text-foreground text-sm">{title}</h4>
+      <p className="text-xs text-muted-foreground mt-1">{description}</p>
+    </div>
+  );
+}
+```
+
+---
+
+## Cách sử dụng
+
+### Bước 1: Lấy Google AI API Key (miễn phí)
+1. Truy cập [Google AI Studio](https://aistudio.google.com/apikey)
+2. Đăng nhập với Google account
+3. Click "Create API key"
+4. Copy API key (bắt đầu bằng `AIzaSy...`)
+
+### Bước 2: Thêm API Key vào website
+1. Mở website Fashion AI Studio
+2. Vào tab **Fashion Studio** → cuộn xuống phần **Google AI API Keys**
+3. Dán API key và nhấn **Thêm**
+4. Có thể thêm nhiều keys để tránh bị rate limit
+
+### Bước 3: Sử dụng các tính năng
+Bây giờ tất cả các tính năng sẽ sử dụng Google AI API miễn phí:
+- **Generate Storyboard** - Tạo storyboard cho video
+- **Analyze Fashion** - Phân tích outfit
+- **Virtual Try-On** - Thử đồ ảo
+- **Image Editor** - Chỉnh sửa ảnh (đã hoạt động trước đó)
+
+---
+
+## Lưu ý kỹ thuật
+
+- Google AI API miễn phí có rate limit (~60 requests/phút)
+- User có thể thêm nhiều API keys để tránh bị limit
+- Hệ thống tự động xoay vòng keys khi gặp lỗi 429/403
+- Nếu không có Google AI keys, hệ thống fallback về Lovable API (nếu còn credits)

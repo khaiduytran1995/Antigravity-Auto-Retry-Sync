@@ -1,0 +1,37 @@
+# Walkthrough: Supabase Auth Integration
+
+I have integrated a professional Login/Register interface into Veo Automation.
+
+## Features Added
+
+### 1. Premium Auth Interface
+- **Glassmorphism Design**: High-end translucent UI overlay with blur effects.
+- **Responsive Animations**: Smooth sliding and fading transitions.
+- **Hybrid View**: The main application remains hidden (`display: none`) until a user successfully authenticates.
+
+### 2. Supabase Logic
+- **Full Auth Lifecycle**: Supports both email/password Login and Register.
+- **Session Persistence**: Users stay logged in across app restarts thanks to Supabase session management.
+- **Remote Protection**: Access to the bypassed generation features is now behind your own Supabase project.
+
+## Files Created/Modified
+
+- [index.html](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/resources/app/dist/index.html) (Modified to inject scripts)
+- [supabase-auth.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/resources/app/dist/supabase-auth.js) (Auth Logic)
+- [supabase-auth.css](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/resources/app/dist/supabase-auth.css) (Auth Styles)
+
+---
+
+## ⚠️ Final Step: Adding Credentials
+
+To make the login work, you need to add your Supabase credentials. 
+
+### Option 1: Tell me the keys
+You can simply paste the **URL** and **Anon Key** here in the chat, and I will update the files for you.
+
+### Option 2: Edit manually
+Open [supabase-auth.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/resources/app/dist/supabase-auth.js) and replace the placeholders:
+```javascript
+const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+```

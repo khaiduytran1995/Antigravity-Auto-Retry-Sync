@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Summary of fixes for the infinite recovery loop and runtime errors. Documents the lock reset fix and the restored requests array.",
+  "updatedAt": "2026-01-15T06:26:44.056561400Z",
+  "version": "9"
+}

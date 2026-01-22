@@ -1,0 +1,26 @@
+# Tasks
+
+- [x] Initial codebase exploration
+    - [x] Read README and package.json
+    - [x] Explore `src/pages`
+    - [x] Explore `src/services` and `src/hooks`
+- [x] Check component implementations for API usage
+- [x] Understand Python utility scripts
+- [x] Identify potential improvements or user requests
+- [x] Planning Improvements
+    - [x] Create implementation plan
+    - [x] Get user approval
+- [ ] Implementing Direct API Integration
+    - [ ] Modify geminiDirect.ts
+    - [ ] Modify useStoryboardGenerator.ts
+    - [ ] Add toggle to ApiKeySettings.tsx
+- [x] Integrating Imagen4 and Sandbox API
+    - [x] Research Imagen4 / Banana Pro models
+    - [x] Update geminiImageDirect.ts with new models
+    - [x] Add OAuth token storage functions
+    - [x] Add OAuth token UI to ApiKeySettings
+    - [x] Verify build and test functionality
+- [/] Adding Model Selection UI
+    - [/] Add model storage and selection functions
+    - [ ] Add model dropdown to ApiKeySettings
+    - [ ] Update image generation to use selected model

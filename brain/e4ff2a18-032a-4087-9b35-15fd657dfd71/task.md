@@ -1,0 +1,26 @@
+# Chuyển Fashion AI Studio sang Google AI Studio API Miễn Phí
+
+## Tổng quan
+Sửa trang web Fashion AI Studio để sử dụng API miễn phí từ Google AI Studio thay vì dịch vụ có phí (Lovable API Gateway).
+
+---
+
+## Tasks
+
+### Planning
+- [x] Phân tích cấu trúc dự án và các Edge Functions hiện có
+- [x] Xác định các functions đang sử dụng Lovable API (có phí)
+- [x] Viết implementation plan
+- [x] Nhận phê duyệt từ user
+
+### Execution
+- [x] Cập nhật `generate-storyboard/index.ts` - thêm Google AI key rotation
+- [x] Cập nhật `analyze-fashion/index.ts` - thêm Google AI key rotation  
+- [x] Cập nhật `virtual-tryon/index.ts` - thêm Google AI key rotation
+- [x] Cập nhật frontend components để gửi userApiKeys
+- [x] Cập nhật `.env` thêm `VITE_GOOGLE_AI_KEY` (tùy chọn)
+
+### Verification
+- [x] Test chạy development server (cần `npm install` trước)
+- [x] Các thay đổi code đã hoàn thành
+- [x] Walkthrough đã được tạo

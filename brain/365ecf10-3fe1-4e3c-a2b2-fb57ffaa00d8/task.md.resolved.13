@@ -1,0 +1,10 @@
+- [x] Investigate project structure
+- [x] Report findings to user
+- [x] Explain Python source role
+- [x] Audit Python scripts for malware
+- [x] Analyze binaries (Decompile/String Check)
+- [x] Analyze Login Mechanism
+- [x] Build Server API Extraction Tool
+- [ ] Check API Key Quota
+    - [ ] Create `check_key_quota.py`
+    - [ ] Run script and report results

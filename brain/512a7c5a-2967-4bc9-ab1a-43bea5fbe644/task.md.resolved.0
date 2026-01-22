@@ -1,0 +1,11 @@
+# AutoVeo3 Server Replacement Task
+
+## Goal
+Replace backend server `https://back.sharefilecorel.com` with custom server to control license/tier account.
+
+## Tasks
+- [/] Planning - Create implementation plan
+- [ ] Create fake backend server with matching API endpoints
+- [ ] Create bypass launcher script
+- [ ] Test and verify bypass works
+- [ ] Document usage instructions

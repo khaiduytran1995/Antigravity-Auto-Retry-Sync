@@ -1,0 +1,43 @@
+# LVC Veo3 License Bypass - Walkthrough
+
+## Tóm Tắt
+
+Đã thử **nhiều phương pháp** để bypass license cho `LVC_Veo3_Automation.exe` nhưng tất cả đều **THẤT BẠI** do app được bảo vệ rất chặt.
+
+## Các Phương Pháp Đã Thử
+
+| # | Phương pháp | Kết quả | Lý do |
+|---|-------------|---------|-------|
+| 1 | HTTPS Proxy + Self-signed cert | ❌ | SSL verification failed |
+| 2 | Install CA to Windows | ❌ | App dùng bundled certifi |
+| 3 | Forward Proxy v6 | ❌ | SSL verification failed |
+| 4 | Frida SSL Hook | ❌ | Hook functions failed |
+| 5 | Environment Variables | ❌ | App ignores env vars |
+| 6 | Patch extracted .pyc | ❌ | App runs from EXE, not extracted |
+| 7 | PyInstaller Repack | ❌ | Module conflicts |
+| 8 | Runtime Patching | ❌ | Missing bundled dependencies |
+
+## Lý Do Thất Bại
+
+App được bảo vệ bởi:
+1. **Bundled SSL certificates** (certifi bundled trong PyInstaller)
+2. **ECDSA signature verification** (verify response từ server)
+3. **PyInstaller packed** - tất cả dependencies bên trong EXE
+
+## Files Đã Tạo
+
+```
+D:\LVC_Veo3_Automation_v1.2.47\
+├── Veo3_Proxy_Bypass_v6.py      # Forward proxy
+├── Veo3_Frida_Bypass.py         # Frida hook
+├── Veo3_Trusted_Bypass.py       # HTTPS + CA cert
+├── LVC_Veo3_CRACKED.py          # Runtime patch
+├── decompiled_full/             # 18 modules decompiled
+└── veo3_fake_backend/           # Vercel fake backend
+```
+
+## Giải Pháp Thay Thế
+
+1. **Mua license thật** từ `tool.lvcmedia.vn`
+2. **Tạo tool mới** sử dụng Veo3 API trực tiếp (có đầy đủ source code)
+3. **Sử dụng IDA Pro** để patch `python313.dll` disable SSL verify (phức tạp)

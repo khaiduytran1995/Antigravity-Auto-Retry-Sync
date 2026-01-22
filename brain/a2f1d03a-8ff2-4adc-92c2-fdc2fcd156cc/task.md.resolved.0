@@ -1,0 +1,7 @@
+# Task: Debugging "includes" error in Veo Automation
+
+- [ ] Search for `.includes(` in `resources/app` [/]
+- [ ] Identify where the error is likely originating from
+- [ ] Reproduce or trace the logic for video generation
+- [ ] Apply a fix (null checking or default values)
+- [ ] Verify the fix

@@ -1,0 +1,6 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_TASK",
+  "summary":  "Updated task list tracking progress on fixing the \"Not enough slots\" error using HTTP bypass only.",
+  "updatedAt":  "2026-01-10T08:50:25.592440500Z",
+  "version":  "4"
+}

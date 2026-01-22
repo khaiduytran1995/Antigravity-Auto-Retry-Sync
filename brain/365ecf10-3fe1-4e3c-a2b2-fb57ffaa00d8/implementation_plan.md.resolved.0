@@ -1,0 +1,20 @@
+# Server API Investigation Plan
+
+## Goal
+Create a script to fetch data from the detected `hoanphicrypto.com` endpoints to understand how the tool retrieves API keys and verifies users.
+
+## Endpoints to Check
+Based on binary string analysis:
+1.  `https://hoanphicrypto.com/11labs/api.txt`
+2.  `https://hoanphicrypto.com/11labs/apiduphong.txt`
+3.  `https://hoanphicrypto.com/11labs/update/soluongminimax.txt`
+4.  `https://hoanphicrypto.com/11labs/register_device.php`
+
+## Implementation
+Create `api_explorer.py`:
+- Use `requests` to GET static text files.
+- Print content (first few lines to verify if they are keys).
+- Attempt a mock login to `register_device.php` with the user's credential from [user.txt](file:///d:/09012026Elevenlabs/py/user.txt).
+
+## Verification
+- Run `api_explorer.py` and analyze output.

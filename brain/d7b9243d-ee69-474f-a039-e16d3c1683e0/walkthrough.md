@@ -1,0 +1,37 @@
+# Imagen 4 & Nano Banana Pro Integration
+
+## Summary
+Integrated multiple AI image generation models with Google Labs OAuth token authentication for higher quality image generation.
+
+## Supported Models (Priority Order)
+1. **Nano Banana Pro** (Gemini 3 Pro Image) - Highest quality, 4K resolution
+2. **Nano Banana** (Gemini 2.5 Flash Image) - Fast and efficient
+3. **Imagen 4** - Latest standalone image model variants
+4. **Gemini 2.0 Flash** - Fallback option
+
+## Changes Made
+
+### [geminiImageDirect.ts](file:///c:/Users/hp/Downloads/fashiond-main/src/services/geminiImageDirect.ts)
+- Added prioritized model list with Nano Banana Pro, Nano Banana, and Imagen 4 models
+- Added OAuth token storage functions (`getLabsOAuthToken`, `setLabsOAuthToken`, `clearLabsOAuthToken`)
+- Added new `callImagenWithOAuth` function for OAuth-based image generation
+
+### [ApiKeySettings.tsx](file:///c:/Users/hp/Downloads/fashiond-main/src/components/ApiKeySettings.tsx)
+- Added OAuth token state management
+- Added new UI card for "Google Labs OAuth Token (Imagen 4)"
+- Included instructions for obtaining OAuth token from labs.google
+
+## How to Use
+
+### Getting OAuth Token
+1. Go to [Google Labs ImageFX](https://labs.google/fx/tools/flow)
+2. Open Developer Tools (F12) → Console
+3. Run: `JSON.parse(document.getElementById('__NEXT_DATA__').textContent).props.pageProps.session.access_token`
+4. Copy and paste the token into Settings
+
+### Priority Order
+1. OAuth token (Nano Banana Pro / Imagen 4) - highest quality
+2. API keys (Gemini Flash) - fallback with key rotation
+
+## Demo Recording
+![OAuth Token UI Demo](file:///C:/Users/hp/.gemini/antigravity/brain/d7b9243d-ee69-474f-a039-e16d3c1683e0/test_oauth_ui_1767511107938.webp)

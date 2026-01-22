@@ -1,0 +1,14 @@
+# Task: Enable "Tùy Chỉnh (Trả Phí)" Feature
+
+## Status
+- [ ] Analyze Supabase data structure [/]
+    - [x] Identify admin users
+    - [/] Deep analyze `adminhuyviet` data
+    - [ ] Identify controlling field for "Paid Custom" feature
+- [ ] Create Implementation Plan
+- [ ] Update [BYPASS_V4.py](file:///D:/Veo3_BU_3012/BYPASS_V4.py)
+    - [ ] Implement correct data structure
+    - [ ] Verify feature enablement
+- [ ] Verify
+    - [ ] Check "Batch Job" -> "Tùy Chỉnh (Trả Phí)" visibility
+    - [ ] Check Cookie Limit

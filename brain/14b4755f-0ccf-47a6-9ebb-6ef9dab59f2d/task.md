@@ -1,0 +1,24 @@
+- [x] Vô hiệu hóa tính năng đăng ký (Chỉ để lại Đăng nhập)
+
+- [x] Explore directory structure and identify core components
+- [x] Decompile `app.asar` to access source code
+- [x] Analyze `package.json` for dependencies and entry points
+- [x] Investigate operating mechanism (API endpoints, server communication)
+- [x] Research the origin/purpose of the tool
+- [x] Gỡ lỗi tạo Video (Sửa lỗi 404 Endpoint)
+- [x] Triển khai khóa tài khoản theo máy (HWID Locking)
+    - [x] Thêm IPC handler lấy Machine ID trong `main.js`
+    - [x] Expose `getMachineId` qua `preload.js`
+    - [x] Cập nhật logic `handleLogin` để ràng buộc và kiểm tra HWID qua Supabase Metadata
+- [x] Provide a comprehensive initial summary
+- [x] Deep Dive: Analyze `tokenManager.js` - Automation and Anti-detection details
+- [x] Deep Dive: Analyze `flowVideo.js` & `sceneExtension.js` - API & Scene logic
+- [x] Deep Dive: Analyze `TokenWarehouse.js` - Load balancing and recovery logic
+- [x] Deep Dive: Analyze Database & Local Storage (better-sqlite3, electron-store)
+- [x] Deep Dive: Analyze `videoMerge.js` - FFmpeg integration details
+- [x] Provide "Developer-Level" final report
+- [x] Implement License Bypass Patch (Mocking `licenseManager.js`)
+- [x] Apply and Activate Bypass (Folder setup and app.asar replacement)
+- [x] Implement Supabase Auth UI & Logic (Glassmorphism design)
+- [x] Configure Supabase Credentials (Real URL & Key added)
+- [x] Debugging Supabase Login/Register (Added visual status and error reporting)

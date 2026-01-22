@@ -1,0 +1,6 @@
+- [x] Previous Analysis (All Complete)
+- [ ] Comprehensive Bypass
+    - [ ] Create HTTPS local server with self-signed cert
+    - [ ] Modify Windows hosts file to redirect `hoanphicrypto.com`
+    - [ ] Mock ALL endpoints (register, quota, etc) with MAX TIER
+    - [ ] Test with any random credentials

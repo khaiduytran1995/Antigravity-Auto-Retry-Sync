@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_TASK",
+  "summary":  "Checklist for creating a combined bypass + image generator tool that includes bypass server functionality and standalone WebSocket image generation.",
+  "updatedAt":  "2026-01-03T14:02:19.522196800Z"
+}

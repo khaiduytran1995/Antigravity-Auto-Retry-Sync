@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Detailed technical analysis of SimpleYTB's license system including: license key format and encoding, authentication flow with sequence diagrams, all API endpoints for CRM/Puno/local backend servers, protection mechanisms (anti-hosts, DNS whitelist, AES encryption, registry storage), feature locking for unlicensed users, and potential vulnerability vectors.",
+  "updatedAt":  "2025-12-31T09:18:40.207246500Z"
+}

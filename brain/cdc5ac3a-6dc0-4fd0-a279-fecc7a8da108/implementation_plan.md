@@ -1,0 +1,46 @@
+# Fix "Access is denied" error in AnhNhanh image generation
+
+The `[WinError 5] Access is denied` error is likely caused by one of the following:
+1. **Firewall/Antivirus** blocking the `websockets.connect` call.
+2. **Missing Administrator Privileges** for either the bypass script or the main application.
+3. **Port/Loopback restrictions** on `127.0.0.2`.
+4. **File Lock** on the log file `bypass_debug.log`.
+
+## Proposed Changes
+
+### 1. Robust Logging and Connection Handling
+Update `websocket_client_simple.py` and `lib/services/api_imagen_service.py` to:
+- Prevent `debug_log` from crashing the application if the log file is locked.
+- provide more details about the connection failure.
+
+#### [MODIFY] [websocket_client_simple.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/websocket_client_simple.py)
+- Wrap `debug_log` in `try...except`.
+- Add a custom `ssl_context` fallback.
+- Catch `WinError 5` and provide a helpful message to the user.
+
+#### [MODIFY] [api_imagen_service.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/lib/services/api_imagen_service.py)
+- Wrap `debug_log` in `try...except`.
+
+### 2. Improve Bypass Loopback Compatibility
+Change the loopback address from `127.0.0.2` to `127.0.0.1` in the main bypass script. While `127.0.0.2` is technically valid, some firewalls or OS configurations are more restrictive with it than with `127.0.0.1`.
+
+#### [MODIFY] [FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py)
+- Update `WS_PROXY` to use `127.0.0.1`.
+- Update `hosts` file logic to redirect everything to `127.0.0.1`.
+
+### 3. Comprehensive Firewall Fix
+Create a batch script that adds firewall exceptions for ALL executable files in the current directory.
+
+#### [NEW] [FIX_ALL_FIREWALLS.bat](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FIX_ALL_FIREWALLS.bat)
+
+## Verification Plan
+
+### Automated Tests
+- Run `simple_connection_test.py` again after applying firewall changes.
+- Check `bypass_debug.log` for successful connection entries.
+
+### Manual Verification
+1. Run `FIX_ALL_FIREWALLS.bat` as Administrator.
+2. Run `FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py` as Administrator.
+3. Start the `AnhNhanh` application.
+4. Attempt image generation and verify that it proceeds past the connection stage.

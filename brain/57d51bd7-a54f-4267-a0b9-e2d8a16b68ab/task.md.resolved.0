@@ -1,0 +1,7 @@
+# Task: To fix "Not enough slots" error in AnhNhanh
+
+- [ ] Research the codebase to understand the registration and generation flow [/]
+- [ ] Identify the specific API call that returns the "Not enough slots" error [/]
+- [ ] Modify the bypass script to intercept and spoof the registration response [/]
+- [ ] Verify the fix by mocking the response or testing if possible [/]
+- [ ] Update documentation or provided scripts [/]

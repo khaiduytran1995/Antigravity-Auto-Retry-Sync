@@ -1,0 +1,24 @@
+# Walkthrough - Fixing "Access is denied" Error
+
+I have implemented several changes to address the `[WinError 5] Access is denied` error you encountered during image generation.
+
+## Changes Made
+
+### 1. Improved Error Handling
+- **[websocket_client_simple.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/websocket_client_simple.py)**: Added a `try...except` block around the WebSocket connection attempt. It now catches `WinError 5` specifically and provides actionable advice (Run as admin, check firewall, etc.).
+- **Robust Logging**: Wrapped [debug_log](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/lib/services/api_imagen_service.py#8-14) in a `try...except` in both [websocket_client_simple.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/websocket_client_simple.py) and [api_imagen_service.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/lib/services/api_imagen_service.py) to ensure that a locked log file doesn't crash the entire generation process.
+
+### 2. Firewall Exception Script
+- **[FIX_ALL_FIREWALLS.bat](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FIX_ALL_FIREWALLS.bat)**: Created a new script that automatically adds inbound and outbound firewall rules for:
+    - All `AnhNhanh` executables (`Debug`, `Encrypted`, `Launcher`, etc.).
+    - `python.exe` (v3.13).
+    - The [anhnhanh_generator.exe](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/anhnhanh_generator.exe).
+
+## How to Verify
+
+1.  **Run Firewall Fix**: Right-click on [FIX_ALL_FIREWALLS.bat](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FIX_ALL_FIREWALLS.bat) and select **"Run as administrator"**.
+2.  **Restart Bypass**: Close any running bypass scripts and run **[FINAL_04_01_2026 AnhNhanh_Complete_Bypass.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/FINAL_04_01_2026%20AnhNhanh_Complete_Bypass.py)** as Administrator.
+3.  **Run AnhNhanh**: Start the `AnhNhanh` application.
+4.  **Test Generation**: Try generating an image again.
+
+If you still see the error, the new detailed logs in [bypass_debug.log](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/bypass_debug.log) will help me identify if it's a specific port conflict or something else.

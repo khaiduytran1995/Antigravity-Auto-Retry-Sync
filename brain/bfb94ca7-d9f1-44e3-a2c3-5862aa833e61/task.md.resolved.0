@@ -1,0 +1,7 @@
+# Tasks
+
+- [/] Search for Vietnamese strings related to plan status ("Gói:", "Hết hạn:", "Chưa kích hoạt")
+- [ ] Identify the state management or variable holding the user's plan
+- [ ] Create an implementation plan to bypass or force the active status
+- [ ] Implement the fix in the obfuscated JS file
+- [ ] Verify the fix

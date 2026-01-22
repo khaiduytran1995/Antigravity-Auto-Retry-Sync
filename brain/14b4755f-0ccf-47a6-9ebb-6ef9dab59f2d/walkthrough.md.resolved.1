@@ -1,0 +1,48 @@
+# Developer-Level Deep Dive: Veo Automation (v1.2.1)
+
+This report provides a "root-level" technical analysis, treating the tool's architecture as a fully understood system.
+
+## 1. Core Architecture & Persistence
+The application follows a standard Electron logic-splitting pattern:
+- **Renderer (React)**: Handles the UI, state, and user interaction.
+- **Main (Node.js)**: Manages persistence, browser automation (CDP), and IPC bridging.
+- **Persistence**: 
+  - **`electron-store`**: Used for credentials (`veoEmail`, `veoPassword`, `flowToken`, `flowCookie`) and configuration settings.
+  - **`better-sqlite3`**: Integrated for structured project management (Project/Scene database), although heavily abstracted.
+
+## 2. The IPC "Command & Control" Layer
+The communication between the UI and Backend is handled via `ipcMain` handlers in [main.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/main.js). Key commands include:
+
+| Channel | Functionality |
+|---------|---------------|
+| `auth:login` | Triggers the automated Google login flow. |
+| `token:lease` | Fetches an active token from the Round-Robin `TokenWarehouse`. |
+| `flow:generate-video` | Proxies the generation request through the stealth browser. |
+| `scene:extend-video` | Chains multiple generations via `sceneId` and `mediaId`. |
+| `video:merge` | Executes FFmpeg `xfade` chains for video post-processing. |
+| `browser:show` | Spawns/unhides the managed browser for manual intervention. |
+
+## 3. Advanced Automation & Stealth Details
+### Mimic API Logic
+The tool *never* calls Google's APIs directly from Node.js (Axios/Fetch). Instead, it uses `window.webContents.executeJavaScript` to inject a `fetch` call into the **living browser context**.
+- **Why?**: This ensures the request carries legitimate cookies, TLS fingerprints, and browser-only headers (Sec-CH-UA, etc.) that are impossible to spoof perfectly from Node.js.
+- **CORS Bypass**: Requests are made from `https://labs.google` origin, so they are not subject to standard cross-origin restrictions.
+
+### reCAPTCHA Exploitation
+The tool hooks into the global `grecaptcha` object. It periodically builds a "trust score" by simulating hardware activity (mouse movement, scrolling) within the hidden window before calling `grecaptcha.enterprise.execute`.
+
+### UI Stabilization
+If the automation gets stuck (e.g., 404 page, Google's "Sign In" splash), a background observer (`injectUIStabilizer`) performs "Surgical Clicks":
+- It scans the DOM for specific text like "Create with Flow" or "+ Dự án mới".
+- It calculates the absolute coordinates and sends a **Hardware-Level Click Event** to bypass JS-only event listeners.
+
+## 4. Media Engineering (FFmpeg)
+The tool isn't just a wrapper; it has a significant media engine:
+- **Scene Chaining**: Automatically extracts `startFrameIndex` and `endFrameIndex` from previous generations to ensure pixel-perfect continuity in extended scenes.
+- **Transition Mapping**: Maps user-friendly transition names to rigorous FFmpeg xfade filters (e.g., `dreamy` -> `dissolve`, `glitch` -> `pixelize`).
+- **Optimization**: Uses `ultrafast` presets for previews and high-bitrate `libx264` for final exports (up to 50Mbps for 4K).
+
+## 5. Security & Licensing
+The tool is protected via a Google Apps Script check ([licenseManager.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/licenseManager.js)).
+- **Signature verification**: HWID (Machine ID) + License Key.
+- **Secret Config**: Critical API endpoints and versioning data are only fetched *after* a successful license handshake and stored only in RAM (`global.SECRET_CONFIG`).

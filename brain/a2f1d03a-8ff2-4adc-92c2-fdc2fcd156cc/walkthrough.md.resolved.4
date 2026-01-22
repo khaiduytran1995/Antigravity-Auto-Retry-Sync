@@ -1,0 +1,57 @@
+# Complete Stabilization Walkthrough
+
+All critical fixes have been implemented to resolve lag, crashes, bot detection, and infinite recovery loops.
+
+## All Improvements
+
+### 1. Account Isolation ✅
+- Fixed cross-account reference typo
+- Each account uses its own dedicated window
+
+### 2. reCAPTCHA Trust Logic ✅
+- Added "human wiggles" (random mouse movements)
+- Serial queue prevents concurrent solves
+- Concurrency safeguard waits for recovery to finish
+
+### 3. Random Human Delays ✅
+- 3-8 second random delay before each reCAPTCHA solve
+- Simulates natural human typing/thinking time
+- Makes bot detection much harder
+
+### 4. **Recovery Cooldown** ✅ (NEW!)
+- **Problem**: Account 1 was stuck in infinite recovery loop
+- **Solution**: 60-second mandatory cooldown after ANY failed recovery
+- **Effect**: Prevents cascading failures and gives system time to stabilize
+
+### 5. Persistent Logging ✅
+- All operations logged to `veo_debug_logs.txt`
+
+## What Changed in This Update
+
+**In [tokenManager.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/decompiled/dist-electron/services/tokenManager.js):**
+```javascript
+// Track failed recovery times
+this.lastFailedRecoveryTime = new Map();
+
+// Before allowing recovery retry, check cooldown
+const lastFailedRecovery = this.lastFailedRecoveryTime.get(accountIndex) || 0;
+const timeSinceLastFailure = Date.now() - lastFailedRecovery;
+if (!isExplicit && timeSinceLastFailure < 60000) {
+    const remainingCooldown = Math.ceil((60000 - timeSinceLastFailure) / 1000);
+    throw new Error(`Recovery cooldown active. Wait ${remainingCooldown}s`);
+}
+```
+
+**Expected Behavior:**
+- If recovery fails, account will NOT retry for 60 seconds
+- You'll see: `⏸️ Recovery COOLDOWN active. Wait 47s before retry.`
+- Prevents infinite loop and gives you time to manually intervene if needed
+
+## Verification
+
+1. **Restart app**
+2. **Create 20+ videos**
+3. **Check logs**: Should see cooldown messages if recovery fails
+4. **No infinite loops** - failed accounts will pause instead of spamming
+
+Send `veo_debug_logs.txt` if you still see issues!

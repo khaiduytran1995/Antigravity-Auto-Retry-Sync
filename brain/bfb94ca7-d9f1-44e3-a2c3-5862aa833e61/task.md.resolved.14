@@ -1,0 +1,15 @@
+# Task Checklist - Debugging VIP Status and Black Screen
+
+- [ ] Analyze app source for more robust VIP bypass points
+    - [ ] Search for `localStorage.getItem('currentUser')`
+    - [ ] Search for `JSON.parse(localStorage.getItem(`
+    - [ ] Look for functions that validate the subscription status
+- [ ] Investigate potential overwriting of `currentUser`
+    - [ ] Check Supabase login logic
+    - [ ] Check if backend calls are forced on startup
+- [ ] Debug the "Black Screen" (Loading Spinner)
+    - [ ] Identify which API endpoint the app is stuck on
+    - [ ] Search for dynamic URL construction (e.g., [.php](file:///d:/15012026kinx-auto/backend/login.php), `/api/`)
+- [ ] Implement a more aggressive bypass
+    - [ ] Patch the `getItem` method or the specific functions using it
+- [ ] Verify fix with user

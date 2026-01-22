@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Implementation plan for restricting one Supabase account to one machine (HWID locking).",
+  "updatedAt": "2026-01-14T11:46:49.839630300Z"
+}

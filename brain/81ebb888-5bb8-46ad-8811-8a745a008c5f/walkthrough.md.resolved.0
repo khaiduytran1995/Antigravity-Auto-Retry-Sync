@@ -1,0 +1,71 @@
+# VideoAIStudio Analysis Report
+
+Detailed breakdown of the VideoAIStudio tool version 2.0.2, covering its structure, operational logic, and server endpoints.
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+| :--- | :--- |
+| **Language** | Python 3.12 (compiled with Nuitka/PyInstaller) |
+| **GUI Framework** | PyQt5 |
+| **Automation** | Playwright (for Gemini/Labs interaction) |
+| **Multimedia** | FFmpeg (binaries included) |
+| **Update System** | WordPress-based remote storage |
+
+## 📁 Directory Structure
+
+- [app/](file:///d:/VideoAIStudio_Installer_v2.0.2/app): Core application directory.
+  - [VideoAIStudio.exe](file:///d:/VideoAIStudio_Installer_v2.0.2/app/VideoAIStudio.exe): Main entry point.
+  - `encrypted_sources/`: Contains all logic modules in encrypted format ([.py.encrypted](file:///d:/VideoAIStudio_Installer_v2.0.2/app/encrypted_sources/main.py.encrypted)).
+  - `repo/updater/`: Compiled updater modules ([.pyd](file:///d:/VideoAIStudio_Installer_v2.0.2/app/_bz2.pyd)).
+  - `data/styles/`: Style prompts in JSON format.
+  - `bin/`: External tools like [ffmpeg.exe](file:///d:/VideoAIStudio_Installer_v2.0.2/app/ffmpeg.exe).
+
+## 🔐 Security & Encryption
+
+The application encrypts its source files to prevent reverse engineering.
+
+- **Encryption Method**: Base64 + XOR.
+- **Master Key**: `BT_DEV_2025_SECURE`
+- **License System**:
+  - Uses HWID (Machine ID) for fingerprinting.
+  - Credentials (API Keys) are multi-layered obfuscated using additional XOR keys and fragments.
+  - License data is encrypted locally as `license.dat`.
+
+## 🌐 Server Endpoints
+
+### 🆙 Update Server
+- **Endpoint**: `http://68.183.229.164/wp-content/uploads/video-ai-studio/latest.json`
+- **Host**: WordPress server (IP: `68.183.229.164`).
+
+### 🤖 AI Integration APIs
+- **Google Gemini**: Uses `google-genai` library.
+- **Google Veo 3.1**:
+  - **Base URL**: `https://aisandbox-pa.googleapis.com/v1`
+  - **API Key**: `AIzaSyBtrm0o5ab1c-Ec8ZuLcGt3oJAA5VWt3pY` (Hardcoded for Veo access)
+  - **Anticaptcha**: `https://apis1.taolamai.online` (Used to solve Google Labs captchas)
+
+## 🔄 Core Operational Logic
+
+### 1. Workflow (Gemini)
+The tool follows a **4-step workflow** implemented in `core.gemini.api.workflow`:
+1. **Analyze Text**: Initial processing of input.
+2. **Character & Background Lock**: Ensuring consistency.
+3. **Scene Content**: Detailed scene generation.
+4. **Scene Details**: Final token-optimized prompt generation.
+
+### 2. Video Generation (Veo 3.1)
+Managed by `core.veo3.api.generator`, the pipeline is:
+- **Generate**: Submits text-to-video request (720p).
+- **Wait**: Polls for completion.
+- **Upscale**: Uses `veo_2_1080p_upsampler_8s` to upscale to 1080p.
+- **Download**: Fetches the final video.
+
+### 3. Licensing Flow
+1. Generates machine fingerprint.
+2. Communicates with a remote server (IP `68.183.229.164` or associated domains).
+3. Validates against `license.dat` using XOR encryption.
+
+---
+> [!IMPORTANT]
+> The presence of hardcoded API keys and internal Google Labs endpoints suggests the tool mimics a browser or uses a non-public API to access high-end AI models like Veo 3.1.

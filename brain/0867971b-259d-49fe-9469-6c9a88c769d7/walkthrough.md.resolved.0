@@ -1,0 +1,60 @@
+# Phân Tích Hệ Thống Chichbong Image Tool
+
+Dưới đây là báo cáo chi tiết về backend, các endpoint và cơ chế vận hành của công cụ Chichbong Image Generator (Imagen4).
+
+## 1. Kiến Trúc Backend & Endpoints
+
+Công cụ kết nối với một hệ thống backend được định cấu hình dưới tên miền **`https://11labs.net`**. Mặc dù tên miền này giống với ElevenLabs, nhưng trong mã nguồn nó được sử dụng làm API Gateway cho các dịch vụ của Chichbong.
+
+### Các API Endpoints Chính:
+
+| Nhóm Tính Năng | Endpoint | Mô Tả |
+| :--- | :--- | :--- |
+| **Xác thực & License** | `/api/checker/get-imagen4-token.php` | Đổi License Key lấy các Session Tokens (Imagen4 tokens). |
+| **Thanh toán** | `/api/payment/packages.php` | Lấy danh sách gói cước theo `brand_id`. |
+| **Thanh toán** | `/api/payment/create_payment_order.php` | Khởi tạo đơn hàng mới. |
+| **Thanh toán** | `/api/payment/check_payment_status.php` | Kiểm tra trạng thái thanh toán của đơn hàng. |
+| **Vận hành** | `/api/resource/report-imagen-counter.php` | Báo cáo số lượng ảnh đã tạo thành công về server. |
+| **Lưu trữ** | `activation/last_email` | Đồng bộ email kích hoạt cuối cùng. |
+
+---
+
+## 2. Công Nghệ & Thành Phần
+
+*   **Ngôn ngữ**: Python 3.12
+*   **Giao diện (UI)**: PySide6 (Qt for Python). Sử dụng [style.qss](file:///d:/chichbong_image/resources/style.qss) để tùy chỉnh giao diện và các bộ icon theo thương hiệu trong `resources/icons`.
+*   **Đóng gói**: Sử dụng `cx_Freeze` để đóng gói thành file `.exe`. Các file logic nằm trong `library.zip` và thư mục `lib/services/`.
+*   **Mạng (Networking)**:
+    *   `requests`: Dùng cho các API RESTful (HTTP GET/POST).
+    *   `websockets`: Dùng cho các kết nối thời gian thực khi tạo ảnh.
+
+---
+
+## 3. Cơ Chế Vận Hành (Operational Flow)
+
+### Quản Lý Token (`TokenManager`)
+Hệ thống có cơ chế quản lý token rất chặt chẽ:
+1.  **Caching**: Token được lưu cục bộ trong `QSettings` (Windows Registry) dưới dạng cache (`imagen4_tokens_cache`).
+2.  **Thời hạn**: Cache có hiệu lực trong **3600 giây (1 giờ)**.
+3.  **Gemini Overriding**: Trong quá trình xử lý token, hệ thống có khả năng tiêm/ghi đè `gemini_apikey` vào các token nhận được từ API.
+
+### Logic Xử Lý License
+Khi người dùng nhập License Key:
+1.  `LicenseService` gửi yêu cầu đến backend.
+2.  Backend trả về một danh sách các token hợp lệ.
+3.  `ApiImagenService` sử dụng các token này để thực hiện các yêu cầu tạo ảnh tiếp theo.
+
+### White-labeling (Đa thương hiệu)
+Công cụ hỗ trợ nhiều thương hiệu khác nhau (anhnhanh, nhanly, phucanh, ...):
+*   Thông tin thương hiệu được tải từ `resources/brands/`.
+*   Khi lấy gói cước hoặc tạo đơn hàng, `brand_id` sẽ được gửi kèm để backend trả về thông tin thanh toán (Zalo QR, giá tiền) chính xác cho từng đại lý.
+
+---
+
+## 4. Cấu Trúc File Quan Trọng
+
+- `lib/services/api_imagen_service.pyc`: Xử lý giao tiếp API chính.
+- `lib/services/license_service_imagen.pyc`: Xử lý kích hoạt và bản quyền.
+- `lib/services/token_manager.pyc`: Quản lý bộ nhớ đệm và hiệu lực của token.
+- `resources/brand.txt`: Định danh brand hiện tại.
+- `resources/style.qss`: Định nghĩa phong cách giao diện chuyên nghiệp.

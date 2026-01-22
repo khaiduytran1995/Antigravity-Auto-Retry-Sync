@@ -1,0 +1,6 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_TASK",
+  "summary":  "Checklist for replacing AutoVeo3 backend with Vercel API and Supabase database",
+  "updatedAt":  "2025-12-30T15:58:37.275408600Z",
+  "version":  "1"
+}

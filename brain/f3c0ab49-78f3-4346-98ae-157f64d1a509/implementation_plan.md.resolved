@@ -1,0 +1,30 @@
+# Fix "Dynamic Import Callback Missing" Error
+
+## Goal Itentified
+The application fails with `TypeError [ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING]: A dynamic import callback was not specified` when invoking `app:downloadAndSave`.
+This occurs because the main process code (compiled to [.jsc](file:///d:/sorabatchcreatevideo-1.1.0-setup/$PLUGINSDIR/resources/extracted_app/out/main/index.jsc) bytecode) attempts to use dynamic `import()`, but the custom bytecode loader ([bytecode-loader.cjs](file:///d:/sorabatchcreatevideo-1.1.0-setup/$PLUGINSDIR/resources/extracted_app/out/main/bytecode-loader.cjs)) uses `vm.runInThisContext` without providing the required `importModuleDynamically` option.
+
+## Proposed Changes
+### Main Process
+#### [MODIFY] [bytecode-loader.cjs](file:///d:/sorabatchcreatevideo-1.1.0-setup/$PLUGINSDIR/resources/extracted_app/out/main/bytecode-loader.cjs)
+- Update `script.runInThisContext` options to include `importModuleDynamically`.
+- The callback will forward the import request to the native Node.js dynamic import.
+
+```javascript
+   const compiledWrapper = script.runInThisContext({
+     filename: filename,
+     lineOffset: 0,
+     columnOffset: 0,
+     displayErrors: true,
+     // Added callback
+     importModuleDynamically: async (specifier) => {
+       return await import(specifier);
+     }
+   });
+```
+
+## Verification Plan
+### Manual Verification
+1.  **Restart the application**: The user needs to restart the app (or the main process) for [bytecode-loader.cjs](file:///d:/sorabatchcreatevideo-1.1.0-setup/$PLUGINSDIR/resources/extracted_app/out/main/bytecode-loader.cjs) changes to take effect. Since this is an extracted app, stopping and getting the user to run it again (or if they are already running it from source/extracted) is needed.
+2.  **Trigger Download**: Perform the action that triggers `app:downloadAndSave` (likely clicking a "Download" or "Save" button for a generated video/image).
+3.  **Check Logs**: Verify that the `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING` error no longer appears in the logs.

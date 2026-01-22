@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Technical plan to integrate Supabase authentication (Login/Register) into the Veo Automation frontend. This involves injecting a custom auth script and UI overlay into the existing index.html to control access to the application.",
+  "updatedAt": "2026-01-14T08:38:00.993537900Z"
+}

@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Step-by-step guide for using IDA Pro to find and patch the exact activation check in Story NextGen 2.0. Includes search strings, what to look for in disassembly, and exact bytes to patch.",
+  "updatedAt": "2026-01-21T18:47:21.298172700Z"
+}

@@ -1,0 +1,21 @@
+# Task: Phân Tích Code Bypass và Tìm Server Pool
+
+## Mục tiêu
+Phân tích logic bypass, xác định các server backend thật và lấy danh sách user.
+- Giải mã code bypass từ [AnhNhanh_AES.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/AnhNhanh_AES.py)
+- Xác định server API thật (`11labs.net`)
+- Xác định server WebSocket/User (`chichbong.me`)
+- Tìm kiếm pool user thật (Vẫn còn là ẩn số, Supabase hiện tại là giả/của tool khác)
+
+## Các bước thực hiện
+
+- [x] Phân tích codebase hiện tại để hiểu cấu trúc API
+- [x] Trích xuất và giải mã code bypass từ [AnhNhanh_AES.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/AnhNhanh_AES.py)
+- [x] Phân tích [decrypted_bypass_code.py](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/decrypted_bypass_code.py) và xác định cơ chế spoofing cho `11labs.net`
+- [x] Kiểm tra [recorded_responses.json](file:///d:/anhnhanh_image_1.3.1/anhnhanh_image/recorded_responses.json) để xác nhận cấu trúc request/response thật
+- [x] Điều tra các server Supabase (`gkhkerlxxoihfvgnexaq`, `vmgqbkadkxaucnzfmpmo`) - Xác định là server cho app phụ/VEO3
+- [x] Nghiên cứu vai trò của `chichbong.me` trong việc quản lý slot và registration qua WebSocket
+- [x] Tìm kiếm server pool user thật cho AnhNhanh (Dự đoán liên quan đến `chichbong.me` hoặc một Supabase hidden khác)
+    - [x] Tìm kiếm `thinvu@11labs.net`: Không tìm thấy trong DB; `thinvu` là tên lập trình viên.
+- [x] Cập nhật GUI và tool extractor với thông tin server mới
+- [x] Tổng hợp báo cáo và cơ chế hoạt động hoàn chỉnh

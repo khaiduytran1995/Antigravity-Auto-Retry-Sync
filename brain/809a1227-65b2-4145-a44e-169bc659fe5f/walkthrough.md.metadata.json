@@ -1,0 +1,6 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Updated analysis report including the payment modal bypass mechanism (patching main.js IPC handler for prf2.php requests).",
+  "updatedAt":  "2026-01-09T06:34:16.828218800Z",
+  "version":  "2"
+}

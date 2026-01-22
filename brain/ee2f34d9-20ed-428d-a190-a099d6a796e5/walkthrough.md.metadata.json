@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Documentation of Kinx Auto API analysis and bypass implementation. Covers discovered API endpoints, response format, and usage instructions for the mitmproxy bypass.",
+  "updatedAt":  "2026-01-09T11:27:00.806538200Z"
+}
