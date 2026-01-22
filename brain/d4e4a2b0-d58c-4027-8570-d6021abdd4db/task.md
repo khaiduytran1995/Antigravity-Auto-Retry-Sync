@@ -1,0 +1,6 @@
+- [x] Analyze `SUPABASE_BRIDGE.py` for potential crash/exit points <!-- id: 0 -->
+- [x] Modify `SUPABASE_BRIDGE.py` to prevent auto-closing <!-- id: 1 -->
+    - [x] Wrap `install_dependencies` in try-except <!-- id: 2 -->
+    - [x] Wrap `main` execution in try-except <!-- id: 3 -->
+    - [x] Replace `input()` with infinite loop <!-- id: 4 -->
+- [ ] Notify user of fix <!-- id: 5 -->
