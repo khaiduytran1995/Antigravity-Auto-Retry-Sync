@@ -1,0 +1,9 @@
+# Veo-Banana Supabase License Integration
+
+## Tasks
+
+- [ ] **Integrate Supabase License System**
+  - [ ] Create Supabase table structure for licenses
+  - [ ] Update bypass server to validate keys against Supabase
+  - [ ] Test the integration
+  - [ ] Create admin tools for managing keys

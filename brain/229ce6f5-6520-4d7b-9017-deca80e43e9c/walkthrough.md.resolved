@@ -13,3 +13,9 @@
 - The patch was applied successfully.
 - The modified [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.1.5-setup/$PLUGINSDIR/resources/app.asar) has been placed in `D:\sorabatchcreatevideo-1.1.0-setup\fastsora-1.1.5-setup\$PLUGINSDIR\resources\app.asar`.
 - Launching the application should now show it as "Vĩnh viễn" (Permanent) and unlock all features, including the "new function".
+
+## UI Migration (1.1.0 → 1.1.5)
+- **Copied**: [index.html](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.1.5-setup/extracted/out/renderer/index.html) with custom Supabase login, rainbow animations, sparkling stars, donate QR.
+- **Copied**: [donate_qr.jpg](file:///d:/sorabatchcreatevideo-1.1.0-setup/$PLUGINSDIR/resources/extracted_app/out/renderer/assets/donate_qr.jpg) image asset.
+- **Updated**: JS/CSS references from [index-D62HuIh4.js](file:///d:/sorabatchcreatevideo-1.1.0-setup/$PLUGINSDIR/resources/extracted_app/out/renderer/assets/index-D62HuIh4.js) → [index-Bd_Kd268.js](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.1.5-setup/extracted/out/renderer/assets/index-Bd_Kd268.js) and CSS accordingly.
+- The application now has the same UI as version 1.1.0 with all 1.1.5 features and bypass.

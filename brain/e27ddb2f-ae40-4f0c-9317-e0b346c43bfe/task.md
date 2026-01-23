@@ -1,0 +1,16 @@
+# Veo-Banana Supabase License Integration
+
+## Tasks
+
+- [/] **Integrate Supabase License System**
+  - [x] Create Supabase table structure for licenses
+  - [x] Update bypass server to validate keys against Supabase
+  - [/] Test the integration
+  - [ ] Create admin tools for managing keys
+- [x] **Create License Admin UI**
+  - [x] Build Python GUI (Tkinter) for generating keys
+  - [x] Implement duration logic (7, 30, 60, 90, Lifetime)
+  - [x] Connect to Supabase for key insertion
+- [x] **Configure New Version**
+  - [x] Resolve Python DLL Conflict (moved to bypass_engine)
+  - [x] Create launcher RUN_BYPASS_NEW.bat
