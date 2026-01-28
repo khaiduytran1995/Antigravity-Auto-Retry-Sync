@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Comprehensive analysis of SuperVeoTifo v1.9.3 - a Tauri-based VEO3 automation tool. Documents application architecture, captcha bypass mechanism using puppeteer-real-browser, backend API at imagenfx.art with HMAC-SHA256 authentication, RealESRGAN upscaling models, proxy support, sidecar commands, and auto-update system hosted on GitHub.",
+  "updatedAt": "2026-01-27T11:29:25.822664800Z"
+}

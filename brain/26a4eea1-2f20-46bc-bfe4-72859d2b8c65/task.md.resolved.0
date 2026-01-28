@@ -1,0 +1,8 @@
+# Build Obfuscated EXE
+
+- [/] Read START_BRIDGE.bat and understand logic
+- [ ] Create a unified builder script that:
+    - [ ] Incorporates SUPABASE_BRIDGE.py logic
+    - [ ] Obfuscates the code (using simple string encoding or similar if PyArmor fails)
+    - [ ] Builds to EXE using PyInstaller with console (not hidden)
+- [ ] Verify the build

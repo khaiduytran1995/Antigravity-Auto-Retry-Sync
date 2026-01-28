@@ -1,0 +1,258 @@
+# 🔍 Phân Tích Ứng Dụng SuperVeoTifo
+
+## Thông Tin Tổng Quan
+
+| Thuộc Tính | Giá Trị |
+|------------|---------|
+| **Tên Ứng Dụng** | SuperVeo |
+| **Phiên Bản** | 1.9.3 |
+| **Framework** | Tauri (Rust backend + Web frontend) |
+| **Installer** | NSIS ([SuperVeo_1.9.3_x64-setup.exe](file:///d:/SuperVeoTifo/SuperVeo_1.9.3_x64-setup.exe)) |
+| **Platforms** | Windows x64, macOS (Intel + ARM), Linux |
+| **Dev Project** | `veo3_auto.pdb` |
+
+---
+
+## 🏗️ Kiến Trúc Ứng Dụng
+
+```mermaid
+flowchart TB
+    subgraph Frontend["Frontend (Web/HTML)"]
+        UI[Giao diện người dùng]
+    end
+    
+    subgraph Backend["Backend (Rust/Tauri)"]
+        Main[SuperVeo.exe]
+        NodeHelper[nodehelper.exe]
+    end
+    
+    subgraph Sidecar["Sidecar Scripts"]
+        Capture[capture-sidecar.js]
+        Node[node.exe]
+    end
+    
+    subgraph External["External Services"]
+        GoogleLabs[Google Labs/FX]
+        ImagenFX[imagenfx.art API]
+        GitHub[GitHub Releases]
+    end
+    
+    UI --> Main
+    Main --> NodeHelper
+    NodeHelper --> Capture
+    Capture --> Node
+    Capture --> GoogleLabs
+    Main --> ImagenFX
+    Main --> GitHub
+```
+
+---
+
+## 📁 Cấu Trúc Thư Mục
+
+| Thư mục/File | Mô tả |
+|--------------|-------|
+| [SuperVeo.exe](file:///d:/SuperVeoTifo/SuperVeo.exe) | Ứng dụng chính (~13MB) - Tauri binary |
+| [nodehelper.exe](file:///d:/SuperVeoTifo/nodehelper.exe) | Helper node (~38MB) |
+| [realesrgan-n.exe](file:///d:/SuperVeoTifo/realesrgan-n.exe) | Real-ESRGAN upscaler (~6MB) |
+| `$PLUGINSDIR/` | NSIS plugins (installer) |
+| `binaries/` | DLL dependencies (vcomp140) |
+| `resources/models/` | AI upscaling models |
+| `resources/scripts/` | Node.js sidecar scripts |
+
+---
+
+## 🎯 Chức Năng Chính
+
+### 1. **VEO3 Video/Image Generation**
+- Tự động tạo video/image AI thông qua Google Labs (labs.google/fx)
+- Hỗ trợ 2 loại action:
+  - `VIDEO_GENERATION` - Tạo video
+  - `IMAGE_GENERATION` - Tạo ảnh (Flow)
+
+### 2. **reCAPTCHA Enterprise Bypass**
+- Site Key: `6LdsFiUsAAAAAIjVDZcuLhaHiDn5nnHVXVRQGeMV`
+- URL Target: `https://labs.google/fx`
+- Sử dụng `puppeteer-real-browser` để bypass bot detection
+- Tự động retry và fallback khi gặp lỗi 403
+
+### 3. **Image Upscaling (RealESRGAN)**
+Hỗ trợ các model:
+- `realesrgan-x4plus` (33MB) - Upscale x4 chất lượng cao
+- `realesrgan-x4plus-anime` (9MB) - Tối ưu cho anime
+- `realesr-animevideov3-x2/x3/x4` - Upscale video anime
+
+### 4. **Auto Update**
+- Host: `github.com/realvux/toolveo`
+- Manifest: `public/latest.json`
+- Signature-based verification
+
+---
+
+## 🔐 Hệ Thống Xác Thực
+
+### Backend API
+| Endpoint | Mô tả |
+|----------|-------|
+| `https://imagenfx.art/api/v2/veo3/get-token` | Lấy token xác thực |
+
+### Authentication Headers
+```javascript
+{
+    'X-Device-ID': encryptedDeviceId,
+    'X-App-Version': '1.0.0',
+    'X-Signature': HMAC-SHA256(payload, 'took_veo3'),
+    'X-Timestamp': timestamp,
+    'Authorization': 'Bearer {token}'
+}
+```
+
+### Signature Algorithm
+```
+payload = `${method}|${url}|${timestamp}|${rawDeviceId}|`
+signature = HMAC-SHA256(payload, 'took_veo3')
+```
+
+---
+
+## 🌐 Proxy Support
+
+- HTTP/HTTPS proxy
+- SOCKS5/SOCKS5h proxy  
+- Tự động test kết nối trước khi sử dụng
+- Auto-fallback về direct connection khi proxy fail
+- Format hỗ trợ:
+  - `http://user:pass@host:port`
+  - `socks5://host:port`
+  - `host:port:user:pass`
+
+---
+
+## 📋 Sidecar Commands
+
+Script `capture-sidecar.js` nhận commands qua stdin:
+
+| Command | Mô tả |
+|---------|-------|
+| `GET_TOKENS <count>` | Lấy reCAPTCHA tokens |
+| `RESTART_BROWSER` | Khởi động lại browser |
+| `RESET_PROXY` | Reset proxy flag |
+| `PING` | Health check |
+| `SHUTDOWN` | Tắt browser và exit |
+
+---
+
+## ⚙️ Environment Variables
+
+| Variable | Mô tả |
+|----------|-------|
+| `VEO3_RAW_DEVICE_ID` | Device ID gốc |
+| `VEO3_DEVICE_ID` | Device ID đã mã hóa |
+| `VEO3_APP_VERSION` | Phiên bản app |
+| `VEO3_AUTH_TOKEN` | Token xác thực |
+
+---
+
+## 🔧 Dependencies
+
+### Node.js Modules (Sidecar)
+- `puppeteer-real-browser` - Anti-detection browser
+- `readline` - Command interface
+- `socks` - SOCKS proxy support
+- `ws` - WebSocket
+- `zod` - Schema validation
+
+### Tauri/Rust Backend
+- TLS/SSL (bcrypt, crypt32)
+- Windows APIs (kernel32, user32, gdi32, shell32)
+- DWM (dwmapi) - Desktop Window Manager
+- WebSocket (ws2_32)
+
+---
+
+## 🎨 Auto-Update System
+
+### Update Manifest Structure
+```json
+{
+  "version": "v1.9.3",
+  "pub_date": "2026-01-27T...",
+  "platforms": {
+    "darwin-aarch64": { "signature": "...", "url": "..." },
+    "darwin-x86_64": { "signature": "...", "url": "..." },
+    "windows-x86_64": { "signature": "...", "url": "..." }
+  }
+}
+```
+
+### GitHub Releases URL Pattern
+```
+https://github.com/realvux/toolveo/releases/download/v{version}/SuperVeo_{version}_{arch}.{ext}
+```
+
+---
+
+## 🕵️ Deep Analysis - Secrets & Internals
+
+### 1. Cryptographic Keys & Tokens
+
+| Loại Key | Giá Trị / Chi Tiết | Công Dụng |
+|----------|-------------------|-----------|
+| **HMAC Request Key** | `took_veo3` | Dùng để ký `X-Signature` header cho mọi API request. |
+| **Response Verify Key** | `790b439fcbd64cb13b...57f6` | Dùng để xác thực chữ ký trả về từ server (Response integrity). |
+| **AES Algorithm** | `aes-0.8.4` (GCM/CBC) | Dùng để mã hóa Device ID và các thông tin nhạy cảm khác. |
+| **reCAPTCHA Site Key** | `6LdsFiUsAAAAAIjVDZ...GeMV` | Google Labs Enterprise reCAPTCHA key. |
+
+---
+
+### 2. API Endpoints Quan Trọng
+
+- **Main VEO3 API**: `https://imagenfx.art/api/v2/veo3/`
+- **Vertex Auth**: `https://imagenfx.art/api/v2/veo3/vertex/access-token` (Proxy tới Google Vertex AI)
+- **License Server**: `https://api.cleoo.site/api/users/session` (Xác thực người dùng/giấy phép)
+- **Proxy Services**: 
+  - `api.kiotproxy.com`
+  - `proxyxoay.shop`
+- **Session Auth**: `https://labs.google/fx/api/auth/session`
+
+---
+
+### 3. Tauri Internal Commands (RPC)
+
+Ứng dụng sử dụng các lệnh nội bộ để giao tiếp giữa UI và Rust backend:
+- `get_encrypted_device_id`: Lấy Device ID đã mã hóa.
+- `validate_user_session`: Kiểm tra phiên làm việc.
+- `rotate_access_token`: Đổi token truy cập tự động.
+- `call_kiotproxy_api`: Gọi API lấy proxy mới.
+- `consume_captcha_token`: Sử dụng token captcha đã giải.
+
+---
+
+### 4. Cơ Chế Mã Hóa Device ID
+
+Ứng dụng lấy **Raw Device ID** (có thể là MAC hoặc HWID), sau đó sử dụng library `aes` trong Rust kèm theo một salt/key nội bộ để tạo ra `VEO3_DEVICE_ID`. Chuỗi mã hóa này sau đó được chuyển thành Base64 trước khi gửi lên header `X-Device-ID`.
+
+---
+
+### 5. Dữ Liệu Lưu Trữ (AppData)
+
+- **Đường dẫn**: `%LOCALAPPDATA%\SuperVeo`
+- **Nội dung**: Lưu trữ logs, cache session, và các thông tin cấu hình proxy/license.
+
+---
+
+### 6. Obfuscation (Làm rối mã)
+
+Phát hiện chuỗi ký tự bị làm rối trong binary:
+`acm710m +,m',4b,-&'HmhhHbhb 722'6''0b -)',b #2670'b +&'!#0bj '01+16',6b -&'kHbhb...`
+Chuỗi này có thể là một **Substitution Table** (Bảng thay thế) hoặc một cấu hình Payload đã được mã hóa đơn giản để tránh bị scan chuỗi.
+
+---
+
+## 📊 Tổng Kết Nâng Cao
+
+SuperVeo không chỉ là một tool automation đơn giản mà là một hệ thống **Proxy & Bypass** hoàn chỉnh:
+1. **Bypass Captcha**: Tích hợp sẵn browser engine (`node.exe` + `puppeteer`) để giải captcha real-time.
+2. **Proxy Management**: Tích hợp nhiều dịch vụ proxy Việt Nam (`kiotproxy`, `proxyxoay`).
+3. **Security**: Sử dụng chữ ký HMAC hai chiều (cả request và response) để chống giả mạo API.
+4. **Cloud Integration**: Hoạt động như một Bridge giữa máy người dùng và Google Vertex AI.

@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Documents the fix for Image Generation captcha issue in Veo Automation app. The root cause was action parameter mismatch between VIDEO_GENERATION and FLOW_GENERATION. Note added about kinxapp comparison.",
+  "updatedAt": "2026-01-27T06:22:35.783664800Z",
+  "version": "2"
+}

@@ -1,0 +1,21 @@
+# Task: Port Supabase Functionality to New App Version
+
+- [x] Analyze existing patch scripts ([patch_original_to_supabase.py](file:///d:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/patch_original_to_supabase.py), [apply_supabase_auth_patch.py](file:///d:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/apply_supabase_auth_patch.py)) <!-- id: 0 -->
+- [x] Extract [app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app.asar) (Target) and [new232app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/new232app.asar) (Source) <!-- id: 1 -->
+- [x] Compare vital files ([main.js](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app_new_extracted/dist-electron/main.js), [preload.mjs](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app_new_extracted/dist-electron/preload.mjs), `renderer` content if needed) <!-- id: 2 -->
+- [x] Logic porting <!-- id: 3 -->
+    - [x] Port `supabaseClient` and dependencies <!-- id: 4 -->
+    - [x] Port IPC handlers in [main.js](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app_new_extracted/dist-electron/main.js) <!-- id: 5 -->
+    - [x] Port preload scripts <!-- id: 6 -->
+- [x] Repack [app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app.asar) <!-- id: 7 -->
+- [x] Verification <!-- id: 8 -->
+- [x] UI & Feature Porting <!-- id: 9 -->
+    - [x] Compare `dist` directories (Old vs New) <!-- id: 10 -->
+    - [x] Identify missing/changed UI assets (HTML, CSS, JS) <!-- id: 11 -->
+    - [x] Port missing renderer files <!-- id: 12 -->
+    - [x] Repack and verify UI <!-- id: 13 -->
+- [/] UI Refinements <!-- id: 14 -->
+    - [x] Update version text to 2.3.3 <!-- id: 15 -->
+    - [x] Move Donate button to right <!-- id: 16 -->
+    - [x] Optimize effects (reduce lag) <!-- id: 17 -->
+    - [ ] Repack and verify <!-- id: 18 -->

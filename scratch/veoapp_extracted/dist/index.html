@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PublicNewSuperTooL 2.3.3 - https://zalo.me/g/kyyyuo618</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'primary': '#4f46e5',
+            'primary-focus': '#4338ca',
+            'primary-content': '#ffffff',
+            'secondary': '#f9fafb',
+            'secondary-focus': '#f3f4f6',
+            'secondary-content': '#1f2937',
+            'accent': '#10b981',
+            'neutral': '#374151',
+            'base-100': '#ffffff',
+            'base-200': '#f9fafb',
+            'base-300': '#f3f4f6',
+            'info': '#3b82f6',
+            'success': '#22c55e',
+            'warning': '#f59e0b',
+            'error': '#ef4444',
+          },
+        },
+      },
+    }
+  </script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <!-- Storyboard dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.548.0"
+  }
+}
+</script>
+  <script type="module" crossorigin src="./assets/index-9w-QImJ4.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BN3fNTwi.css">
+  <link rel="stylesheet" href="./assets/custom-ui.css">
+  <script>
+    // Star Background Effect
+    function createStars() { const e = document.createElement("div"); e.className = "starry-bg"; for (let t = 0; t < 50; t++) { const n = document.createElement("div"); n.className = "star", n.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${Math.random() * 3 + 1}px;height:${Math.random() * 3 + 1}px;animation-delay:${Math.random() * 3}s;animation-duration:${Math.random() * 2 + 1}s`, e.appendChild(n) } document.body.prepend(e) }
+    // QR Donate Button
+    function createDonateBtn() { const e = document.createElement("button"); e.className = "qr-donate-btn", e.style.right = "20px", e.style.left = "auto", e.style.right = "20px", e.style.left = "auto", e.innerHTML = '<span style="font-size:18px">❤️</span> Ủng Hộ Tác Giả', e.onclick = showQR, document.body.appendChild(e) }
+    function showQR() { const e = document.createElement("div"); e.className = "qr-donate-modal", e.innerHTML = '<div class="qr-donate-content"><h3>🎁 Ủng Hộ Tác Giả</h3><p>Quét mã QR để ủng hộ phát triển công cụ</p><img src="./assets/qr-donate.jpg" alt="QR Donate"/><br/><button class="qr-close-btn" onclick="this.parentElement.parentElement.remove()">Đóng</button></div>', document.body.appendChild(e), e.onclick = t => { t.target === e && e.remove() } }
+    window.addEventListener("DOMContentLoaded", () => { setTimeout(() => { createStars(); createDonateBtn() }, 1e3) });
+  </script>
+  </script>
+  <script>
+    // Ultimate VIP Branding Applicator
+    function applyUltimateEffects() {
+      const TARGET_TEXT = "PublicNewSuperTooL v2.3.3 VIP";
+
+      function walkAndAttact(node) {
+        if (node.nodeType === 3) { // Text node
+          const text = node.nodeValue;
+          if (text.includes(TARGET_TEXT) || text.includes("PublicNewSuper") || text.includes("v2.3.3")) {
+            const parent = node.parentNode;
+            // Ensure we don't double apply to sparkles
+            if (parent && parent.tagName !== 'SCRIPT' && parent.tagName !== 'STYLE') {
+              // 1. Add Class
+              if (!parent.classList.contains('vip-style-target')) {
+                parent.classList.add('vip-style-target');
+              }
+
+              // 2. FORCE Inline Styles using cssText for Electron compatibility
+              if (!parent.getAttribute('data-vip-styled')) {
+                parent.setAttribute('data-vip-styled', 'true');
+                parent.style.cssText = `
+                  background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000) !important;
+                  background-size: 200% auto !important;
+                  -webkit-background-clip: text !important;
+                  background-clip: text !important;
+                  -webkit-text-fill-color: transparent !important;
+                  color: transparent !important;
+                  font-weight: 700 !important;
+                  font-size: 14px !important;
+                  animation: rainbowChase 2s linear infinite !important;
+                  display: inline-block !important;
+                  position: relative !important;
+                `;
+              }
+
+              // 3. Add Sparkles
+              if (false && !parent.querySelector('.vip-sparkle-left')) {
+                if (window.getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
+
+                const left = document.createElement('span');
+                left.className = 'vip-sparkle-left';
+                left.textContent = '⚡';
+                left.style.position = 'absolute'; left.style.left = '-30px'; left.style.top = '50%'; left.style.transform = 'translateY(-50%)'; left.style.textShadow = '0 0 10px #ffff00'; left.style.pointerEvents = 'none';
+                parent.appendChild(left);
+
+                const right = document.createElement('span');
+                right.className = 'vip-sparkle-right';
+                right.textContent = '⚡';
+                right.style.position = 'absolute'; right.style.right = '-30px'; right.style.top = '50%'; right.style.transform = 'translateY(-50%) scaleX(-1)'; right.style.textShadow = '0 0 10px #ffff00'; right.style.pointerEvents = 'none';
+                parent.appendChild(right);
+              }
+            }
+          }
+        } else {
+          for (let i = 0; i < node.childNodes.length; i++) {
+            walkAndAttact(node.childNodes[i]);
+          }
+        }
+      }
+
+      // Run walker
+      walkAndAttact(document.body);
+
+      // Also ensure icon is correct
+      document.querySelectorAll('.ant-avatar').forEach(icon => {
+        if (!icon.style.background.includes('linear-gradient')) {
+          icon.style.background = 'linear-gradient(135deg, #6b46c1, #9333ea)';
+          icon.style.color = 'white';
+          if (icon.innerText.trim().length === 1) icon.innerText = 'P';
+        }
+      });
+    }
+
+    // Schedule runs - wait longer for React to render
+    const intervals = [500, 1500, 3000, 5000, 8000, 10000];
+    intervals.forEach(delay => setTimeout(applyUltimateEffects, delay));
+
+    // Also run on window load (after everything is ready)
+    window.addEventListener('load', () => {
+      setTimeout(applyUltimateEffects, 500);
+      setTimeout(applyUltimateEffects, 2000);
+    });
+
+    // Observer - watch for React re-renders
+    const observer = new MutationObserver(() => {
+      requestAnimationFrame(applyUltimateEffects);
+    });
+
+    // Start observer after DOM is ready
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        observer.observe(document.body, { childList: true, subtree: true });
+      });
+    }
+  </script>
+  <script>
+    // Rainbow border for red elements
+    function applyRainbowBorders() { const observer = new MutationObserver(() => { document.querySelectorAll('[style*="border"][style*="ef4444"],[style*="border"][style*="ff4d4f"],[style*="border"][style*="red"]').forEach(e => { e.classList.add('rainbow-border'); e.style.borderColor = ''; }); document.querySelectorAll('.ant-input[style*="border"],.ant-select[style*="border"]').forEach(e => { if (e.style.borderColor && (e.style.borderColor.includes('239') || e.style.borderColor.includes('255'))) { e.classList.add('rainbow-border'); e.style.borderColor = ''; } }); }); observer.observe(document.body, { childList: true, subtree: true, attributes: true }); setInterval(() => { document.querySelectorAll('[style*="#ef4444"],[style*="#ff4d4f"]').forEach(e => { e.classList.add('rainbow-border'); e.style.borderColor = ''; }); }, 500); }
+    window.addEventListener("DOMContentLoaded", () => { setTimeout(applyRainbowBorders, 1500); });
+  </script>
+  <script>
+    // Swap panels - Left becomes Right, Right becomes Left
+    // Uses CSS order to reposition without breaking layout
+    function swapPanelsV2() {
+      const style = document.createElement('style');
+      style.textContent = `
+        /* Swap using absolute positioning */
+        .ant-layout-sider { 
+            position: absolute !important; 
+            right: 0 !important; 
+            left: auto !important; 
+        }
+        .ant-layout-content { 
+            margin-left: 0 !important; 
+            margin-right: 320px !important; 
+        }
+        /* Also for sidebar-v2 class */
+        .sidebar-v2 {
+            position: absolute !important;
+            right: 0 !important;
+            left: auto !important;
+        }
+        .sidebar-v2 + div, .sidebar-v2 ~ .ant-layout-content {
+            margin-left: 0 !important;
+            margin-right: 320px !important;
+        }
+    `;
+      document.head.appendChild(style);
+      console.log('✅ Panels swapped with absolute positioning');
+    }
+    window.addEventListener("DOMContentLoaded", () => { setTimeout(swapPanelsV2, 1500); });
+  </script>
+  <script>
+    // Custom API Key Input for Clone Feature
+    function addApiKeyInput() {
+      var savedKey = localStorage.getItem('custom-gemini-api-key') || '';
+      var observer = new MutationObserver(function () {
+        var serverHints = document.querySelectorAll('.setting-hint');
+        serverHints.forEach(function (hint) {
+          if (hint.textContent.indexOf('không cần nhập API key') >= 0 && !hint.parentElement.querySelector('.custom-api-input')) {
+            var settingGroup = hint.parentElement;
+            var inputDiv = document.createElement('div');
+            inputDiv.className = 'custom-api-input';
+            inputDiv.style.cssText = 'margin-top:12px;padding:12px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;';
+            inputDiv.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="color:#a78bfa;font-weight:600;">🔑 Hoặc dùng API Key riêng:</span></div><input type="text" id="custom-gemini-key" placeholder="Nhập Gemini API Key (AIzaSy...)" value="' + savedKey + '" style="width:100%;padding:10px 12px;background:#1e1b4b;border:1px solid #6366f1;border-radius:6px;color:#fff;font-size:14px;outline:none;"/><div style="margin-top:8px;display:flex;gap:8px;"><button onclick="saveCustomApiKey()" style="flex:1;padding:8px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;">💾 Lưu Key</button><button onclick="clearCustomApiKey()" style="padding:8px 12px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;">🗑️</button></div><p style="margin-top:8px;font-size:12px;color:#9ca3af;">Lấy API Key miễn phí: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#60a5fa;">Google AI Studio</a></p>';
+            settingGroup.appendChild(inputDiv);
+          }
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+    function saveCustomApiKey() {
+      var key = document.getElementById('custom-gemini-key');
+      if (key && key.value && key.value.indexOf('AIza') === 0) {
+        localStorage.setItem('custom-gemini-api-key', key.value);
+        alert('✅ Đã lưu API Key! App sẽ sử dụng key này.');
+      } else {
+        alert('❌ API Key không hợp lệ! Key phải bắt đầu bằng AIza...');
+      }
+    }
+    function clearCustomApiKey() {
+      localStorage.removeItem('custom-gemini-api-key');
+      var input = document.getElementById('custom-gemini-key');
+      if (input) input.value = '';
+      alert('🗑️ Đã xóa API Key!');
+    }
+    window.addEventListener("DOMContentLoaded", function () { setTimeout(addApiKeyInput, 2000); });
+
+    // Override analyzeWithGemini to use custom API key
+    window.addEventListener("DOMContentLoaded", function () {
+      setTimeout(function () {
+        if (window.electronAPI && window.electronAPI.clone && window.electronAPI.clone.analyzeWithGemini) {
+          var originalAnalyze = window.electronAPI.clone.analyzeWithGemini;
+          window.electronAPI.clone.analyzeWithGemini = function (frames, apiKey, model) {
+            var customKey = localStorage.getItem('custom-gemini-api-key');
+            if (customKey && customKey.indexOf('AIza') === 0) {
+              console.log('✅ Using custom API key:', customKey.substring(0, 10) + '...');
+              return originalAnalyze(frames, customKey, model);
+            }
+            return originalAnalyze(frames, apiKey, model);
+          };
+          console.log('✅ Clone API patched to use custom key!');
+        }
+      }, 3000);
+    });
+
+    // Intercept fetch to bypass sharefilecorel.com clone authorization
+    (function () {
+      var originalFetch = window.fetch;
+      window.fetch = function (url, options) {
+        var urlStr = typeof url === 'string' ? url : url.toString();
+
+        // Mock api/clone/usage - return unlimited usage
+        if (urlStr.indexOf('api/clone/usage') >= 0) {
+          console.log('✅ Bypassing clone/usage check');
+          return Promise.resolve(new Response(JSON.stringify({
+            success: true,
+            data: { isPremium: true, remaining: 999, total: 999, used: 0, resetAt: null }
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+        }
+
+        // Mock api/clone/get-key - return custom key from localStorage
+        if (urlStr.indexOf('api/clone/get-key') >= 0) {
+          var customKey = localStorage.getItem('custom-gemini-api-key') || '';
+          console.log('✅ Bypassing clone/get-key, using custom key');
+          return Promise.resolve(new Response(JSON.stringify({
+            success: true,
+            data: { key: customKey, version: 'v1', usage: { remaining: 999 } }
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+        }
+
+        // Mock api/clone/report-usage - always success
+        if (urlStr.indexOf('api/clone/report-usage') >= 0) {
+          console.log('✅ Bypassing clone/report-usage');
+          return Promise.resolve(new Response(JSON.stringify({
+            success: true
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+        }
+
+        // Intercept chat/completions and redirect to Gemini API
+        if (urlStr.indexOf('chat/completions') >= 0) {
+          console.log('✅ Intercepting chat/completions, redirecting to Gemini');
+          var customKey = localStorage.getItem('custom-gemini-api-key');
+          if (customKey && customKey.indexOf('AIza') === 0) {
+            // Parse the original request body
+            return options && options.body ? (function () {
+              try {
+                var body = JSON.parse(options.body);
+                var messages = body.messages || [];
+                var prompt = messages.map(function (m) {
+                  // Handle both string and object content
+                  if (typeof m.content === 'string') return m.content;
+                  if (Array.isArray(m.content)) {
+                    return m.content.map(function (c) {
+                      if (typeof c === 'string') return c;
+                      if (c.text) return c.text;
+                      if (c.type === 'text') return c.text || '';
+                      return '';
+                    }).join('\n');
+                  }
+                  if (m.content && m.content.text) return m.content.text;
+                  return '';
+                }).filter(function (s) { return s; }).join('\n');
+
+                // Call Gemini API directly
+                var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + customKey;
+                return originalFetch(geminiUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                  })
+                }).then(function (res) { return res.json(); }).then(function (data) {
+                  // Convert Gemini response to OpenAI format
+                  var text = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text || '';
+                  return new Response(JSON.stringify({
+                    choices: [{ message: { content: text, role: 'assistant' } }]
+                  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+                });
+              } catch (e) {
+                console.error('Gemini redirect error:', e);
+                return originalFetch.apply(this, arguments);
+              }
+            })() : originalFetch.apply(this, arguments);
+          }
+        }
+
+        return originalFetch.apply(this, arguments);
+      };
+      console.log('✅ Clone API authorization bypass installed');
+    })();
+  </script>
+</head>
+
+<body class="bg-base-200">
+  <div id="root"></div>
+</body>
+
+</html>

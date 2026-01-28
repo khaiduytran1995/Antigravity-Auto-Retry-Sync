@@ -1,0 +1,67 @@
+# Mock HTTP Server Implementation - Walkthrough
+
+## 🎯 What was done
+
+Replaced the SQLite backend server with a **lightweight mock HTTP server** that stores all data in a JSON file, eliminating server startup issues.
+
+---
+
+## 📁 New Files Created
+
+| File | Purpose |
+|------|---------|
+| [mockProfilesService.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app_extracted/apps/electron/dist/main/mockProfilesService.js) | JSON file storage for profiles, API keys, config |
+| [mockHttpServer.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app_extracted/apps/electron/dist/main/mockHttpServer.js) | HTTP server (port 4000) handling all `/api/*` endpoints |
+
+---
+
+## 🔧 Changes Made
+
+### [main.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app_extracted/apps/electron/dist/main/main.js)
+- Replaced `serverManager` (real backend) with `mockHttpServer`
+- Starts mock server on port 4000 at app launch
+- Stops mock server on app shutdown
+
+---
+
+## 💾 Data Storage
+
+**Location**: `%APPDATA%\Veo3Studio\profiles.json`
+
+**Persistence**: ✅ Data survives app restart
+
+---
+
+## ✅ Mocked Endpoints
+
+| Endpoint | Status |
+|----------|--------|
+| `GET/POST /api/profiles` | ✅ Full CRUD |
+| `GET/PATCH/DELETE /api/profiles/:id` | ✅ Full CRUD |
+| `GET /api/profiles/:id/proxy` | ✅ Mocked |
+| `POST /api/profiles/warmup-all` | ✅ Disabled |
+| `GET /api/profiles/warmup-status` | ✅ Mocked |
+| `GET/POST /api/api-keys` | ✅ Full CRUD |
+| `GET/PATCH /api/config` | ✅ Working |
+| `POST /api/license/validate` | ✅ Always valid |
+| `GET /api/health` | ✅ Working |
+
+---
+
+## 🧪 Testing Steps
+
+1. Launch `Veo3Studio.exe`
+2. Open DevTools Console (F12)
+3. Expected logs:
+   - `[App] 🚀 Starting mock HTTP server...`
+   - `[App] ✅ Mock server started on port 4000`
+4. Create a profile → should save to JSON
+5. Restart app → profile should persist
+
+---
+
+## ⚠️ Known Limitations
+
+- GenNormal (video generation) requires real backend with Python
+- Some advanced features may not work without full server
+- Profile browser automation still works (IPC-based)

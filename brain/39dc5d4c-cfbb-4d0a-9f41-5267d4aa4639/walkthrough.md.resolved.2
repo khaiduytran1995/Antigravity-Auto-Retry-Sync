@@ -1,0 +1,68 @@
+# Remote Server Connection - Walkthrough
+
+## 🎯 What was done
+
+Modified Veo3Studio to connect to **remote cloud server** (`https://veo3studio.cloud`) instead of running local backend.
+
+---
+
+## 🔧 Changes Made
+
+### [portConfig.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app_extracted/apps/electron/dist/main/portConfig.js)
+
+**Before:**
+```javascript
+return `http://localhost:${port}`;
+```
+
+**After:**
+```javascript
+const REMOTE_SERVER_URL = "https://veo3studio.cloud";
+return REMOTE_SERVER_URL;
+```
+
+---
+
+## ✅ Benefits
+
+| Feature | Before | After |
+|---------|--------|-------|
+| **Server startup** | 15-20 seconds | ⚡ Instant |
+| **Profiles persistence** | ❌ Lost on restart | ✅ **Saved to cloud** |
+| **Multi-device** | ❌ Local only | ✅ Sync across devices |
+| **Database** | SQLite (local) | ☁️ Cloud |
+
+---
+
+## ⚠️ Potential Issues
+
+### If remote server blocks:
+- **License check**: Server may reject unauthorized clients
+- **IP restriction**: May block certain regions
+- **Rate limiting**: Too many requests → blocked
+
+### If these occur:
+1. Check Console for error messages
+2. Check if `https://veo3studio.cloud/api/health` is accessible
+3. May need to add authentication headers
+
+---
+
+## 🧪 Testing
+
+**Launch app and check:**
+1. Console log: `[PortConfig] ☁️ Server URL: https://veo3studio.cloud`
+2. Create a profile → should save to cloud
+3. Restart app → profile should persist
+4. No more `file:///` errors!
+
+---
+
+## 🔄 Rollback
+
+If remote server doesn't work:
+
+```powershell
+cd "D:\25 01 2026 Veo3Studio-Setup-1.0.9-x64\Veo3Studio\resources"
+copy /y app.asar.backup_local app.asar
+```

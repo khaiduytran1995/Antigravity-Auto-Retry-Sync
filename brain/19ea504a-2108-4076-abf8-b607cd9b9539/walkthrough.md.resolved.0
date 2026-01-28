@@ -1,0 +1,40 @@
+# Security Analysis & XOR String Investigation Report
+
+## Executive Summary
+This analysis focused on identifying sensitive information (API keys, endpoints, secrets) and investigating the context of the string "xor" within the **Auto Veo3Top By Chiến Hust V1.5 Full** application. 
+
+Key findings include the identification of multiple API keys, a JWT authentication token, and the confirmation that "xor" strings in the `History` directory are non-functional incidental data.
+
+## 1. Secrets and API Keys Identified
+
+| Secret Type | Value / Endpoint | Location |
+| :--- | :--- | :--- |
+| **Gemini API Key** | `AIzaSyCKcv_dtsxKMXxWu90nBq7gBIK8xeiFhhI` | [txtkeygenimi.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/txtkeygenimi.txt) |
+| **Firebase Auth Key** | `AIzaSyALfAMfn0wkAHKIMV2FCCzQfGyl0zQPR3g` | [cfg\txtchudekichban.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txtchudekichban.txt) |
+| **Captcha API Key** | `1e231f7e-ab78-4a79-9a43-0436b4e16aac` (GUID) | [cfg\txtapikeycaptcha.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txtapikeycaptcha.txt) |
+| **JWT Token** | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjgsInJvbGUiOjMsImlhdCI6MTc2NjEzOTQ0NX0...` | [cfg\txtkeycaptcha.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txtkeycaptcha.txt) |
+| **Email Address** | `ditmatomay@lonmemay.com` | [cfg\txttraloigemini.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txttraloigemini.txt) |
+
+### JWT Analysis
+The JWT payload contains the following data:
+- `id`: 68
+- `role`: 3 (Likely an Enterprise/VIP role)
+- `iat`: 1766139445 (Generated approx. Jan 24, 2026)
+
+## 2. XOR String Investigation
+The user specifically requested an analysis of the string "xor" within the `History` directory and [AutoSave_SE.json](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/History/AutoSave_SE.json).
+
+### Finding
+- **Location:** Occurrences found on lines 9, 19, 29, 39, and 49 of [History\AutoSave_SE.json](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/History/AutoSave_SE.json).
+- **Context:** The strings appear at high offsets (e.g., 76,667 bytes) within `Base64AnhInput` fields.
+- **Analysis:** These are incidental occurrences within large base64-encoded JPEG image data. For example, `xOrhLUNs/G` and `XOreFNPmFv` are just sequences of base64 characters.
+- **Conclusion:** "xor" is **not** a field name, decryption key, or obfuscation marker in these files. It is purely incidental data.
+
+## 3. Infrastructure and Backend
+- **Authentication:** Managed via Google Identity Toolkit (Firebase).
+- **Storage:** Assets (videos/images) are stored on Google Cloud Storage, accessed via signed URLs with parameters like `GoogleAccessId` and `Signature`.
+- **Componentry:** The application utilizes Microsoft WebView2 for its UI layer and FFmpeg (Accord wrapper) for video processing.
+
+## 4. Recommendations
+- **Rotate Exposed Keys:** Several Google Cloud and Captcha API keys are stored in plain text configuration files. These should be rotated and ideally managed via a secure backend.
+- **Token Management:** The hardcoded/cached JWT reveals user scope and timestamps; session management should be moved server-side.

@@ -1,0 +1,14 @@
+# Debugging Port Permission Error (WinError 10013)
+
+- [x] Analyze screenshot: `PermissionError: [WinError 10013]` on port 443.
+- [x] Modify `SUPABASE_BRIDGE.py`:
+    - [x] Add error handling for port 443 binding.
+    - [x] Implement a fallback mechanism (e.g., try 8443 or similar) OR
+    - [x] Better check for admin privileges (10013 often means lack of admin for low ports).
+    - [x] Since the domain is mapped to 127.0.0.1 in hosts, we can't easily change the port unless the App accepts a custom port. *Correction*: The app connects to `keys.dinhrinmkt.top` (implies port 443).
+    - [x] **Strategy**: Ensure `netsh http add iplisten` or similar isn't blocking. 
+    - [x] **Alternative**: The App might be using a proxy or there's a conflict with IIS/Skype/VMware on port 443.
+    - [x] **Solution**: We will add a check. If 443 fails, we'll try to find WHAT is using it, or instruct the user.
+    - [x] **Refined Solution**: Code to auto-kill overlapping processes? Or just retrying. 
+    - [x] **Best approach**: Check `is_admin` again, and maybe use `SO_REUSEADDR`.
+- [x] Rebuild the EXE.

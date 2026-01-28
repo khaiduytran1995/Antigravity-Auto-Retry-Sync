@@ -1,0 +1,27 @@
+# Supabase Port Walkthrough
+
+I have successfully ported the Supabase authentication logic from the old version to the new [app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app.asar) (version 2.3.2/2.3.3).
+
+## Changes Made
+
+### 1. Extraction & Analysis
+- Extracted [app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app.asar) (New) and compared it with [new232app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/new232app.asar) (Old).
+- Identified that [main-CHQQFXN8.js](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app_new_extracted/dist-electron/main-CHQQFXN8.js) in the new version contains the bundled main process logic.
+
+### 2. Logic Porting
+- **Login Handler (`api:backendLogin`)**: Replaced the original backend login call with a direct Supabase RPC call (`login_user`).
+- **Token Verification (`api:backendVerifyToken`)**: Patched to always return `success: true` (Bypass).
+- **Profile Handler (`api:backendGetProfile`)**: Patched to return a hardcoded "VIP" user profile to unlock full features.
+
+### 3. Repacking
+- Repacked the modified files into [app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app.asar).
+- Backup of the original file was saved as `app.asar.original_backup`.
+
+## Verification Steps
+
+1. **Launch the Application**: Run `Auto Veo3 v2.0 Setup 2.3.2.exe` (or your main launcher).
+2. **Login**: Enter any valid Supabase credentials (if the RPC requires them) or try logging in.
+   - The patch logs to the console: `🔐 [SUPABASE] Processing login request...`
+3. **Verify Status**:
+   - Check if the application loads fully.
+   - Verify if "VIP" features are enabled (due to the fake profile).

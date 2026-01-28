@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plan to patch main.js to inject SECRET_CONFIG.",
+  "updatedAt": "2026-01-28T11:50:44.727721Z"
+}

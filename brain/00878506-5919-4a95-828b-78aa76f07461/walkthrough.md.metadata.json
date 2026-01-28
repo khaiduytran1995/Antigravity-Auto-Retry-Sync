@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Summary of changes made to fix Veo Automation app to enable image/video generation by injecting SECRET_CONFIG.",
+  "updatedAt": "2026-01-28T13:35:02.440996800Z"
+}

@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Walkthrough of the Supabase integration into Auto Veo3 v2.3.2, including auth flow patching and IPC handler setup.",
+  "updatedAt": "2026-01-24T16:52:10.878042200Z",
+  "version": "1"
+}

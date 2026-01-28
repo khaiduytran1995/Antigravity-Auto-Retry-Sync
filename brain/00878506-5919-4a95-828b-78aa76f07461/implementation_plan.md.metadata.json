@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plan chi tiết để sửa app Veo Automation bằng cách inject global.SECRET_CONFIG vào main.js để bỏ qua license check và cho phép tạo ảnh/video.",
+  "updatedAt": "2026-01-28T13:32:56.987649200Z"
+}

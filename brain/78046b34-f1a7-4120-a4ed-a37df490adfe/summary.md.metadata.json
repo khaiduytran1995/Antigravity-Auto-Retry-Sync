@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Current status summary of Selenium integration - video works, image fails. All Selenium code in place but not being loaded by app.",
+  "updatedAt": "2026-01-26T18:36:39.478254500Z"
+}

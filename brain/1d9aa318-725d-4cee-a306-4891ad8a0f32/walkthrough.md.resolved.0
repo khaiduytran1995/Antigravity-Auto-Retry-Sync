@@ -1,0 +1,81 @@
+# TVC Story Creator - Hệ Thống Hoàn Chỉnh
+
+## ✅ Đã Hoàn Thành
+
+Hệ thống tự động tạo TVC với **Antigravity AI** là trái tim sáng tạo.
+
+---
+
+## Kiến Trúc
+
+```
+Frontend (Web App)  →  Backend (Flask)  →  AI Processor (Antigravity)
+     ↑                      ↓                      ↓
+     └──────────── Results ←──────────────────────┘
+```
+
+---
+
+## Cấu Trúc Thư Mục
+
+| File | Mô tả |
+|------|-------|
+| [index.html](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/index.html) | Giao diện web |
+| [styles.css](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/styles.css) | Thiết kế premium |
+| [app.js](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/app.js) | Frontend logic + API |
+| [server.py](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/server.py) | Flask backend |
+| [ai_processor.py](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/ai_processor.py) | AI workflow |
+| [START_SERVER.bat](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/START_SERVER.bat) | Khởi động server |
+| [RUN_AI_PROCESSOR.bat](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/RUN_AI_PROCESSOR.bat) | Chạy AI |
+
+---
+
+## Cách Sử Dụng
+
+### Bước 1: Khởi động Server
+```bash
+# Chạy file batch hoặc:
+python server.py
+```
+Server: **http://localhost:5000**
+
+### Bước 2: Upload Hình Ảnh
+- Mở trình duyệt → http://localhost:5000
+- Kéo thả hình ảnh sản phẩm
+
+### Bước 3: Cấu Hình TVC
+- Chọn phong cách (Gia đình, Tết, Premium...)
+- Nhập thông điệp chính
+- Chọn thời lượng
+
+### Bước 4: Tạo Câu Chuyện
+- Click **"Tạo Câu Chuyện TVC"**
+- Job sẽ được lưu vào `jobs/pending/`
+
+### Bước 5: Chạy AI Processor
+```bash
+python ai_processor.py
+```
+Kết quả sẽ xuất hiện trong storyboard!
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/upload` | Upload hình ảnh |
+| POST | `/api/generate` | Tạo job TVC |
+| GET | `/api/status/:id` | Kiểm tra trạng thái |
+| GET | `/api/result/:id` | Lấy kết quả |
+| GET | `/api/jobs` | Danh sách jobs |
+
+---
+
+## Trạng Thái
+
+| Component | Status |
+|-----------|--------|
+| Backend Server | ✅ Running at :5000 |
+| Frontend | ✅ Ready |
+| AI Processor | ✅ Ready |

@@ -1,0 +1,25 @@
+# Security Analysis Task
+
+- [x] **Application Reconnaissance**
+    - [x] List directory structure.
+    - [x] Identify configuration and history files.
+
+- [x] **Initial Keyword Search**
+    - [x] Search for "http", "https", "key", "secret", "token".
+    - [x] Search for "xor" to identify potential encryption/obfuscation.
+
+- [/] **Deep Dive: Configuration and Data Files**
+    - [x] Analyze [cfg\txtchudekichban.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txtchudekichban.txt) (Firebase Key found).
+    - [x] Analyze [cfg\txtapikeycaptcha.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txtapikeycaptcha.txt) (Captcha Key found).
+    - [x] Analyze [cfg\txtkeycaptcha.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txtkeycaptcha.txt) (JWT found).
+    - [x] Analyze [cfg\txttraloigemini.txt](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/cfg/txttraloigemini.txt) (Email found).
+    - [/] Analyze `chien.txt` (Base64 decoding in progress).
+    - [x] Analyze [History\AutoSave_SE.json](file:///d:/Auto%20Veo3Top%20By%20Chi%E1%BA%BFn%20Hust%20V1.5%20Full/History/AutoSave_SE.json) (Image data found, no network secrets).
+
+- [/] **Encryption and Obfuscation Analysis**
+    - [/] Locate XOR keys or decryption logic.
+    - [ ] Decode any obfuscated endpoints.
+
+- [ ] **Final Report**
+    - [ ] Consolidate all found API keys, URLs, and server details.
+    - [ ] Document potential vulnerabilities related to hardcoded secrets.

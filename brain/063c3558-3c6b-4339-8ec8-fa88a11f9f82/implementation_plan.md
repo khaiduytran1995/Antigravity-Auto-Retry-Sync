@@ -1,0 +1,23 @@
+# Implementation Plan - Inject SECRET_CONFIG
+
+## Goal
+Ensure the application functions correctly by populating `global.SECRET_CONFIG` in `main.js`, which is otherwise left null due to the license check bypass in `preload.js`.
+
+## Problem
+The `preload.js` bypass prevents the backend's `verifyLicense` from running, which normally fetches and sets `global.SECRET_CONFIG`. Code analysis shows `main.js` attempts to access this global variable. If it is null, key features (like video generation API calls) may fail or be skipped.
+
+## Proposed Changes
+### Backend
+#### [MODIFY] [main.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/temp_asar_work/dist-electron/main.js)
+- Locate the initialization `global['SECRET_CONFIG']=null;`
+- Replace it with a hardcoded valid configuration object derived from the previous version analysis.
+- **Config to Inject:**
+  ```javascript
+  global['SECRET_CONFIG']={userAgent:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",apiEndpoint:"https://aisandbox-pa.googleapis.com/v1/video:batchAsyncGenerateVideoText",latestVersion:"1.2.8",downloadUrl:""};
+  ```
+
+## Verification Plan
+### Automated Verification
+- Repack the application.
+- Launch the application.
+- Verify that features relying on backend config (likely video generation) are available and don't crash.

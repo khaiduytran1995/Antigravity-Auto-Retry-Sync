@@ -1,0 +1,95 @@
+# 📦 Phân Tích app.asar - Auto Veo3 v2.3.2
+
+## Tổng quan
+
+File [app.asar](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app.asar) đã được extract thành công. Đây là ứng dụng Electron phiên bản **2.3.2**.
+
+## Cấu trúc file
+
+```
+app_current_extracted/
+├── package.json           (1KB - Thông tin app)
+├── dist/                  (Frontend - UI)
+│   ├── index.html
+│   └── assets/
+│       ├── index-DVAW207y.js         (5.7MB - React app)
+│       ├── index-BN3fNTwi.css        (30KB - Styles)
+│       ├── veo3VideoService-BQa_4NiJ.js
+│       ├── videoChainService-sckE-sv8.js
+│       └── ...
+├── dist-electron/         (Backend - Main process)
+│   ├── main.js            (Entry point)
+│   ├── main-XVq9s0Wo.js   (10MB - Core logic ⭐)
+│   ├── geminiAnalyzer-CHcDXWHQ.js
+│   ├── openaiAnalyzer-CHLJ7QZn.js
+│   ├── elevenLabsService-QCo_C9_F.js
+│   ├── videoDownloader-BBFjP27u.js
+│   ├── frameExtractor-CwA20pGr.js
+│   ├── preload.mjs        (Preload script)
+│   └── ...
+└── node_modules/          (18956 files - Dependencies)
+```
+
+## Thông tin Package
+
+| Field | Value |
+|-------|-------|
+| **Name** | veo-mac-pro |
+| **Version** | 2.3.2 |
+| **Author** | 0941280777 |
+| **Main** | dist-electron/main.js |
+
+## Dependencies chính
+
+- **Puppeteer** v24.34.0 - Browser automation
+- **Selenium WebDriver** v4.40.0 - Browser automation
+- **@google/genai** v1.28.0 - Google Generative AI
+- **@google/generative-ai** v0.24.1 - Gemini AI
+- **Ant Design** v5.22.5 - UI Components
+- **FFmpeg** - Video processing
+- **Axios** - HTTP requests
+- **React** v19.2.0 - Frontend
+- **Electron Updater** - Auto updates
+
+## APIs được sử dụng
+
+### 1. Google Generative AI (Gemini/Veo)
+```
+URL: https://generativelanguage.googleapis.com
+Version: v1beta
+```
+- SDK: `genai-js` v0.24.1
+- File: [main-XVq9s0Wo.js](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app_current_extracted/dist-electron/main-XVq9s0Wo.js), [index-gZI1AySy.js](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app_current_extracted/dist-electron/index-gZI1AySy.js)
+- API Key được lưu trong: `storyboard-api-keys.json` (userData folder)
+
+### 2. ElevenLabs (Text-to-Speech)
+```
+File: elevenLabsService-QCo_C9_F.js
+Header: xi-api-key
+```
+
+### 3. OpenAI
+```
+File: openaiAnalyzer-CHLJ7QZn.js
+```
+
+## ⚠️ Phát hiện quan trọng
+
+| Item | Status |
+|------|--------|
+| **Supabase** | ❌ **KHÔNG TÌM THẤY** trong file hiện tại |
+| **License Check** | ❌ Không tìm thấy keyword "license" |
+| **API Keys hardcoded** | ❌ Không có JWT token hardcoded |
+
+## Kết luận
+
+**App.asar hiện tại (v2.3.2) KHÔNG chứa cấu hình Supabase.** 
+
+Nếu bạn muốn patch Supabase vào, bạn cần:
+1. Thêm `@supabase/supabase-js` vào dependencies
+2. Tạo file cấu hình Supabase client
+3. Tích hợp vào [main-XVq9s0Wo.js](file:///D:/Auto%20Veo3%20v2.0%20Setup%202.2.0/Auto%20Veo3%20v2.0%20Setup%202.3.2/PublicNewSuperTooL%202.3.2/resources/app_current_extracted/dist-electron/main-XVq9s0Wo.js) hoặc tạo module riêng
+
+---
+
+*Extracted: 2026-01-24 22:42*

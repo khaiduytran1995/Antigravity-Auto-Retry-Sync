@@ -1,0 +1,25 @@
+# TVC Story Creator App
+
+## Mục tiêu
+Xây dựng ứng dụng web để tạo câu chuyện TVC với hình ảnh liên mạch như một bộ phim.
+
+## Tiến độ
+
+### [x] Thiết lập dự án
+- [x] Tạo cấu trúc thư mục
+- [x] Tạo file HTML chính
+- [x] Tạo file CSS với thiết kế premium
+
+### [/] Xây dựng giao diện
+- [/] Tạo UI upload hình ảnh
+- [ ] Tạo panel hiển thị storyboard
+- [ ] Tạo controls cho việc tạo nội dung
+
+### [ ] Tích hợp AI capabilities
+- [ ] Kết nối với Antigravity generate_image
+- [ ] Tạo logic sinh câu chuyện
+- [ ] Xuất video/slideshow
+
+### [ ] Testing & Polish
+- [ ] Test toàn bộ flow
+- [ ] Hoàn thiện UI/UX

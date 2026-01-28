@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Cập nhật hướng dẫn khắc phục lỗi warmup - Đã disable hoàn toàn warmup function, app không cần server backend cho authentication",
+  "updatedAt": "2026-01-27T08:44:51.124546100Z",
+  "version": "1"
+}

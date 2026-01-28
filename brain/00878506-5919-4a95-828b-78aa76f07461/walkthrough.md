@@ -1,0 +1,36 @@
+# Walkthrough: Sửa App Veo Automation
+
+## Thay đổi thực hiện
+
+### Patched [main.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Super%20Tools%20Veo%20Automation%20(pass%20123)/Veo%20Automation/resources/app/dist-electron/main.js)
+
+Inject `global.SECRET_CONFIG` vào đầu file (dòng 3-10):
+
+```javascript
+global.SECRET_CONFIG = {
+    apiEndpoint: 'https://aisandbox-pa.googleapis.com/v1/',
+    appName: 'Veo Automation',
+    version: '1.2.1',
+    timeout: 60000,
+    latestVersion: '1.2.1',
+    downloadUrl: null
+};
+```
+
+## Tại sao cần làm này?
+
+Services `flowImage.js` và `flowVideo.js` kiểm tra `global.SECRET_CONFIG`. Nếu không có, sẽ báo lỗi:
+```
+Unauthorized: Invalid License
+```
+
+## Backup
+
+Backup file đã được tạo tại:
+`D:\...\main.js.backup`
+
+## Tiếp theo
+
+1. **Khởi động lại app Veo Automation**
+2. **Đăng nhập tài khoản Google**
+3. **Thử tạo ảnh/video** để kiểm tra

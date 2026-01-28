@@ -1,0 +1,86 @@
+# Hướng dẫn khắc phục lỗi warmup
+
+## Vấn đề
+
+Lỗi trong Console:
+```
+Failed to load resource: net::ERR_FILE_NOT_FOUND
+/h:api/profiles/warmup-status1
+```
+
+**Nguyên nhân**: Ứng dụng đang dùng **cache cũ**,  chứ không phải code Supabase mới đã được cập nhật trong [app.asar](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app.asar).
+
+## Giải pháp
+
+### Bước 1: Đóng hoàn toàn Veo3Studio
+
+1. Thoát ứng dụng Veo3Studio
+2. Kiểm tra Task Manager để chắc chắn không còn process `Veo3Studio.exe` nào chạy
+3. Kill tất cả process nếu cần
+
+### Bước 2: Xóa cache Electron
+
+**Chạy script PowerShell này:**
+
+```powershell
+# Đường dẫn cache của Veo3Studio
+$appDataPath = "$env:APPDATA\Veo3Studio"
+
+# Xóa cache
+if (Test-Path $appDataPath) {
+    Remove-Item "$appDataPath\Cache" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "$appDataPath\Code Cache" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "$appDataPath\GPUCache" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "$appDataPath\Session Storage" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "✅ Cache đã được xóa!"
+} else {
+    Write-Host "⚠️ Không tìm thấy thư mục cache tại: $appDataPath"
+}
+```
+
+### Bước 3: Mở lại Veo3Studio
+
+1. Chạy file `Veo3Studio.exe`
+2. Kiểm tra Console (F12) - sẽ KHÔNG còn lỗi `ERR_FILE_NOT_FOUND`
+3. Thử đăng nhập với tài khoản Supabase
+
+## Kiểm tra thành công
+
+Sau khi mở lại, bạn sẽ thấy trong Console logs:
+
+```
+[Auth] Supabase + SQL Table mode
+[Auth] Login: <your-email>
+[Auth] Login OK, role: ADMIN, expires: <date>
+```
+
+✅ **Nếu thấy logs trên = SUCCESS!** Ứng dụng đã load code Supabase mới.
+
+## Nếu vẫn lỗi
+
+Chạy script này để reset app hoàn toàn:
+
+```powershell
+# Xóa TOÀN BỘ data app (bạn sẽ mất sessions)
+Remove-Item "$env:APPDATA\Veo3Studio" -Recurse -Force
+Remove-Item "$env:APPDATA\Roaming\veo3studio-user-data-dir" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "✅ App data đã được reset hoàn toàn!"
+```
+
+⚠️ **Lưu ý**: Script này sẽ xóa session hiện tại, bạn cần đăng nhập lại.
+
+## File đã update
+
+- ✅ [app.asar](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app.asar) - Phiên bản mới với Supabase (40,253,294 bytes)
+- 📦 Backup: `app.asar.old` (phiên bản gốc) 
+- 📦 Backup: [app.asar.bak](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app.asar.bak) (backup cũ hơn)
+
+## Rollback nếu cần
+
+Nếu muốn quay lại phiên bản cũ:
+
+```powershell
+cd "D:\25 01 2026 Veo3Studio-Setup-1.0.9-x64\Veo3Studio\resources"
+Move-Item app.asar app.asar.new -Force
+Move-Item app.asar.old app.asar -Force
+```

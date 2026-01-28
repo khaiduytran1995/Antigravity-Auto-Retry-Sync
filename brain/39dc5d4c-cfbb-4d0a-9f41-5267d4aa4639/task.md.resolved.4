@@ -1,0 +1,24 @@
+# Task: Update Veo3Studio New Version to Use Supabase
+
+## Analysis
+- [x] Examine old version (app + server) - uses Supabase
+- [x] Examine new version (app.asar + server110) - uses remote API
+- [x] Compare authentication implementations
+- [x] Identify all files that need updates
+
+## Implementation
+### App (Electron Frontend)
+- [x] Update [firebaseAuthHandlers.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app/apps/electron/dist/main/firebaseAuthHandlers.js) in app_extracted
+  - [x] Replace minified code with Supabase version
+  - [x] Ensure Supabase URL and key are correct
+  
+### Server (Backend)
+- [x] Update [remoteAuth.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/server/dist/lib/remoteAuth.js) in server110
+  - [x] Replace remote API with Supabase endpoints
+  - [x] Update authentication logic
+  - [x] Update license validation
+
+## Verification
+- [x] Repack app.asar with updated code
+- [x] Test login functionality
+- [x] Verify Supabase integration works

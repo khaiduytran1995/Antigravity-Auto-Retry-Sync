@@ -1,0 +1,11 @@
+# extreme_deep_dive_task.md
+
+- [x] Decode `acm710m` obfuscated string in `SuperVeo.exe`
+- [x] Search for hardcoded proxy credentials (KiotProxy, ProxyXoay)
+- [x] Investigate `generate_test_license` trigger and logic
+- [x] Map full `VEO3_AUTH_TOKEN` acquisition flow
+- [x] Search for developer-specific signatures or hardcoded emails
+- [x] Analyze `nodehelper.exe` for embedded Node.js scripts or configs
+- [x] Verify if `took_veo3` is used for other services
+- [x] Create Final Comprehensive Secrets Map
+ [ ]

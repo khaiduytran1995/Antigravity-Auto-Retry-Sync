@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plan to mock all backend APIs by creating IPC handlers that store data in JSON file instead of SQLite database, eliminating server dependency",
+  "updatedAt": "2026-01-27T09:20:13.728886200Z",
+  "version": "1"
+}

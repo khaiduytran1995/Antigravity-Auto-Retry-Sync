@@ -1,0 +1,29 @@
+# TVC Story Creator - Automated System
+
+## Mục tiêu
+Hệ thống tự động tạo TVC với Antigravity AI là trái tim sáng tạo.
+
+## Tiến độ
+
+### [x] Backend Server
+- [x] [server.py](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/server.py) - Flask API server
+- [x] [requirements.txt](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/requirements.txt) - Dependencies
+
+### [x] AI Processor
+- [x] [ai_processor.py](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/ai_processor.py) - Xử lý job và tạo story
+
+### [x] Frontend Integration
+- [x] [app.js](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/app.js) - Kết nối với API backend
+
+### [x] Startup Scripts
+- [x] [START_SERVER.bat](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/START_SERVER.bat) - Khởi động server
+- [x] [RUN_AI_PROCESSOR.bat](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/RUN_AI_PROCESSOR.bat) - Chạy AI processor
+
+### [x] TVC Storyboard Generation
+- [x] Created [VEO3_PROMPTS.md](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/VEO3_PROMPTS.md) (10 clips, 16:9)
+- [x] Generated 10 initial AI images
+- [x] **Regenerated Key Images (v2)** with strict product matching (Clips 2, 3, 7, 8, 9, 10) using uploaded reference photos.
+
+### [x] Deliverables
+- [x] [generated/](file:///c:/Users/hp/Downloads/Lap%20Xuong%20Kim%20Thanh/server.py#181-184) folder populated with all images
+- [x] [walkthrough.md](file:///C:/Users/hp/.gemini/antigravity/brain/1d9aa318-725d-4cee-a306-4891ad8a0f32/walkthrough.md) updated with v2 storyboard

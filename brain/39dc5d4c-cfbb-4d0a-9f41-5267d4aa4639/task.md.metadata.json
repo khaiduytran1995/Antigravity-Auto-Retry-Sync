@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Checklist for mocking all backend APIs with localStorage storage to eliminate server dependency",
+  "updatedAt": "2026-01-27T09:19:13.462764200Z",
+  "version": "5"
+}

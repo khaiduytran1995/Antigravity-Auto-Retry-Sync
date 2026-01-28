@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "Báo cáo Phân tích Bảo mật và Điều tra Chuỗi XOR (Tiếng Việt)\n- Xác định các khóa API (Gemini, Firebase, Captcha).\n- Phân tích mã JWT (Role 3).\n- Xác nhận chuỗi \"xor\" trong AutoSave_SE.json chỉ là dữ liệu hình ảnh ngẫu nhiên.",
+  "updatedAt": "2026-01-28T07:43:51.449807Z",
+  "version": "1"
+}

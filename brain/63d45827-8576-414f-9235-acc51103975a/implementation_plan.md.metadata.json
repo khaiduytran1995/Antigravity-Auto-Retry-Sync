@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plan to port Supabase functionality from old asar to new asar by extracting, patching, and repacking.",
+  "updatedAt": "2026-01-28T04:09:17.161066300Z"
+}

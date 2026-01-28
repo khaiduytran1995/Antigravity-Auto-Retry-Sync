@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "Lộ trình phân tích bảo mật và điều tra bản quyền Auto Veo3Top.\n- Đã xác định định dạng mã máy (Machine Code) trong tệp thực thi.\n- Đang tìm hiểu cách ứng dụng tạo ra và xác thực mã này qua server.",
+  "updatedAt": "2026-01-28T07:54:52.557485700Z",
+  "version": "1"
+}

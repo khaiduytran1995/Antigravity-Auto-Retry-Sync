@@ -1,0 +1,29 @@
+# Kế hoạch Thay thế URL Google Sheets
+
+Thay thế URL trang tính quản lý bản quyền trong tệp thực thi để người dùng có thể tự quản lý danh sách máy được phép sử dụng.
+
+## Lưu ý cho người dùng
+> [!IMPORTANT]
+> - URL mới phải là một liên kết Google Sheets hợp lệ.
+> - Độ dài của URL mới **không được vượt quá 100 ký tự**.
+> - Bạn cần cấu hình trang tính của mình theo đúng định dạng mà ứng dụng yêu cầu (tôi sẽ hỗ trợ kiểm tra nếu cần).
+
+## Các bước thực hiện
+
+### 1. Thành phần: Tệp thực thi chính
+- **Tệp mục tiêu:** `Auto Veo3Top By Chiến Hust V1.5.exe`
+- **Vị trí cần sửa:** Offset `599014` (định dạng UTF-16LE).
+
+### 2. Quy trình sửa đổi
+- **Bước 1:** Sao lưu tệp `Auto Veo3Top By Chiến Hust V1.5.exe` thành `Auto Veo3Top By Chiến Hust V1.5.exe.bak`.
+- **Bước 2:** Chạy script Python để ghi đè URL mới vào vị trí đã xác định.
+- **Bước 3:** Nếu URL mới ngắn hơn 100 ký tự, phần còn lại sẽ được lấp đầy bằng các byte null (`00 00`) để không làm hỏng cấu trúc tệp.
+
+## Kế hoạch xác minh
+
+### Kiểm tra tự động
+- Chạy lại script tìm kiếm offset để xác nhận URL mới đã nằm đúng vị trí.
+- Kiểm tra kích thước tệp (phải bằng khớp chính xác với tệp gốc).
+
+### Kiểm tra thủ công
+- Yêu cầu người dùng mở ứng dụng và kiểm tra xem nó có nhận diện được máy từ trang tính mới hay không.

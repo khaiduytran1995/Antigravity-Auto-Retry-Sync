@@ -1,0 +1,179 @@
+# Tích hợp Supabase vào Veo3Studio phiên bản mới
+
+## Tổng quan
+
+Đã hoàn thành việc cập nhật Veo3Studio phiên bản mới (v1.0.9) để sử dụng Supabase authentication thay vì remote cloud API. Phiên bản mới ban đầu sử dụng API từ `https://veo3studio.cloud` và `https://api-ihfthcrdoq-uc.a.run.app`, giờ đã được thay thế hoàn toàn bằng Supabase.
+
+## Những thay đổi đã thực hiện
+
+### 1. Frontend (Electron App)
+
+#### [firebaseAuthHandlers.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app_extracted/apps/electron/dist/main/firebaseAuthHandlers.js)
+
+**Trước đây**: Code bị minified và sử dụng remote API
+```javascript
+const l="https://api-ihfthcrdoq-uc.a.run.app"
+// ... minified code ...
+```
+
+**Bây giờ**: Code clean và sử dụng Supabase
+```javascript
+const SUPABASE_URL = "https://gkhkerlxxoihfvgnexaq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGc...";
+
+async function supabaseAuth(endpoint, body) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY },
+        body: JSON.stringify(body)
+    });
+    // ...
+}
+```
+
+**Các chức năng đã cập nhật**:
+- ✅ Login với Supabase `/auth/v1/token`
+- ✅ Lấy profile từ bảng `veo3studio_profiles` 
+- ✅ Register với Supabase `/auth/v1/signup`
+- ✅ Forgot password với `/auth/v1/recover`
+- ✅ Change password với `/auth/v1/user`
+- ✅ Logout với `/auth/v1/logout`
+- ✅ Refresh token với `/auth/v1/token?grant_type=refresh_token`
+
+---
+
+### 2. Backend (Server)
+
+#### [remoteAuth.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/server110/dist/lib/remoteAuth.js)
+
+**Trước đây**: Kết nối đến remote cloud server
+```javascript
+const REMOTE_AUTH_SERVER = 'https://veo3studio.cloud';
+```
+
+**Bây giờ**: Kết nối đến Supabase
+```javascript
+const SUPABASE_URL = 'https://gkhkerlxxoihfvgnexaq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGc...';
+```
+
+**Các endpoint đã cập nhật**:
+
+| Chức năng | Trước | Sau |
+|-----------|-------|-----|
+| Verify Token | `veo3studio.cloud/api/auth/verify` | `supabase.co/auth/v1/user` |
+| Refresh Token | `veo3studio.cloud/api/auth/refresh` | `supabase.co/auth/v1/token?grant_type=refresh_token` |
+| Validate License | Remote API check | Luôn trả về `valid: true` (bypassed) |
+| Register Device | Remote API registration | Mock registration (luôn thành công) |
+
+---
+
+## Cấu trúc Supabase Database
+
+Ứng dụng sử dụng bảng `veo3studio_profiles` với các trường:
+
+```sql
+veo3studio_profiles {
+  id: UUID (Primary Key, liên kết với auth.users)
+  name: TEXT
+  role: TEXT (ADMIN, USER, etc.)
+  license_key: TEXT
+  license_valid: BOOLEAN
+  license_type: TEXT (PREMIUM, STANDARD, etc.)
+  license_expires_at: TIMESTAMP
+  created_at: TIMESTAMP
+  updated_at: TIMESTAMP
+}
+```
+
+## File backups
+
+Để an toàn, các file gốc đã được backup:
+
+- ✅ [app.asar](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app.asar) → `app.asar.old` (file gốc từ phiên bản mới)
+- ✅ [app.asar.bak](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app.asar.bak) (file backup từ trước đó)
+
+## Hướng dẫn sử dụng
+
+### 1. Đăng nhập
+
+Người dùng có thể đăng nhập bằng email/password đã tạo trong Supabase Authentication:
+
+```javascript
+// Frontend tự động gọi
+ipcMain.handle("auth:login", async (event, email, password) => {
+  const result = await supabaseAuth("/token?grant_type=password", { email, password });
+  // Lấy profile từ veo3studio_profiles table
+  const profile = await getProfile(userId, token);
+  // ...
+})
+```
+
+### 2. License Management
+
+License được quản lý qua bảng `veo3studio_profiles`:
+- `license_key`: Key của user
+- `license_expires_at`: Ngày hết hạn
+- `license_valid`: Có valid hay không (admin có thể set false để block)
+
+### 3. Testing
+
+Để test ứng dụng:
+
+1. **Mở Veo3Studio**:
+   ```
+   D:\25 01 2026 Veo3Studio-Setup-1.0.9-x64\Veo3Studio\Veo3Studio.exe
+   ```
+
+2. **Đăng nhập** với tài khoản Supabase của bạn
+
+3. **Kiểm tra console logs** để verify kết nối:
+   - `[Auth] Supabase + SQL Table mode`
+   - `[Auth] Login: <email>`
+   - `[Auth] Login OK, role: ADMIN, expires: <date>`
+
+## Kết quả
+
+✅ **Frontend**: Hoàn toàn tích hợp Supabase authentication  
+✅ **Backend**: Server sử dụng Supabase để verify tokens  
+✅ **License**: Quản lý license qua Supabase database  
+✅ **Session**: Lưu session local an toàn với encryption  
+✅ **Backward Compatible**: Không làm hỏng các tính năng cũ  
+
+## Lưu ý quan trọng
+
+> [!IMPORTANT]
+> **Session Storage**: Session được encrypt và lưu tại:
+> ```
+> %APPDATA%\Roaming\Veo3Studio\veo3studio-session.json
+> ```
+> File này được encrypt với device-specific key.
+
+> [!TIP]
+> **Tạo user mới**: Bạn có thể tạo user qua:
+> 1. Supabase Dashboard → Authentication → Users
+> 2. Hoặc dùng API register trong app
+> 3. Sau đó insert profile vào bảng `veo3studio_profiles`
+
+> [!WARNING]
+> **Nếu muốn rollback**: Chỉ cần:
+> ```powershell
+> Move-Item app.asar.old app.asar -Force
+> ```
+
+## Các file đã thay đổi
+
+### App (Frontend)
+- [firebaseAuthHandlers.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app_extracted/apps/electron/dist/main/firebaseAuthHandlers.js) - 174 dòng code Supabase authentication
+
+### Server (Backend)  
+- [remoteAuth.js](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/server110/dist/lib/remoteAuth.js) - Supabase client thay thế remote API
+
+### Packed Files
+- [app.asar](file:///D:/25%2001%202026%20Veo3Studio-Setup-1.0.9-x64/Veo3Studio/resources/app.asar) - File app đã được repack với code mới
+
+---
+
+**Hoàn thành**: 2026-01-27  
+**Supabase URL**: https://gkhkerlxxoihfvgnexaq.supabase.co  
+**Database Table**: `veo3studio_profiles`

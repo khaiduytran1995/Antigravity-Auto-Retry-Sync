@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Kế hoạch thay đổi tiền tố mã máy từ CHIENVEO3TOP thành DUYVEO3TOP.\n- Chỉ có 1 vị trí cần thay thế (offset 598981).\n- Cần padding 4 ký tự để giữ nguyên độ dài của tệp.\n- Yêu cầu cập nhật cả trang tính Google Sheets.",
+  "updatedAt": "2026-01-28T08:57:22.888697700Z",
+  "version": "1"
+}
