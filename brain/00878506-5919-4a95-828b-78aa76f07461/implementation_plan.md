@@ -1,54 +1,35 @@
-# Puppeteer-Real-Browser Captcha Bypass Integration
+# Fix Login Persistence + Add JSON Cookies Feature
 
-## Goal
-Replace Selenium-based recaptchaService with puppeteer-real-browser sidecar process for better stealth and anti-detection.
+## Problem
+1. App keeps asking for login even though user is already logged in
+2. Error "reply was never sent" - IPC failure
+3. Need JSON Cookies import feature like veoapp.asar
 
-## Current State
-- App uses `recaptchaService.js` with Selenium WebDriver in headless mode
-- Selenium is detectable and often gets 403 errors
-- Need to replace with more stealthy puppeteer-real-browser approach
+## Root Cause Analysis
+- Current `flowVideo.js` and `flowImage.js` rely on `tokenManager.getCookie()` and `tokenManager.getProjectId()` which may NOT be captured properly
+- The app uses `mimicApiCall` via Electron browser which causes IPC failures
+- The axios refactor is correct but still uses session data from tokenManager which is missing
 
-## Proposed Changes
+## Solution
 
-### 1. Create Sidecar Script
-#### [NEW] `capture-sidecar.js`
-Place in `dist-electron/scripts/`
+### 1. Add IPC Handler for JSON Cookie Import
+Add to `main.js`:
+```javascript
+ipcMain.handle('auth:add-from-cookie', async (event, cookieJson) => {
+  // Parse JSON, validate, fetch token, store in electron-store
+});
+```
 
-Copy the user's provided script with minor adaptations:
-- Support both VIDEO_GENERATION and IMAGE_GENERATION actions
-- Add IPC communication via stdin/stdout
-- Persistent browser instance
+### 2. Add fetchTokenFromCookie Function
+In `tokenManager.js`:
+- Use HTTPS request to `labs.google/fx/api/auth/session`
+- Extract token and email from JSON response
+- Store in electron-store
 
----
-
-### 2. Modify recaptchaService.js
-#### [MODIFY] [recaptchaService.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/recaptchaService.js)
-
-[COMPLETED] Replaced Selenium pool with sidecar process manager.
-
----
-
-### 3. Refactor Generation Services
-#### [MODIFY] [flowVideo.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowVideo.js)
-#### [MODIFY] [flowImage.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowImage.js)
-
-**Changes:**
-- Replace `tokenManager.mimicApiCall` with direct `axios` requests (matching v2.3.3)
-- Remove reliance on `SECRET_CONFIG` for endpoints; use hardcoded Google API endpoints from v2.3.3
-- Simplify project structure and context to match v2.3.3
-- Ensure reCAPTCHA tokens are fetched from the new `recaptchaService`
-- Improve error logging and recovery
-
----
-
-### 4. Update Dependencies
-[COMPLETED] Added `puppeteer-real-browser` to package.json.
-
----
+### 3. Fix Session Storage
+- When user logs in successfully, ENSURE cookie and token are SAVED to electron-store
+- On app start, try to use stored credentials BEFORE forcing login
 
 ## Verification Plan
-1. Start app and check if sidecar spawns successfully
-2. Login with Google account
-3. Generate image → check if token works
-4. Generate video → check if token works
-5. Monitor console for 403 errors
+1. Import JSON cookies from browser extension
+2. Test flow generation without login prompt

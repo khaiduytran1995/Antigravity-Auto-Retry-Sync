@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Refactor image/video generation services to match working app v2.3.3 logic exactly",
-  "updatedAt": "2026-01-28T16:41:56.313860700Z",
-  "version": "2"
+  "summary": "Plan to add JSON cookies import feature and fix login persistence issue in target app",
+  "updatedAt": "2026-01-28T17:02:21.227915600Z",
+  "version": "3"
 }
