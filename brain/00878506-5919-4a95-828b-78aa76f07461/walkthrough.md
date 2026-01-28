@@ -1,84 +1,38 @@
-# Puppeteer-Real-Browser Captcha Bypass Implementation
-
-## Summary
-Replaced Selenium-based captcha bypass with puppeteer-real-browser sidecar process for better stealth and anti-detection.
+# JSON Cookies Import Feature - Walkthrough
 
 ## Changes Made
 
-### 1. Created Sidecar Script
-**File**: [capture-sidecar.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/scripts/capture-sidecar.js)
+### 1. tokenManager.js - New Methods Added
 
-A standalone Node.js process using puppeteer-real-browser that:
-- Opens hidden Chrome browser with stealth settings
-- Navigates to labs.google/fx to load grecaptcha
-- Accepts commands via stdin:
-  - `GET_TOKENS <count> [action]` - Generate captcha tokens
-  - `RESTART_BROWSER` - Force restart browser
-  - `SHUTDOWN` - Clean exit
-- Returns JSON responses via stdout
-- Supports VIDEO_GENERATION, IMAGE_GENERATION, FLOW_GENERATION actions
+Added two methods to TokenManager class:
 
----
+- **`fetchTokenFromCookie(cookieString)`** - Fetches bearer token from `labs.google/fx/api/auth/session` using provided cookie string
+- **`addAccountFromCookie(cookieJsonString)`** - Parses JSON cookies from browser extension, filters labs.google domain, fetches token, saves to electron-store
 
-### 2. Replaced recaptchaService.js
-**File**: [recaptchaService.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/recaptchaService.js)
+### 2. cookieIpc.js - New IPC Handler
 
-Changed from Selenium browser pool to sidecar process manager:
-- Spawns `capture-sidecar.js` as child process
-- Communicates via stdin/stdout JSON
-- Auto-starts browser on first token request
-- Handles process lifecycle and restarts
+Created new file with IPC handler:
+```javascript
+ipcMain.handle('auth:add-from-cookie', async (event, { cookieJson, accountIndex = 1 }) => {
+    const tm = getTokenManager(accountIndex);
+    return await tm.addAccountFromCookie(cookieJson);
+});
+```
 
-**API remains the same** - existing code calling `recaptchaService.getToken()` will work without changes.
+## Files Modified
+- `tokenManager.js` - Added 100+ lines for cookie import functionality
+- `cookieIpc.js` - New file with IPC handler
 
----
+## Issue Encountered
+The main.js injection duplicated content due to obfuscation. User needs to:
+1. Restore `main.js` from `main.js.backup`
+2. Add at end of file: `require('./cookieIpc');`
 
-### 3. Refactored Generation Services (Matching v2.3.3)
-**Files**: [flowVideo.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowVideo.js), [flowImage.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowImage.js)
-
-Recoded to match the working app v2.3.3 logic:
-- **Direct axios**: Replaced `mimicApiCall` (IPC-based) with direct `axios` requests to avoid the "reply was never sent" error.
-- **Payload alignment**: Changed `clientContext` structure to use `recaptchaContext: { token: ... }` as required by Google's API in v2.3.3.
-- **Endpoints**: Used standard Google API endpoints.
-- **Headers**: Optimized headers for stability and stealth.
-
----
-
-### 4. Added Dependency
-**File**: [package.json](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/package.json)
-
-Added `puppeteer-real-browser: ^1.2.11` and ran npm install.
-
----
-
-## Testing Steps
-
-1. **Start the application**
-   ```
-   cd "D:\14012026Veo Automation Setup 1.2.1\$PLUGINSDIR\Filegocdeupdate\Veo Automation"
-   .\Veo Automation.exe
-   ```
-
-2. **Login with Google account**
-
-3. **Test image generation** - Check console for:
-   ```
-   [SidecarManager] ✅ Browser ready!
-   [SidecarManager] Getting token for action: IMAGE_GENERATION
-   ```
-
-4. **Test video generation** - Check console for:
-   ```
-   [SidecarManager] Getting token for action: VIDEO_GENERATION
-   ```
-
-5. **Check for 403 errors** - If occurs, browser auto-restarts
-
-## Key Advantages over Selenium
-
-| Feature | Selenium (old) | Puppeteer-Real-Browser (new) |
-|---------|---------------|------------------------------|
-| Detection | Easily detected | Hard to detect (turnstile bypass) |
-| Stealth | Limited | Built-in anti-detection |
-| Browser | Headless only | Real browser with hidden window |
-| Performance | New browser per request | Persistent browser |
+## Usage
+From renderer, call:
+```javascript
+const result = await window.api.invoke('auth:add-from-cookie', {
+    cookieJson: '[{"name":"...", "value":"...", "domain":".labs.google"}]',
+    accountIndex: 1
+});
+```

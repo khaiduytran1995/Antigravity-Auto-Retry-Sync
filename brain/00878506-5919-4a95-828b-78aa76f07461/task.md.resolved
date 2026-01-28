@@ -1,6 +1,12 @@
 # JSON Cookies Import + Login Persistence Fix
 
-- [/] Add fetchTokenFromCookie to tokenManager.js
-- [ ] Add auth:add-from-cookie IPC handler in main.js
-- [ ] Fix session storage persistence
+- [x] Add fetchTokenFromCookie to tokenManager.js
+- [x] Add addAccountFromCookie to tokenManager.js  
+- [x] Create cookieIpc.js with auth:add-from-cookie handler
+- [ ] Restore main.js from backup (injection caused duplication)
 - [ ] Test integration
+
+## Notes
+- main.js is obfuscated - direct injection duplicated content
+- cookieIpc.js needs to be required by main.js to work
+- User should manually restore main.js.backup and add require at end
