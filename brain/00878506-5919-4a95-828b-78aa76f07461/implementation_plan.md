@@ -1,73 +1,55 @@
-# Sửa App Veo Automation Để Tạo Ảnh/Video Hoạt Động
+# Puppeteer-Real-Browser Captcha Bypass Integration
 
-## Phân Tích Kết Quả
+## Goal
+Replace Selenium-based recaptchaService with puppeteer-real-browser sidecar process for better stealth and anti-detection.
 
-### Working App (veoapp.asar - v2.3.3)
-- **Version**: 2.3.3 với ES modules (`"type": "module"`)
-- **Bundle**: Sử dụng code bundled (`main-CHQQFXN8.js`)
-- **Dependencies**: puppeteer, selenium-webdriver cho captcha
-- **Cấu trúc**: Code nén, khó đọc nhưng hoạt động
-
-### Target App (resources/app)
-- **Cấu trúc**: Separate service files (flowImage.js, flowVideo.js, tokenManager.js)
-- **Services hoạt động**:
-  - `flowVideo.js` - Tạo video (644 lines)
-  - `flowImage.js` - Tạo ảnh (243 lines)  
-  - `tokenManager.js` - Quản lý auth, captcha, API calls (2231 lines)
-
-## Vấn Đề Chính
-
-### 1. `global.SECRET_CONFIG` không được khởi tạo
-Cả `flowImage.js` và `flowVideo.js` đều kiểm tra:
-```javascript
-const secretConfig = global.SECRET_CONFIG;
-if (!secretConfig) throw new Error("Unauthorized: Invalid License");
-```
-
-**Giải pháp**: Inject `SECRET_CONFIG` vào `main.js`
-
-### 2. API Endpoint thiếu
-App cần `secretConfig.apiEndpoint` để gọi API Google Labs.
-
----
+## Current State
+- App uses `recaptchaService.js` with Selenium WebDriver in headless mode
+- Selenium is detectable and often gets 403 errors
+- Need to replace with more stealthy puppeteer-real-browser approach
 
 ## Proposed Changes
 
-### [MODIFY] [main.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Super%20Tools%20Veo%20Automation%20(pass%20123)/Veo%20Automation/resources/app/dist-electron/main.js)
+### 1. Create Sidecar Script
+#### [NEW] `capture-sidecar.js`
+Place in `dist-electron/scripts/`
 
-Inject `SECRET_CONFIG` vào global ngay đầu file:
+Copy the user's provided script with minor adaptations:
+- Support both VIDEO_GENERATION and IMAGE_GENERATION actions
+- Add IPC communication via stdin/stdout
+- Persistent browser instance
 
+---
+
+### 2. Modify recaptchaService.js
+#### [MODIFY] `recaptchaService.js`
+
+Replace Selenium pool with sidecar process manager:
+- Spawn `capture-sidecar.js` as child process
+- Communicate via stdin/stdout JSON
+- Handle process lifecycle (start, restart, shutdown)
+- Support multiple actions (video/image generation)
+
+**Key interface:**
 ```javascript
-// Thêm vào đầu main.js (sau các require/import)
-global.SECRET_CONFIG = {
-    apiEndpoint: 'https://aisandbox-pa.googleapis.com/v1/video:batchAsyncGenerateVideo',
-    appName: 'Veo Automation',
-    version: '1.2.1',
-    // Các config cần thiết khác
-    timeout: 60000
-};
+class PuppeteerSidecarService {
+  async start()           // Spawn sidecar process
+  async getToken(cookie, action)  // Get recaptcha token
+  async restart()         // Force restart browser
+  async shutdown()        // Clean shutdown
+}
 ```
 
 ---
 
-## User Review Required
-
-> [!IMPORTANT]
-> File `main.js` của target app bị obfuscate nặng (1 dòng với 40KB code). Việc inject code cần cẩn thận.
-
-> [!WARNING]
-> Nếu app gốc yêu cầu license verification từ server, việc bypass có thể không hoạt động đầy đủ. Cần xác nhận bạn có quyền sử dụng app này.
+### 3. Update Dependencies
+Add `puppeteer-real-browser` to package.json.
 
 ---
 
 ## Verification Plan
-
-### Manual Testing
-1. Sau khi patch, khởi động app Veo Automation
-2. Đăng nhập tài khoản Google
-3. Thử tạo ảnh với prompt bất kỳ → Kiểm tra xem có lỗi "Unauthorized: Invalid License" không
-4. Thử tạo video với prompt bất kỳ → Kiểm tra xem có lỗi không
-
-### Console Check
-1. Mở DevTools (Ctrl+Shift+I nếu được hỗ trợ)
-2. Kiểm tra console log để xem `SECRET_CONFIG` có được nhận diện không
+1. Start app and check if sidecar spawns successfully
+2. Login with Google account
+3. Generate image → check if token works
+4. Generate video → check if token works
+5. Monitor console for 403 errors

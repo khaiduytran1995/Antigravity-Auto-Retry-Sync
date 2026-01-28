@@ -1,5 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan chi tiết để sửa app Veo Automation bằng cách inject global.SECRET_CONFIG vào main.js để bỏ qua license check và cho phép tạo ảnh/video.",
-  "updatedAt": "2026-01-28T13:32:56.987649200Z"
+  "summary": "Plan to integrate puppeteer-real-browser based captcha bypass into target app v1.2.1, replacing Selenium with sidecar Node.js process",
+  "updatedAt": "2026-01-28T16:06:14.068057400Z",
+  "version": "1"
 }

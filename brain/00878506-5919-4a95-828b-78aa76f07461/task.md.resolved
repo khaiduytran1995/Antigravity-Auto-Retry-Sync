@@ -1,7 +1,5 @@
-# Sửa App Veo Automation Tạo Ảnh/Video
+# Captcha Bypass Implementation
 
-- [x] Phân tích working app (veoapp.asar)
-- [x] Phân tích target app structure
-- [x] Xác định vấn đề: thiếu SECRET_CONFIG
-- [x] Inject SECRET_CONFIG vào main.js
-- [x] Verify app hoạt động
+- [/] Create capture-sidecar.js script
+- [ ] Modify recaptchaService.js to use sidecar
+- [ ] Test integration
