@@ -29,6 +29,12 @@ In `tokenManager.js`:
 ### 3. Fix Session Storage
 - When user logs in successfully, ENSURE cookie and token are SAVED to electron-store
 - On app start, try to use stored credentials BEFORE forcing login
+ 
+### 4. Fix Recovery Window Visibility
+- Ensure `automatedRecovery` respects `isExplicit` flag
+- Force `show: false` for background recovery attempts
+- Prevent `tokenManager` from showing window unless explicitly requested
+
 
 ## Verification Plan
 1. Import JSON cookies from browser extension

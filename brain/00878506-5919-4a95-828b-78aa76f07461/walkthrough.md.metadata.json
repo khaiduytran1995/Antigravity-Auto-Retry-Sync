@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Walkthrough of JSON cookies import feature implementation",
-  "updatedAt": "2026-01-28T17:11:35.489768600Z",
-  "version": "4"
+  "summary": "Documented JSON Cookies Import and Login Persistence Fix.",
+  "updatedAt": "2026-01-28T17:34:04.903639400Z",
+  "version": "5"
 }

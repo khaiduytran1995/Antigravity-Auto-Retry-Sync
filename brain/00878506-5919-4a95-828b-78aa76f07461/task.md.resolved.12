@@ -1,0 +1,18 @@
+# JSON Cookies Import + Login Persistence Fix
+
+- [x] Add fetchTokenFromCookie to tokenManager.js
+- [x] Add addAccountFromCookie to tokenManager.js  
+- [x] Create cookieIpc.js with auth:add-from-cookie handler
+- [x] Analyze [veoapp.asar](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Super%20Tools%20Veo%20Automation%20%28pass%20123%29/Veo%20Automation/resources/veoapp.asar) logic (confirmed `getAccountCredentials` has no expiry check)
+- [x] Modify [tokenManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/tokenManager.js) (Target App)
+    - [x] Update `login()` to check stored token first
+    - [x] Implement `getAccountCredentials`-like logic
+    - [x] Ensure `lastRefresh` is handled correctly
+- [x] Verify [main.js](file:///C:/Users/hp/.gemini/antigravity/scratch/veoapp_extracted/dist-electron/main.js) handlers use the new logic
+- [x] Test generation flow (Logic verified: Axois -> Success / 403 -> Recovery)
+
+# Fix Hidden Recovery & Window Visibility
+- [x] Debug why `automatedRecovery` shows window even when `isExplicit` is false (Added check to hide if visible)
+- [x] Verify `isExplicitRecovery` state management
+- [x] Ensure [veoapp.asar](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Super%20Tools%20Veo%20Automation%20%28pass%20123%29/Veo%20Automation/resources/veoapp.asar) behavior (hidden background recovery) is replicated
+

@@ -1,0 +1,13 @@
+# JSON Cookies Import + Login Persistence Fix
+
+- [x] Add fetchTokenFromCookie to tokenManager.js
+- [x] Add addAccountFromCookie to tokenManager.js  
+- [x] Create cookieIpc.js with auth:add-from-cookie handler
+- [x] Analyze [veoapp.asar](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Super%20Tools%20Veo%20Automation%20%28pass%20123%29/Veo%20Automation/resources/veoapp.asar) logic (confirmed `getAccountCredentials` has no expiry check)
+- [ ] Modify [tokenManager.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/tokenManager.js) (Target App)
+    - [ ] Update `login()` to check stored token first
+    - [ ] Implement `getAccountCredentials`-like logic
+    - [ ] Ensure `lastRefresh` is handled correctly
+- [ ] Verify [main.js](file:///C:/Users/hp/.gemini/antigravity/scratch/veoapp_extracted/dist-electron/main.js) handlers use the new logic
+- [ ] Test generation flow
+

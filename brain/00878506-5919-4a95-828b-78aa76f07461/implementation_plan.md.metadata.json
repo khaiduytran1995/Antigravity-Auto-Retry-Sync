@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan to add JSON cookies import feature and fix login persistence issue in target app",
-  "updatedAt": "2026-01-28T17:02:21.227915600Z",
-  "version": "3"
+  "summary": "Added details about fixing hidden recovery window visibility.",
+  "updatedAt": "2026-01-28T17:44:13.862070400Z",
+  "version": "4"
 }
