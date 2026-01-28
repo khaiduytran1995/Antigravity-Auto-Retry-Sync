@@ -22,28 +22,27 @@ Copy the user's provided script with minor adaptations:
 ---
 
 ### 2. Modify recaptchaService.js
-#### [MODIFY] `recaptchaService.js`
+#### [MODIFY] [recaptchaService.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/recaptchaService.js)
 
-Replace Selenium pool with sidecar process manager:
-- Spawn `capture-sidecar.js` as child process
-- Communicate via stdin/stdout JSON
-- Handle process lifecycle (start, restart, shutdown)
-- Support multiple actions (video/image generation)
-
-**Key interface:**
-```javascript
-class PuppeteerSidecarService {
-  async start()           // Spawn sidecar process
-  async getToken(cookie, action)  // Get recaptcha token
-  async restart()         // Force restart browser
-  async shutdown()        // Clean shutdown
-}
-```
+[COMPLETED] Replaced Selenium pool with sidecar process manager.
 
 ---
 
-### 3. Update Dependencies
-Add `puppeteer-real-browser` to package.json.
+### 3. Refactor Generation Services
+#### [MODIFY] [flowVideo.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowVideo.js)
+#### [MODIFY] [flowImage.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowImage.js)
+
+**Changes:**
+- Replace `tokenManager.mimicApiCall` with direct `axios` requests (matching v2.3.3)
+- Remove reliance on `SECRET_CONFIG` for endpoints; use hardcoded Google API endpoints from v2.3.3
+- Simplify project structure and context to match v2.3.3
+- Ensure reCAPTCHA tokens are fetched from the new `recaptchaService`
+- Improve error logging and recovery
+
+---
+
+### 4. Update Dependencies
+[COMPLETED] Added `puppeteer-real-browser` to package.json.
 
 ---
 

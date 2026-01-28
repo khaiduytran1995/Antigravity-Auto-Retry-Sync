@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Plan to integrate puppeteer-real-browser based captcha bypass into target app v1.2.1, replacing Selenium with sidecar Node.js process",
-  "updatedAt": "2026-01-28T16:06:14.068057400Z",
-  "version": "1"
+  "summary": "Refactor image/video generation services to match working app v2.3.3 logic exactly",
+  "updatedAt": "2026-01-28T16:41:56.313860700Z",
+  "version": "2"
 }

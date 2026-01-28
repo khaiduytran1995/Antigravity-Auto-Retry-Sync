@@ -33,7 +33,18 @@ Changed from Selenium browser pool to sidecar process manager:
 
 ---
 
-### 3. Added Dependency
+### 3. Refactored Generation Services (Matching v2.3.3)
+**Files**: [flowVideo.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowVideo.js), [flowImage.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/flowImage.js)
+
+Recoded to match the working app v2.3.3 logic:
+- **Direct axios**: Replaced `mimicApiCall` (IPC-based) with direct `axios` requests to avoid the "reply was never sent" error.
+- **Payload alignment**: Changed `clientContext` structure to use `recaptchaContext: { token: ... }` as required by Google's API in v2.3.3.
+- **Endpoints**: Used standard Google API endpoints.
+- **Headers**: Optimized headers for stability and stealth.
+
+---
+
+### 4. Added Dependency
 **File**: [package.json](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/package.json)
 
 Added `puppeteer-real-browser: ^1.2.11` and ran npm install.
