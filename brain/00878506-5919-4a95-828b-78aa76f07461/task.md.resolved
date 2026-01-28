@@ -1,5 +1,6 @@
 # Captcha Bypass Implementation
 
-- [/] Create capture-sidecar.js script
-- [ ] Modify recaptchaService.js to use sidecar
-- [ ] Test integration
+- [x] Create capture-sidecar.js script
+- [x] Modify recaptchaService.js to use sidecar
+- [x] Install puppeteer-real-browser dependency
+- [ ] Test integration (user verification needed)

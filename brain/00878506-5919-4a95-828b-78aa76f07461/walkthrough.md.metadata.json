@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Complete architecture analysis comparing veoapp v2.3.3 (working, no license) vs target v1.2.1 (requires SECRET_CONFIG). Documents API endpoints, module systems, and recommendations.",
-  "updatedAt": "2026-01-28T15:58:41.544335500Z",
-  "version": "1"
+  "summary": "Complete walkthrough of puppeteer-real-browser captcha bypass implementation for Veo Automation v1.2.1",
+  "updatedAt": "2026-01-28T16:21:28.550918300Z",
+  "version": "2"
 }

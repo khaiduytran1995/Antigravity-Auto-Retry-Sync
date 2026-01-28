@@ -1,56 +1,73 @@
-# VeoApp Architecture Analysis
+# Puppeteer-Real-Browser Captcha Bypass Implementation
 
-## Working App (veoapp.asar v2.3.3)
+## Summary
+Replaced Selenium-based captcha bypass with puppeteer-real-browser sidecar process for better stealth and anti-detection.
 
-### Structure
-- **Entry Point**: `main.js` → imports bundled `main-CHQQFXN8.js` (~10MB)
-- **Architecture**: ES Modules, bundled with Vite
-- **API Calls**: Direct axios to Google APIs
-- **reCAPTCHA**: Uses `getRecaptchaService()` with Puppeteer/Selenium
+## Changes Made
 
-### Key API Endpoints
-| Endpoint | Function |
-|----------|----------|
-| `https://labs.google/fx/api/trpc/project.createProject` | Create project |
-| `https://aisandbox-pa.googleapis.com/v1/:uploadUserImage` | Upload image |
-| `https://aisandbox-pa.googleapis.com/v1/video:batchAsyncGenerateVideoStartImage` | Generate video |
-| `https://aisandbox-pa.googleapis.com/v1/video:batchAsyncGenerateVideoText` | Text-to-video |
-| `https://aisandbox-pa.googleapis.com/v1/video:batchCheckAsyncVideoGenerationStatus` | Check status |
+### 1. Created Sidecar Script
+**File**: [capture-sidecar.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/scripts/capture-sidecar.js)
 
-### No License Check
-- **No `SECRET_CONFIG`** - không có license verification
-- **No backend auth** - sử dụng Google cookies trực tiếp
+A standalone Node.js process using puppeteer-real-browser that:
+- Opens hidden Chrome browser with stealth settings
+- Navigates to labs.google/fx to load grecaptcha
+- Accepts commands via stdin:
+  - `GET_TOKENS <count> [action]` - Generate captcha tokens
+  - `RESTART_BROWSER` - Force restart browser
+  - `SHUTDOWN` - Clean exit
+- Returns JSON responses via stdout
+- Supports VIDEO_GENERATION, IMAGE_GENERATION, FLOW_GENERATION actions
 
 ---
 
-## Target App (v1.2.1)
+### 2. Replaced recaptchaService.js
+**File**: [recaptchaService.js](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/dist-electron/services/recaptchaService.js)
 
-### Structure  
-- **Entry Point**: Obfuscated `main.js`
-- **Architecture**: CommonJS với separate service files
-- **Services**: `tokenManager.js`, `flowVideo.js`, `flowImage.js`
-- **API Calls**: Through `mimicApiCall` in Electron window
+Changed from Selenium browser pool to sidecar process manager:
+- Spawns `capture-sidecar.js` as child process
+- Communicates via stdin/stdout JSON
+- Auto-starts browser on first token request
+- Handles process lifecycle and restarts
 
-### Issue
-- Requires `global.SECRET_CONFIG` with `apiEndpoint`
-- License check fails → "Unauthorized: Invalid License"
+**API remains the same** - existing code calling `recaptchaService.getToken()` will work without changes.
 
 ---
 
-## Key Difference
+### 3. Added Dependency
+**File**: [package.json](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/$PLUGINSDIR/Filegocdeupdate/Veo%20Automation/resources/app/package.json)
 
-| Feature | veoapp v2.3.3 | Target v1.2.1 |
-|---------|--------------|---------------|
-| Module System | ES Modules (bundled) | CommonJS (separate) |
-| API Client | Direct axios | mimicApiCall via Electron |
-| License | None | SECRET_CONFIG required |
-| reCAPTCHA | HybridRecaptchaService | TokenManager internal |
+Added `puppeteer-real-browser: ^1.2.11` and ran npm install.
 
-## Recommendation
+---
 
-**Option 1**: Use veoapp.asar v2.3.3 directly - it's newer and has no license checks
+## Testing Steps
 
-**Option 2**: If must use v1.2.1, the SECRET_CONFIG patch already applied should work. Test by:
-1. Restart the application
-2. Login with Google
-3. Try generating video/image
+1. **Start the application**
+   ```
+   cd "D:\14012026Veo Automation Setup 1.2.1\$PLUGINSDIR\Filegocdeupdate\Veo Automation"
+   .\Veo Automation.exe
+   ```
+
+2. **Login with Google account**
+
+3. **Test image generation** - Check console for:
+   ```
+   [SidecarManager] ✅ Browser ready!
+   [SidecarManager] Getting token for action: IMAGE_GENERATION
+   ```
+
+4. **Test video generation** - Check console for:
+   ```
+   [SidecarManager] Getting token for action: VIDEO_GENERATION
+   ```
+
+5. **Check for 403 errors** - If occurs, browser auto-restarts
+
+## Key Advantages over Selenium
+
+| Feature | Selenium (old) | Puppeteer-Real-Browser (new) |
+|---------|---------------|------------------------------|
+| Detection | Easily detected | Hard to detect (turnstile bypass) |
+| Stealth | Limited | Built-in anti-detection |
+| Browser | Headless only | Real browser with hidden window |
+| Performance | New browser per request | Persistent browser |
