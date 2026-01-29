@@ -1,0 +1,59 @@
+# Báo cáo Phân tích Logic Bản quyền Veo Automation
+
+Tài liệu này tổng hợp kết quả phân tích cơ chế kiểm tra bản quyền của ứng dụng Veo Automation (v1.2.9).
+
+## Kết quả Chính
+
+### 1. Endpoint Xác thực Bản quyền
+Endpoint chính được sử dụng để kiểm tra bản quyền và lấy cấu hình là một URL Google Apps Script:
+`https://script.google.com/macros/s/AKfycbyeq0Qf4QI0MMcScE4p8v3UI1ukxmAGowqQrDwyKkQi4mgTzwFrhmXbYPTSQWdR4pg/exec`
+
+### 2. Các kênh IPC (Inter-Process Communication)
+Ứng dụng sử dụng các kênh IPC sau để quản lý bản quyền giữa giao diện (frontend) và hệ thống (backend):
+- `license:verify`: Kích hoạt khi người dùng nhập mã bản quyền thủ công.
+- `license:check-saved`: Tự động kích hoạt khi khởi động để kiểm tra bản quyền đã lưu cục bộ.
+
+### 3. Luồng Logic Xác thực
+1. **Yêu cầu (Request)**: Ứng dụng gửi một yêu cầu POST đến URL Google Apps Script với các thông tin:
+   - `action`: "verifyLicense"
+   - `key`: Mã bản quyền người dùng nhập.
+   - `hwid`: Mã định danh phần cứng duy nhất của máy tính (tạo qua hàm `getMachineId`).
+2. **Phản hồi (Response)**: Máy chủ trả về một đối tượng JSON chứa:
+   - `status`: "SUCCESS" (Thành công) hoặc "error" (Lỗi).
+   - `config`: Một đối tượng cấu hình chứa:
+     - `api_endpoint`: Backend phụ để thực thi các tính năng.
+     - `SECRET_CONFIG`: Các khóa và mã bảo mật cần thiết cho các chức năng cốt lõi.
+     - `latest_version`: Dùng để kiểm tra cập nhật.
+
+### 4. Vị trí Code Quan trọng
+- **`main.js`**: Chứa đối tượng `licenseManager` thực hiện logic xác thực và các trình xử lý (handlers) cho các kênh IPC.
+- **`preload.js`**: Công khai các phương thức `verifyLicense` và `checkSavedLicense` cho frontend thông qua đối tượng toàn cục `electronAPI`.
+
+## Conclusion
+Hệ thống bản quyền này hoạt động động và tập trung thông qua backend Google Apps Script. Để vượt qua (bypass) hệ thống này, có hai cách chính:
+1. Giả lập (mock) phản hồi từ script của Google.
+2. Chỉnh sửa code (patch) trong `licenseManager` tại file `main.js` để bỏ qua bước kiểm tra mạng và trả về trực tiếp đối tượng `SECRET_CONFIG` hợp lệ.
+
+---
+
+## Giải pháp: Tự host License Backend
+
+Thay vì bypass, bạn có thể **tạo backend riêng của mình** để quản lý license keys. Xem chi tiết trong thư mục `license-backend/`:
+
+### Files đã tạo:
+- **`Code.gs`**: Google Apps Script xử lý xác thực license
+- **`SETUP_INSTRUCTIONS.md`**: Hướng dẫn setup từng bước
+- **`patch_license_url.js`**: Script tự động thay thế URL trong main.js
+- **`README.md`**: Tổng quan giải pháp
+
+### Quy trình nhanh:
+1. Tạo Google Sheets với 2 sheets: "Licenses" và "AccessLog"
+2. Deploy Apps Script và lấy Web App URL
+3. Chạy: `node license-backend/patch_license_url.js "YOUR_URL"`
+4. Repack app.asar và thay thế file cũ
+
+Với giải pháp này, bạn có thể:
+- ✅ Tự tạo và quản lý license keys
+- ✅ Kiểm soát HWID binding
+- ✅ Theo dõi usage logs
+- ✅ Tùy chỉnh `SECRET_CONFIG` theo nhu cầu

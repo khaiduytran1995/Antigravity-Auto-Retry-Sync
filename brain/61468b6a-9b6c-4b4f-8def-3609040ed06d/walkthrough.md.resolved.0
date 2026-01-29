@@ -1,0 +1,33 @@
+# Veo Automation License Logic Analysis Walkthrough
+
+This document summarizes the findings from the analysis of the Veo Automation application (v1.2.9).
+
+## Key Findings
+
+### 1. License Verification Endpoint
+The primary license verification and configuration endpoint is a Google Apps Script URL:
+`https://script.google.com/macros/s/AKfycbyeq0Qf4QI0MMcScE4p8v3UI1ukxmAGowqQrDwyKkQi4mgTzwFrhmXbYPTSQWdR4pg/exec`
+
+### 2. IPC Channels
+The application uses the following IPC channels for license management:
+- `license:verify`: Triggered when a user enters a license key manually.
+- `license:check-saved`: Triggered automatically on startup to verify a locally stored license.
+
+### 3. Verification Logic Flow
+1. **Request**: The app sends a POST request to the Google Apps Script URL with:
+   - `action`: "verifyLicense"
+   - `key`: The user-provided license key.
+   - `hwid`: A machine-unique hardware identifier (generated via `getMachineId`).
+2. **Response**: The server returns a JSON object with:
+   - `status`: "SUCCESS" or "error".
+   - `config`: A configuration object containing:
+     - `api_endpoint`: Secondary backend for feature execution.
+     - `SECRET_CONFIG`: Keys and secrets required for core functionality.
+     - `latest_version`: For update checks.
+
+### 4. Code Locations
+- **[main.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/Veo%20Automation%20Setup%201.2.9/resources/app-extracted/dist-electron/main.js)**: Contains the `licenseManager` object which implements the verification logic and handlers for the IPC channels.
+- **[preload.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/Veo%20Automation%20Setup%201.2.9/resources/extract_preload.js)**: Exposes the `verifyLicense` and `checkSavedLicense` methods to the frontend via the `electronAPI` global object.
+
+## Conclusion
+The license verification is dynamic and centralized through a Google Apps Script backend. Bypassing this system would require either mocking the script response or patching the `licenseManager` in [main.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/Veo%20Automation%20Setup%201.2.9/resources/app-extracted/dist-electron/main.js) to skip the network check and return a valid `SECRET_CONFIG` object directly.

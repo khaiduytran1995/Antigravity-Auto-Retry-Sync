@@ -1,6 +1,7 @@
 # Task: Check Endpoint and License
 
 - [x] Locate source code (extract app.asar if necessary)
-- [/] Identify API endpoints
-- [/] Identify license verification logic
-- [ ] Report findings to user
+- [x] Identify API endpoints
+- [x] Identify license verification logic
+- [x] Report findings to user
+- [x] Tạo Google Apps Script backend thay thế
