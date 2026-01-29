@@ -1,0 +1,6 @@
+# Task Checklist
+
+- [ ] Search for keywords: XOR, KEY, SECRET, AUTH, SUPABASE, LICENSE [/]
+- [ ] Inspect configuration files (JSON, JS, ENV) [ ]
+- [ ] Check for hardcoded credentials in application logic [ ]
+- [ ] Analyze the application architecture for potential leaks [ ]

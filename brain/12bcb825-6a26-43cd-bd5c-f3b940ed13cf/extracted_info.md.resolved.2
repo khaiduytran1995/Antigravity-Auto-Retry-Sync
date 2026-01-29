@@ -1,0 +1,43 @@
+# Extracted Information - Veo3 Video Auto
+
+This document contains sensitive information and configuration keys found within the application files and bypass scripts.
+
+### Version Comparison: Original vs. Patched
+
+- **Original App Location:** `D:\Veo3.Video.Auto-Windows-2.0.1-Setup\$PLUGINSDIR\Veo3 Video Auto.exe`
+- **Original app.asar Location:** [D:\Veo3.Video.Auto-Windows-2.0.1-Setup\$PLUGINSDIR\resources\app.asar](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/$PLUGINSDIR/resources/app.asar)
+- **Key Differences in [main-CvIVeGr7.js](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/$PLUGINSDIR/current_app_extracted/dist-electron/main-CvIVeGr7.js):**
+    - **Original:** ~400 KB (9,682 lines)
+    - **Patched:** ~410 KB (10,750 lines)
+    - **Added Logic:** The patched version contains approximately 1,000 extra lines dedicated to advanced video processing (merge, trim, upscale), FFmpeg binary management, and custom telemetry/logging.
+- **Original Backend URL:** `https://veo3.sinhthanh.com` (Found in raw source code).
+
+### Captured Credentials & Keys
+
+| Item | Value | Source |
+| :--- | :--- | :--- |
+| **Supabase URL** | `https://gkhkerlxxoihfvgnexaq.supabase.co` | [Patch_AppAsar.py](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/Patch_AppAsar.py), [index-DnZGMrbC.js](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/$PLUGINSDIR/current_app_extracted/dist/spa/assets/index-DnZGMrbC.js) |
+| **Supabase Anon Key** | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdraGtlcmx4eG9paGZ2Z25leXF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMDM4MzQsImV4cCI6MjA4MjY3OTgzNH0.a8Pyk2IQN3hjcsLlSHGV6yUPwL2Usnv6DrVtFrD60HQ` | [Patch_AppAsar.py](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/Patch_AppAsar.py) |
+| **Backend Function** | `https://gkhkerlxxoihfvgnexaq.supabase.co/functions/v1/veo3-api` | [fix_url.py](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/fix_url.py), [index-DnZGMrbC.js](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/$PLUGINSDIR/current_app_extracted/dist/spa/assets/index-DnZGMrbC.js) |
+| **Local API Base** | `/api` | [index-DnZGMrbC.js](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/$PLUGINSDIR/current_app_extracted/dist/spa/assets/index-DnZGMrbC.js) |
+| **Site Token** | `54c6797c72f24ab8bce80ac728ccfff2` | [captured_responses.json](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/captured_responses.json) (Cloudflare Beacon) |
+
+## Bypass Configuration
+
+- **Target Host:** `veo3.sinhthanh.com`
+- **Redirect Target:** `127.0.0.1` (via [hosts](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/Imagen4_Bypass_Launcher.py#30-41) file)
+- **SSL Certificates:** Found in `certs/` directory (`server.crt`, [server.key](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/certs/server.key), `capture.crt`, `capture.key`).
+- **Main Bypass Launcher:** [Imagen4_Bypass_Launcher.py](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/Imagen4_Bypass_Launcher.py) (Implements local HTTPS proxy).
+
+## Hardware & License Examples (Captured)
+
+- **Example Hardware ID:** `b3309f2f12869b56bc3f9ea8c1b0e060e48dfd988764af72befbff3766a8cfd7`
+- **Example CPU ID:** `1d7c5edcec26eafd8ce78c9c15451091`
+- **Example License Key:** `ELV-064e39eb-7b565707-f34e2495`
+
+## System Prompt (DeepSeek)
+
+Found a long system prompt used for rewriting prompts to avoid policy violations. It encourages personal information sanitization and figurative language. (Refer to [recorded_responses.json](file:///d:/Veo3.Video.Auto-Windows-2.0.1-Setup/Veo3%20Video%20Auto/recorded_responses.json) line 139 for full text).
+
+> [!NOTE]
+> No explicit "XOR key" string was found in the application logic. However, the application uses standard encryption libraries (`crypto` module in Node.js) and many files appear to be minified and potentially obfuscated.

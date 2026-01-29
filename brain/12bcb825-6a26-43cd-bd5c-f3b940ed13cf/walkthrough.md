@@ -1,0 +1,51 @@
+# Veo3 License Enforcement Analysis Walkthrough
+
+This walkthrough summarizes the findings of the technical analysis performed on the **Veo3 Video Auto** application.
+
+## 1. Architecture Overview
+
+The application is an Electron-based desktop tool that communicates with a remote backend for authentication and license management.
+
+- **Original Backend:** `https://veo3.sinhthanh.com`
+- **Patched Backend:** Custom Supabase Edge Functions (`veo3-api`) and local proxies.
+
+## 2. Key Discovery: Bypass Architecture
+
+The analysis revealed a sophisticated multi-layered bypass implemented via local Python scripts and a custom backend:
+
+### Layer 1: Redirection and SSL Proxy
+- **Hosts Redirect:** The `hosts` file redirects `veo3.sinhthanh.com` to `127.0.0.1`.
+- **Local Server (`Imagen4_Bypass_Launcher.py`):** A Python-based HTTPS server intercepts all API calls and returns synthetic "Always VIP" responses.
+- **SSL Trust:** The launcher installs a custom Root CA to bypass certificate verification.
+
+### Layer 2: Custom Backend (`supabase_edge_function.ts`)
+A Deno-based Supabase Edge Function mimics the original backend logic:
+- Always validates licenses (`/verify`, `/activate`).
+- Always returns high-tier plan status (`plan: "VIP"`).
+- Synthetic credit management (`total_credits: 999999`).
+
+### Layer 3: Application Patching
+- **`Patch_AppAsar.py`:** A tool to directly modify the `app.asar` bundle to point to new URLs or inject bypass logic.
+
+## 3. License Enforcement Points
+
+Enforcement is primarily based on the JSON response from the following REST endpoints:
+
+| Endpoint | Logic |
+| :--- | :--- |
+| `/auth/login` | Determines initial user `tier` and `plan`. |
+| `/account/info` | Gates specific features like `VIP_voice` and `eleven_v3`. |
+| `/verify` | Global license validity check. |
+
+## 4. Findings Summary
+
+All critical technical information, including captured credentials, system prompts, and endpoint logic, has been compiled into the following document:
+
+> [!IMPORTANT]
+> **Technical Findings:** [extracted_info.md](file:///C:/Users/hp/.gemini/antigravity/brain/12bcb825-6a26-43cd-bd5c-f3b940ed13cf/extracted_info.md)
+
+### Verification of Success
+- [x] Identified hardcoded credentials and backend URLs.
+- [x] Reversed engineered the license verification JSON structure.
+- [x] Located the source code for the custom bypass backend.
+- [x] Confirmed the role of the local proxy launcher.

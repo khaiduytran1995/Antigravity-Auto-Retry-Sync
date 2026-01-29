@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Implementation plan for analyzing Veo Automation's backend endpoints and license verification logic. Contains steps for string de-obfuscation, IPC channel mapping, and verification of the Google Apps Script communication.",
+  "updatedAt": "2026-01-29T15:48:04.616453800Z"
+}
