@@ -1,7 +1,12 @@
-# Task: Check Endpoint and License
+# Task: Porting Video/Image Features
 
 - [x] Locate source code (extract app.asar if necessary)
 - [x] Identify API endpoints
 - [x] Identify license verification logic
 - [x] Report findings to user
 - [x] Tạo Google Apps Script backend thay thế
+- [/] Port new video and image generation features from [moiapp.asar](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/Super%20Tools%20Veo%20Automation%20%28pass%20123%29/Veo%20Automation/resources/moiapp.asar) to `app` folder
+    - [ ] Explore [moiapp.asar](file:///D:/14012026Veo%20Automation%20Setup%201.2.1/Super%20Tools%20Veo%20Automation%20%28pass%20123%29/Veo%20Automation/resources/moiapp.asar) contents
+    - [ ] Extract key logic files ([main.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/Veo%20Automation%20Setup%201.2.9/resources/app-extracted/dist-electron/main.js), [preload.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/Veo%20Automation%20Setup%201.2.9/resources/extract_preload.js))
+    - [ ] Compare with current version and port changes
+    - [ ] Verify integrated features
