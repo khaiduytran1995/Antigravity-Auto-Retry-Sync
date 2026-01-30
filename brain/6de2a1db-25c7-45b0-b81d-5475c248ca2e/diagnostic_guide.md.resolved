@@ -1,0 +1,26 @@
+# Hướng dẫn kiểm tra Server Log
+
+Redirect đã chạy thành công, nhưng Tool vẫn báo "Lỗi kết nối". Cần xác định nguyên nhân.
+
+## Bước 1: Kiểm tra xem Tool có gọi tới Server không
+
+1. Vào **File Manager** trên host `hero.io.vn`
+2. Tìm thư mục: `/api/users/`
+3. Kiểm tra xem có file **`api_log.txt`** không?
+
+## Kết quả
+
+### ✅ NẾU CÓ FILE `api_log.txt`:
+- Tool ĐÃ gọi tới server của bạn
+- Vấn đề nằm ở **format JSON** hoặc **Headers**
+- Hãy gửi nội dung file `api_log.txt` cho tôi
+
+### ❌ NẾU KHÔNG CÓ FILE:
+- Tool BỊ CHẶN bởi SSL/HTTPS
+- Cần dùng giải pháp khác:
+  - **Giải pháp A:** Chạy file [1kichhoat.py](file:///D:/SuperVeoTifo/NewSuperVeo/1kichhoat.py) để bypass hoàn toàn (không cần server)
+  - **Giải pháp B:** Cài đặt chứng chỉ SSL hợp lệ trên `hero.io.vn`
+  - **Giải pháp C:** Dùng Local Bridge ([LAUNCH_LOCAL.bat](file:///D:/SuperVeoTifo/NewSuperVeo/LAUNCH_LOCAL.bat))
+
+## Lưu ý
+File `api_log.txt` được tạo TỰ ĐỘNG khi Tool gọi API. Nếu không có file này, nghĩa là Tool chưa bao giờ kết nối thành công tới server.

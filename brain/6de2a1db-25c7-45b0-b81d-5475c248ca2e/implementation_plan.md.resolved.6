@@ -1,0 +1,36 @@
+# Sửa lỗi "Kết nối thất bại" trên App SuperVeo
+
+Sau khi patch domain thành công, server đã chạy trên trình duyệt nhưng App vẫn báo lỗi. Kế hoạch này tập trung vào việc xử lý triệt để các rào cản về SSL, Cache và Headers.
+
+## User Review Required
+
+> [!IMPORTANT]
+> Bạn cần đảm bảo đã **XÓA THƯ MỤC CACHE** của App trước khi thực hiện bước tiếp theo.
+> Thư mục: `%APPDATA%\com.veo3.auto`
+
+## Proposed Changes
+
+### [Server PHP]
+Cập nhật [session.php](file:///D:/SuperVeoTifo/vercel-session-backend/php/api/users/session.php) để log lại mọi yêu cầu (giúp kiểm tra xem App có thực sự gọi tới host không).
+
+#### [MODIFY] [session.php](file:///D:/SuperVeoTifo/vercel-session-backend/php/api/users/session.php)
+- Thêm logic ghi log vào file `api_log.txt`.
+
+### [Local Diagnostics]
+Tạo script dọn dẹp cache và kiểm tra kết nối chuyên sâu.
+
+#### [NEW] [CLEAN_UP_VEO.bat](file:///D:/SuperVeoTifo/NewSuperVeo/CLEAN_UP_VEO.bat)
+- Tự động xóa thư mục AppData và cấu hình cũ để App nhận domain mới hoàn toàn.
+
+#### [NEW] [diagnosis_server.py](file:///D:/SuperVeoTifo/NewSuperVeo/diagnosis_server.py)
+- Server local giả lập `api.hero.io.vn` để bắt request từ App và xem App gửi gì (Headers, Body) mà bị lỗi.
+
+## Verification Plan
+
+### Automated Tests
+1. Chạy `CLEAN_UP_VEO.bat` để làm sạch môi trường.
+2. Chạy [SuperVeo.exe](file:///d:/SuperVeoTifo/SuperVeo.exe) và quan sát log trên Server (hoặc Local Bridge) để xem request có tới không.
+
+### Manual Verification
+1. Truy cập `https://api.hero.io.vn/api/api_log.txt` (nếu có) để xem lịch sử truy cập của Tool.
+2. Kiểm tra lại 🔒 SSL trên trình duyệt: Nếu báo "Self-signed" hoặc "Not secure", Tool sẽ không bao giờ kết nối được.

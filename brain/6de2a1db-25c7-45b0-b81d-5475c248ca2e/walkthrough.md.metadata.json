@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Final bypass solution for SuperVeo.\n- Bridge server with enhanced JSON structure for full compatibility.\n- Automated launch using the original stable EXE.\n- Verified VIP status for both Image and Video features.",
-  "updatedAt": "2026-01-29T17:59:35.576428800Z",
-  "version": "9"
+  "summary": "Walkthrough of the final fixes implemented for SuperVeo.exe connection issues. Includes the cache cleanup script and the logging-enabled PHP backend.",
+  "updatedAt": "2026-01-30T08:50:35.624240400Z",
+  "version": "10"
 }
