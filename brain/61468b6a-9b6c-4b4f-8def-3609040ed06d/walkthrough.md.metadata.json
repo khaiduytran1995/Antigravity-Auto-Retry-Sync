@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Báo cáo phân tích logic bản quyền của Veo Automation (v1.2.9) bằng tiếng Việt. Tài liệu chi tiết về API endpoints, các kênh IPC và luồng xử lý xác thực.",
-  "updatedAt": "2026-01-29T16:05:36.835908600Z",
-  "version": "1"
+  "summary": "Báo cáo hoàn tất cập nhật v1.3.0 với hướng dẫn khắc phục lỗi missing dependencies.",
+  "updatedAt": "2026-01-30T17:00:57.063727400Z",
+  "version": "4"
 }

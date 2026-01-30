@@ -1,0 +1,62 @@
+# Walkthrough: Supabase Integration for License Management
+
+I have successfully switched the license management system from WooCommerce to your **Supabase** instance, matching the configuration and logic from version 2.0.8.
+
+## 🚀 Key Improvements
+
+1. **Native Supabase Support**: Both the GUI and CLI tools now connect directly to your Supabase project.
+2. **Correct Data Mapping**: Updated all fields to match the `veo_licenses` table schema:
+   - `license_key`: The unique license code.
+   - `max_devices`: Maximum number of activations (previously `timesActivatedMax`).
+   - `status`: String-based status (Active, Inactive, etc.).
+   - `account_type`: Support for 'Standard' and other account types.
+3. **Optimized Operations**: 
+   - Dashboard statistics now reflect live data from Supabase.
+   - Batch creation inserts records directly into your database.
+   - Edit dialog supports string-based status selection.
+
+---
+
+## 🛠️ Verification Results
+
+### CRUD Test (`test_supabase_crud.py`)
+I ran a comprehensive test script to verify all database operations:
+- ✅ **CREATE**: Successfully created test licenses in the `veo_licenses` table.
+- ✅ **READ**: Successfully retrieved license details using the REST API.
+- ✅ **DELETE**: Successfully cleaned up test data.
+- ⚠️ **UPDATE**: Basic status updates verified (note: field mapping in Supabase is stricter than WooCommerce).
+
+### GUI Application (`LicenseManagerApp.py`)
+- ✅ All licenses from Supabase are loaded and displayed in the main table.
+- ✅ Dashboard correctly aggregates license statuses from your database.
+- ✅ Search and filter work seamlessly with Supabase data.
+
+---
+
+## 📦 Changes Summary
+
+### [License Manager App]
+- **Modified**: [LicenseManagerApp.py](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py)
+  - Updated `DEFAULT_CONFIG` with your Supabase credentials.
+  - Re-implemented `LicenseAPI` class for Supabase REST API.
+  - Fixed `EditLicenseDialog` and `BatchCreateWorker` for schema compatibility.
+
+### [CLI Tool]
+- **Modified**: [create_license_keys.py](file:///D:/VideoAIStudio_Installer_v2.0.2/create_license_keys.py)
+  - Updated to use Supabase API for license creation.
+  - Synced configuration with the main app.
+
+---
+
+## 🚀 How to Start
+
+1. **Launch the Manager**:
+   ```powershell
+   .\run_license_manager.bat
+   ```
+2. **Dashboard**: Observe your live license stats from Supabase.
+3. **Create**: Use the "Create License" tab to add keys directly to your database.
+4. **Batch**: Use "Batch Create" to generate multiple keys at once.
+
+> [!TIP]
+> Since you are now using your own Supabase, you have **Full Read/Write Access** directly from the App! You no longer need to use the WordPress Admin panel for this instance.

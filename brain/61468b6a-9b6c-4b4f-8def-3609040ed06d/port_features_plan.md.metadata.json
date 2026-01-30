@@ -1,5 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
-  "summary": "Kế hoạch port tính năng mới từ moiapp.asar sang app, bao gồm các tùy chọn và bước tiếp theo.",
-  "updatedAt": "2026-01-30T16:35:34.431537900Z"
+  "summary": "Kế hoạch cập nhật app lên phiên bản 1.3.0 từ moiapp.asar, bao gồm bypass license và giữ nguyên các tính năng mới như Gemini/Puppeteer.",
+  "updatedAt": "2026-01-30T16:55:21.960383400Z",
+  "version": "1"
 }
