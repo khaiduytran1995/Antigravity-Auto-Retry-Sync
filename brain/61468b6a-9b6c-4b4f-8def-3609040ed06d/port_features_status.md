@@ -1,0 +1,101 @@
+# Báo cáo Port Features từ moiapp.asar
+
+## 📊 Hiện trạng App hiện tại
+
+### Features đã có trong app:
+| Feature | Status | Ghi chú |
+|---------|--------|---------|
+| `scene:create-video` | ✅ Có | Tạo video từ scene |
+| `scene:create-video-from-image` | ✅ Có | Tạo video từ ảnh |
+| `flow:generate-video` | ✅ Có | Tạo video từ flow |
+| `flow:generate-image` | ✅ Có | Tạo ảnh từ flow |
+| `scene:create-image` | ❓ Chưa xác định | Cần kiểm tra moiapp |
+
+---
+
+## ⚠️ Vấn đề gặp phải
+
+### Không thể extract moiapp.asar tự động
+```
+Error: ENOENT: no such file or directory
+Missing files trong moiapp.asar.unpacked
+```
+
+**Nguyên nhân:** 
+- `moiapp.asar.unpacked` không tồn tại hoặc thiếu files
+- Tool `asar` không thể extract do dependency issues
+
+---
+
+## 🔍 Phát hiện
+
+Từ grep search, app hiện tại đã có:
+1. **`scene:create-video`** - Handler tạo video từ scene
+2. **`scene:create-video-from-image`** - Handler tạo video từ ảnh  
+3. **IPC handlers** cho flow generation
+
+Code trong `main.js` và `preload.js`:
+```javascript
+// main.js
+electron_1.ipcMain.handle('scene:create-video', async (_0x267ed6, _0x455ab3) => {
+  // Implementation
+});
+
+// preload.js  
+createSceneVideo: (payload) => ipcRenderer.invoke('scene:create-video', payload),
+createSceneVideoFromImage: (payload) => ipcRenderer.invoke('scene:create-video-from-image', payload),
+```
+
+---
+
+## 💡 Các phương án tiếp theo
+
+### Phương án 1: Xác định features thiếu qua người dùng
+**Yêu cầu:** Người dùng cho biết cụ thể features nào cần thêm vào
+
+**Ưu điểm:** Nhanh nhất, không cần extract moiapp
+
+---
+
+### Phương án 2: Extract thủ công bằng 7-Zip
+**Các bước:**
+1. Cài 7-Zip (nếu chưa có)
+2. Chuột phải `moiapp.asar` → 7-Zip → Extract to "moiapp-extracted"
+3. Gửi file `moiapp-extracted/dist-electron/main.js` để so sánh
+
+**Thời gian:** ~5 phút
+
+---
+
+### Phương án 3: So sánh trực tiếp qua UI
+**Yêu cầu:** 
+- Chạy app với moiapp.asar
+- Chạy app với app hiện tại
+- Liệt kê features khác biệt
+
+---
+
+## 📝 Cần làm rõ
+
+**Câu hỏi cho người dùng:**
+
+1. **moiapp.asar có tính năng gì mới** mà app hiện tại chưa có?
+   - Tạo ảnh từ scene (`scene:create-image`)?
+   - Upload reference image?
+   - Upscale image?
+   - Features khác?
+
+2. **Bạn có thể extract moiapp.asar** bằng 7-Zip không?
+
+3. **Hoặc bạn biết cụ thể** IPC handler nào cần thêm?
+
+---
+
+## ✅ Sẵn sàng thực hiện
+
+Một khi xác định được features cần port, tôi có thể:
+1. Tìm code implementation trong các versions khác
+2. Hoặc tạo implementation mới dựa trên code hiện có
+3. Port và test ngay lập tức
+
+**Thời gian ước tính:** 15-20 phút sau khi xác định features
