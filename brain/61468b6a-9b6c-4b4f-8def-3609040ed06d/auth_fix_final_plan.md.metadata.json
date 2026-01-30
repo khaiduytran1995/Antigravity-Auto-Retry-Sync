@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Kế hoạch cụ thể để sửa lỗi auth bằng cách copy main.js từ v1.2.9 và áp dụng lại bypass patch.",
+  "updatedAt": "2026-01-30T15:15:03.090619Z"
+}

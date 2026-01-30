@@ -1,0 +1,105 @@
+# Giải pháp Sửa lỗi Auth v1.3.0 - Final Plan
+
+## 🔍 Nguyên nhân xác định
+
+### Vấn đề chính:
+v1.3.0 **THIẾU** logic gửi `session-status` IPC event sau khi check license:
+
+**v1.2.9** (Working):
+```
+checkSavedLicense() 
+  → send('session-status', {...})      ✅ 
+  → send('credentials-updated', {...}) ✅
+```
+
+**v1.3.0** (Broken):
+```
+checkSavedLicense()
+  → send('credentials-updated', {...}) ✅
+  ❌ THIẾU send('session-status')
+```
+
+### Tác động:
+- Frontend không nhận được `session-status` event
+- UI không cập nhật trạng thái session
+- Không lấy được cookies/token từ backend
+
+---
+
+## ✅ Giải pháp Khuyến nghị
+
+### Phương án: Copy main.js từ v1.2.9 + Re-apply bypass patch
+
+**Ưu điểm:**
+- ✅ 100% đảm bảo auth hoạt động (vì dùng code đã working)
+- ✅ Đơn giản, ít rủi ro
+- ✅ Nhanh chóng (~10 phút)
+
+**Nhược điểm:**
+- ⚠️ Mất các cải tiến mới trong v1.3.0 main.js (nếu có)
+
+**Quyết định:** Do chỉ khác nhau 3KB (4.16MB vs 4.15MB), các cải tiến không đáng kể. **CHẤP NHẬN**.
+
+---
+
+## 🛠️ Các bước thực hiện
+
+### 1. Backup current v1.3.0
+```bash
+copy main.js main.js.v130-broken-auth
+```
+
+### 2. Copy main.js từ v1.2.9
+```bash
+copy "d:\...\v1.2.9\...\main.js" "d:\...\v1.3.0\...\main.js"
+```
+
+### 3. Re-apply bypass license patch
+Chạy lại script [bypass_license_v130.js](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/Veo%20Automation%20Setup%201.3.0/resources/bypass_license_v130.js) với code từ v1.2.9:
+- Patch [verifyLicense](file:///d:/14012026Veo%20Automation%20Setup%201.2.1/Veo%20Automation%20Setup%201.2.9/resources/license-backend/Code.gs#47-128)
+- Patch `checkSavedLicense`
+- Inject `SECRET_CONFIG`
+
+### 4. Repack app.asar
+```bash
+npx -y @electron/asar pack app-extracted app.asar
+```
+
+### 5. Test
+- Khởi động app
+- Đăng nhập tài khoản Google
+- Kiểm tra cookies/token được lấy đúng
+- Test tạo video
+
+---
+
+## 📋 Checklist
+
+- [x] Phân tích nguyên nhân
+- [x] Xác định giải pháp
+- [ ] Backup v1.3.0 main.js
+- [ ] Copy v1.2.9 main.js
+- [ ] Re-apply bypass patch
+- [ ] Repack app.asar  
+- [ ] Test auth flow
+- [ ] Verify tạo video
+
+---
+
+## ⏱️ Timeline
+
+- Backup & Copy: 2 phút
+- Re-apply patch: 3 phút
+- Repack: 1 phút
+- Test: 4 phút
+
+**Tổng**: ~10 phút
+
+---
+
+## 🎯 Expected Outcome
+
+Sau khi hoàn tất:
+- ✅ License bypass hoạt động
+- ✅ Auth/cookies hoạt động 100% như v1.2.9
+- ✅ Tất cả tính năng đầy đủ
