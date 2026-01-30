@@ -1,6 +1,6 @@
 {
   "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Báo cáo hoàn tất cập nhật v1.3.0 với hướng dẫn khắc phục lỗi missing dependencies.",
-  "updatedAt": "2026-01-30T17:00:57.063727400Z",
-  "version": "4"
+  "summary": "Báo cáo hoàn tất v1.3.0 với frontend hiện đại và workflow paste token/cookie thủ công.",
+  "updatedAt": "2026-01-30T17:36:10.088024900Z",
+  "version": "6"
 }

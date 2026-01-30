@@ -1,62 +1,77 @@
-# Implementation Plan: Supabase Migration for License Management
+# Implementation Plan: User Profile & License Manager
 
-Migrate the License Manager GUI application and key generation scripts from WooCommerce API to Supabase REST API, mirroring the logic used in version 2.0.8.
+Refactor the License Manager to work with the `veo3studio_profiles` table, supporting both user profile management and license key assignment.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> This change will permanently switch the application to use your Supabase instance. Ensure you have backed up any necessary data from the WooCommerce server if needed.
+> This refactoring changes the app from **License Key Management** to **User Profile Management**. The app will now manage users (email, name, role) with their assigned license keys.
+
+**Key Changes:**
+- Table: `veo3studio_profiles` (confirmed existing in Supabase)
+- Schema: [id](file:///D:/VideoAIStudio_Installer_v2.0.2/decrypted_v2.0.8%20supbabase/license/core/authentication.py#219-330), `email`, `name`, `role`, [license_key](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#187-202), `license_type`, `license_valid`, `license_expires_at`, `created_at`
+- Purpose: Manage user accounts with license assignments
 
 ## Proposed Changes
 
-### [License Manager App]
+### [GUI Application]
 
 #### [MODIFY] [LicenseManagerApp.py](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py)
-- Update `DEFAULT_CONFIG` with Supabase URL, Anon Key, and Service Key.
-- Refactor [LicenseAPI](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#55-189) class:
-  - Implement Supabase REST API integration using `requests`.
-  - Update [get_all_licenses](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#66-85) to fetch from `veo_licenses` table.
-  - Update [create_license](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#86-131) to insert into `veo_licenses` table using correct schema.
-  - Update [update_license](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#132-170) (Edit) to use Supabase `PATCH` request.
-  - Update [delete_license](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#171-189) to use Supabase `DELETE` request.
-- Update UI mapping to match Supabase field names:
-  - `licenseKey` -> [license_key](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#194-209)
-  - `timesActivatedMax` -> `max_devices`
-  - `expiresAt` -> `expires_at`
-  - [status](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#222-231) (string mapping instead of IDs if necessary)
+
+**API Layer Updates:**
+- Update `LicenseAPI.get_all_licenses()` → `get_all_profiles()` to fetch user profiles
+- Update [create_license()](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#88-125) → `create_profile()` with fields: email, name, role, license_key, license_type, license_expires_at
+- Update [update_license()](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#126-163) → `update_profile()` to modify user license details
+- Update [delete_license()](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#981-997) → `delete_profile()` to remove users
+
+**UI Updates:**
+- **Dashboard Tab**: Show user statistics (Total Users, Active Licenses, Expired Licenses, by Role, by License Type)
+- **Table Columns**: Display `Email`, `Name`, `Role`, `License Key`, `License Type`, `Valid`, `Expires At`
+- **Create User Dialog**: Input fields for email, name, role (dropdown), license_key (auto-generate), license_type (dropdown), expires_at (date picker)
+- **Edit User Dialog**: Allow changing licence_type, expires_at, license_valid status
+- **Batch Create**: Generate multiple user profiles with unique emails and license keys
+
+**License Key Generator:**
+- Format: `VEO3-XXXX-XXXX-XXXX` (matching existing pattern)
+- Characters: Uppercase + digits (excluding confusing chars: 0, O, I, 1, L)
 
 ---
 
-### [CLI Tools]
+### [CLI Tool]
 
 #### [MODIFY] [create_license_keys.py](file:///D:/VideoAIStudio_Installer_v2.0.2/create_license_keys.py)
-- Update configuration to use Supabase.
-- Update [create_license_via_api](file:///D:/VideoAIStudio_Installer_v2.0.2/create_license_keys.py#78-201) to use Supabase `POST` request.
+
+**Updates:**
+- Rename to `create_user_profiles.py` (or keep name but update logic)
+- Support creating user profiles with:
+  - `--email`: User email (required)
+  - `--name`: User name (required)
+  - `--role`: SUPER_ADMIN, ADMIN, USER (default: USER)
+  - `--license-type`: ENTERPRISE, PREMIUM, TRIAL (default: PREMIUM)
+  - `--valid-days`: Days until expiration (default: 365)
+- Auto-generate license key with VEO3 prefix
 
 ---
 
-### [Configuration]
+### [Testing]
 
-#### [NEW] [supabase_config.json](file:///D:/VideoAIStudio_Installer_v2.0.2/supabase_config.json)
-- Store Supabase credentials securely.
+#### [NEW] [test_user_profile_crud.py](file:///D:/VideoAIStudio_Installer_v2.0.2/test_user_profile_crud.py)
+
+Comprehensive CRUD test script:
+- Create test user profile
+- Read profile by license_key
+- Update license_type and expires_at
+- Delete test profile
 
 ## Verification Plan
 
 ### Automated Tests
-1. **Supabase CRUD Test**:
-   - Create a script `test_supabase_crud.py` to:
-     - Create a test license.
-     - Verify it exists in Supabase.
-     - Update its status.
-     - Delete it.
-   - Run: `python test_supabase_crud.py`
-
-2. **Integration Test**:
-   - Run the modified [LicenseManagerApp.py](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py).
-   - Verify all tabs load data from Supabase.
-   - Test "Create License" and verify it appears in the list.
-   - Test "Batch Create" and monitor progress.
+1. Run `test_user_profile_crud.py` to verify all CRUD operations
+2. Test license key generation (ensure VEO3 prefix, correct format)
+3. Test batch user creation
 
 ### Manual Verification
-1. Open the [Supabase Dashboard](https://supabase.com/dashboard) and verify that the `veo_licenses` table reflects the changes made through the app.
-2. Launch the app and perform a test activation (if possible) using a newly created key.
+1. Launch GUI app and verify dashboard statistics
+2. Create a new user profile via GUI
+3. Edit user license details
+4. Verify license validation logic (check against existing key: `VEO3-S4XX-R0CN-OQ9P`)

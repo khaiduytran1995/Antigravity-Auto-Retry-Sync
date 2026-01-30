@@ -1,0 +1,77 @@
+# Implementation Plan: User Profile & License Manager
+
+Refactor the License Manager to work with the `veo3studio_profiles` table, supporting both user profile management and license key assignment.
+
+## User Review Required
+
+> [!IMPORTANT]
+> This refactoring changes the app from **License Key Management** to **User Profile Management**. The app will now manage users (email, name, role) with their assigned license keys.
+
+**Key Changes:**
+- Table: `veo3studio_profiles` (confirmed existing in Supabase)
+- Schema: [id](file:///D:/VideoAIStudio_Installer_v2.0.2/decrypted_v2.0.8%20supbabase/license/core/authentication.py#219-330), `email`, `name`, `role`, [license_key](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#187-202), `license_type`, `license_valid`, `license_expires_at`, `created_at`
+- Purpose: Manage user accounts with license assignments
+
+## Proposed Changes
+
+### [GUI Application]
+
+#### [MODIFY] [LicenseManagerApp.py](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py)
+
+**API Layer Updates:**
+- Update `LicenseAPI.get_all_licenses()` → `get_all_profiles()` to fetch user profiles
+- Update [create_license()](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#88-125) → `create_profile()` with fields: email, name, role, license_key, license_type, license_expires_at
+- Update [update_license()](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#126-163) → `update_profile()` to modify user license details
+- Update [delete_license()](file:///D:/VideoAIStudio_Installer_v2.0.2/LicenseManagerApp.py#981-997) → `delete_profile()` to remove users
+
+**UI Updates:**
+- **Dashboard Tab**: Show user statistics (Total Users, Active Licenses, Expired Licenses, by Role, by License Type)
+- **Table Columns**: Display `Email`, `Name`, `Role`, `License Key`, `License Type`, `Valid`, `Expires At`
+- **Create User Dialog**: Input fields for email, name, role (dropdown), license_key (auto-generate), license_type (dropdown), expires_at (date picker)
+- **Edit User Dialog**: Allow changing licence_type, expires_at, license_valid status
+- **Batch Create**: Generate multiple user profiles with unique emails and license keys
+
+**License Key Generator:**
+- Format: `VEO3-XXXX-XXXX-XXXX` (matching existing pattern)
+- Characters: Uppercase + digits (excluding confusing chars: 0, O, I, 1, L)
+
+---
+
+### [CLI Tool]
+
+#### [MODIFY] [create_license_keys.py](file:///D:/VideoAIStudio_Installer_v2.0.2/create_license_keys.py)
+
+**Updates:**
+- Rename to `create_user_profiles.py` (or keep name but update logic)
+- Support creating user profiles with:
+  - `--email`: User email (required)
+  - `--name`: User name (required)
+  - `--role`: SUPER_ADMIN, ADMIN, USER (default: USER)
+  - `--license-type`: ENTERPRISE, PREMIUM, TRIAL (default: PREMIUM)
+  - `--valid-days`: Days until expiration (default: 365)
+- Auto-generate license key with VEO3 prefix
+
+---
+
+### [Testing]
+
+#### [NEW] [test_user_profile_crud.py](file:///D:/VideoAIStudio_Installer_v2.0.2/test_user_profile_crud.py)
+
+Comprehensive CRUD test script:
+- Create test user profile
+- Read profile by license_key
+- Update license_type and expires_at
+- Delete test profile
+
+## Verification Plan
+
+### Automated Tests
+1. Run `test_user_profile_crud.py` to verify all CRUD operations
+2. Test license key generation (ensure VEO3 prefix, correct format)
+3. Test batch user creation
+
+### Manual Verification
+1. Launch GUI app and verify dashboard statistics
+2. Create a new user profile via GUI
+3. Edit user license details
+4. Verify license validation logic (check against existing key: `VEO3-S4XX-R0CN-OQ9P`)
