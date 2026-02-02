@@ -1,0 +1,9 @@
+# Task: Merge Features from Old ASAR to New ASAR
+
+- [ ] Unpack [115app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/115app.asar) (Old) and [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar) (New) <!-- id: 0 -->
+- [ ] Identify and Map files for UI, Supabase, and Bypass logic <!-- id: 1 -->
+- [ ] Merge UI/Text Effects/Colors (CSS/Assets) <!-- id: 2 -->
+- [ ] Merge Supabase Login Logic <!-- id: 3 -->
+- [ ] Merge Bypass Logic <!-- id: 4 -->
+- [ ] Repack [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar) <!-- id: 5 -->
+- [ ] Verify functionality <!-- id: 6 -->

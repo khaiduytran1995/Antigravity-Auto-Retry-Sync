@@ -1,0 +1,6 @@
+# Task: Check Keys and Endpoints
+
+- [/] Search for keys and endpoints in the codebase <!-- id: 0 -->
+- [ ] Verify Supabase configuration <!-- id: 1 -->
+- [ ] Verify Backend/Endpoint configuration <!-- id: 2 -->
+- [ ] Report findings to user <!-- id: 3 -->

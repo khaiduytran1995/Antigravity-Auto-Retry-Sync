@@ -1,0 +1,17 @@
+# Task: Merge UI and Logic from 115app.asar to app.asar
+
+- [ ] Extract asar files <!-- id: 0 -->
+    - [ ] Extract `115app.asar` to `115app_extracted` <!-- id: 1 -->
+    - [ ] Extract `app.asar` to `app_extracted` <!-- id: 2 -->
+- [ ] Analyze differences and identify components to port <!-- id: 3 -->
+    - [ ] Compare UI files (CSS, HTML, JS) <!-- id: 4 -->
+    - [ ] Identify Supabase login logic <!-- id: 5 -->
+    - [ ] Identify bypass logic <!-- id: 6 -->
+- [ ] Port changes to `app_extracted` <!-- id: 7 -->
+    - [ ] Update UI (layouts, colors, text effects) <!-- id: 8 -->
+    - [ ] Integrate Supabase login <!-- id: 9 -->
+    - [ ] Apply bypass logic <!-- id: 10 -->
+- [ ] Repack and verify <!-- id: 11 -->
+    - [ ] Repack `app_extracted` to `app_merged.asar` <!-- id: 12 -->
+    - [ ] Replace original `app.asar` with `app_merged.asar` <!-- id: 13 -->
+    - [ ] Verify functionality <!-- id: 14 -->

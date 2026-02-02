@@ -1,0 +1,7 @@
+# Task: Fresh Analysis of FastSora.exe
+
+- [ ] Identify file type (Magic Bytes) of `FastSora.exe` [/]
+- [ ] Check for embedded mechanisms (NSIS, Electron/ASAR, 7z) [ ]
+- [ ] Extract contents if possible [ ]
+- [ ] Search for *any* backend URLs (generic regex) to identify infrastructure [ ]
+- [ ] Search for potential credentials keys (generic patterns) [ ]

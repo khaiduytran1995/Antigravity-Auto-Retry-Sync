@@ -1,0 +1,6 @@
+# Task: Investigate Fastsora Setup for Keys and Endpoints
+
+- [ ] List contents of `d:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6-setup/$PLUGINSDIR` <!-- id: 0 -->
+- [ ] Search for sensitive keywords (Supabase, Key, Secret, API, HTTP) in found files <!-- id: 1 -->
+- [ ] Analyze specific interesting files found <!-- id: 2 -->
+- [ ] Report findings to user <!-- id: 3 -->

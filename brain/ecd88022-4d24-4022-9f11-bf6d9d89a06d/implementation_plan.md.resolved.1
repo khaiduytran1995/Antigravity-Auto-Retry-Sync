@@ -1,0 +1,32 @@
+# Implementation Plan - Merge Features from Old ASAR to New ASAR
+
+## Goal
+Transfer UI styling, Supabase login, and Bypass logic from [115app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/115app.asar) to [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar).
+
+## Analysis Findings
+- The "Old" `115app` contains all relevant logic (Supabase, Bypass, Styling) directly embedded in [out/renderer/index.html](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app_extracted/out/renderer/index.html).
+- It also uses [donate_qr.jpg](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/115app_extracted/out/renderer/assets/donate_qr.jpg) and a specific CSS file.
+- The "New" `app` uses a clean [index.html](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app_extracted/out/renderer/index.html).
+
+## Proposed Changes
+
+### 1. Asset Transfer
+- **[COPY]** [out/renderer/assets/donate_qr.jpg](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/115app_extracted/out/renderer/assets/donate_qr.jpg) (From Old -> New)
+- **[COPY]** `out/renderer/assets/index-tH6wFvq5.css` (From Old -> New)
+
+### 2. HTML Merge ([index.html](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app_extracted/out/renderer/index.html))
+- **Modify** [out/renderer/index.html](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app_extracted/out/renderer/index.html) in the new app:
+    - **Header**: Inject CDN links (Tailwind, Supabase), CSP meta tags, and the `<style>` block for Rainbow/Login effects.
+    - **Body**: Add `sparkle-bg` class.
+    - **Content**: Insert the "Login Modal" and "Anti-Bypass" HTML structures before the `#app` div.
+    - **Script**: Copy the entire `<script>` block containing Supabase initialization, Login handling, and Anti-Bypass logic.
+
+### 3. Repacking
+- Pack `app_extracted` back into [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar).
+
+## Verification Plan
+1. Open App.
+2. Verify "Rainbow" background and "Sparkle" effects.
+3. Verify Login Modal appears.
+4. Test Login with Supabase.
+5. Verify access to new features after login.

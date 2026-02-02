@@ -1,0 +1,6 @@
+# Task: Analyze FastSora v1.2.8
+
+- [ ] Verify file exists at new path [/]
+- [ ] Search for backend URLs (https://, api., etc.) [ ]
+- [ ] Search for authentication keys/tokens [ ]
+- [ ] Report findings [ ]

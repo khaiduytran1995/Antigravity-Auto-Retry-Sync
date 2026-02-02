@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plan to replace HWID license system with Supabase email/password login in FastSora v1.2.8.",
+  "updatedAt": "2026-02-01T19:09:20.946550600Z"
+}

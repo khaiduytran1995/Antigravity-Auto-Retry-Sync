@@ -1,0 +1,137 @@
+# Replace HWID License with Supabase Email/Password Login
+
+## Background
+
+FastSora v1.2.8 uses a HWID-based license system that:
+1. Calls `auth_client.exe` to get encrypted HWID + payload
+2. Sends POST to `http://103.163.24.92:3000/api/v2/check`
+3. Verifies server response signature via `auth_client.exe --verify`
+
+**Goal:** Replace this with Supabase email/password authentication.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> Please provide your Supabase credentials:
+> - **Supabase URL**: `https://YOUR_PROJECT.supabase.co`
+> - **Supabase Anon Key**: `eyJh...` (public anon key)
+> - **User Table Name**: (if custom, default is `profiles`)
+
+---
+
+## Proposed Changes
+
+### Main Process ([out/main/_index.js](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.8-setup/$PLUGINSDIR/app-64-extracted/resources/app-unpacked/out/main/_index.js))
+
+#### [MODIFY] [_index.js](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.8-setup/$PLUGINSDIR/app-64-extracted/resources/app-unpacked/out/main/_index.js)
+
+**1. Add Supabase Client Import (line ~30)**
+```diff
++const { createClient } = require("@supabase/supabase-js");
++const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
++const SUPABASE_ANON_KEY = "eyJh..."; // User to provide
++const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+```
+
+**2. Replace [setupLicenseHandlers()](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.8-setup/$PLUGINSDIR/app-64-extracted/resources/app-unpacked/out/main/_index.js#4429-4469) function (lines 4429-4467)**
+```javascript
+const setupLicenseHandlers = () => {
+  electron.ipcMain.handle("app:getVersion", () => pkg.version);
+  
+  // NEW: Supabase Login
+  electron.ipcMain.handle("license:login", async (event, email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (error) {
+        return { valid: false, message: error.message };
+      }
+      // Optional: Check user profile/license in database
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      
+      return {
+        valid: true,
+        user: data.user,
+        profile: profile
+      };
+    } catch (error) {
+      return { valid: false, message: error.message };
+    }
+  });
+  
+  // NEW: Check current session
+  electron.ipcMain.handle("license:checkSession", async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      return { valid: true, user: session.user };
+    }
+    return { valid: false };
+  });
+  
+  // NEW: Logout
+  electron.ipcMain.handle("license:logout", async () => {
+    await supabase.auth.signOut();
+    return { success: true };
+  });
+};
+```
+
+---
+
+### Renderer/Vue UI Changes
+
+#### [MODIFY] [index-*.js](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.8-setup/$PLUGINSDIR/app-64-extracted/resources/app-unpacked/out/renderer/assets/)
+
+Replace the HWID verification UI with email/password login form:
+- Add email input field
+- Add password input field
+- Add "Login" button
+- Remove HWID display/copy functionality
+- Call `license:login` IPC instead of `license:onlineVerify`
+
+---
+
+### Dependencies
+
+#### [ADD] Supabase client package
+
+Run in `app-unpacked` folder:
+```bash
+npm install @supabase/supabase-js
+```
+
+---
+
+## Verification Plan
+
+### Manual Testing
+
+1. **Repack and Run App**
+   - Repack `app-unpacked` → [app.asar](file:///d:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.1.5-setup/$PLUGINSDIR/resources/app.asar)
+   - Copy to original location
+   - Launch FastSora.exe
+
+2. **Test Login Flow**
+   - Enter valid Supabase user email/password
+   - Verify successful login shows main UI
+   - Verify invalid credentials show error message
+
+3. **Test Session Persistence**
+   - Close and reopen app
+   - Verify auto-login works if session stored
+
+---
+
+## Questions for User
+
+1. Do you already have a Supabase project set up with users?
+2. What fields do you want to check in the `profiles` table (e.g., `license_valid`, `role`)?
+3. Do you want "Remember Me" functionality for persistent login?

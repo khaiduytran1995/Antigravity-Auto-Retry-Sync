@@ -1,0 +1,19 @@
+# Task: Replace HWID License with Supabase Login
+
+## Planning
+- [x] Analyze current license check flow in app.asar
+- [x] Identify files/functions to modify
+- [x] Create implementation plan
+
+## Implementation (SDK approach - FAILED)
+- [x] Install Supabase client - module loading issues in asar
+- [x] Modify _index.js - done but SDK not found
+
+## Implementation (REST API approach - NEW)
+- [ ] Rewrite Supabase handlers using REST API with fetch [/]
+- [ ] Remove SDK dependency
+- [ ] Repack and test
+
+## Verification
+- [ ] Test login flow
+- [ ] Test app functionality after login

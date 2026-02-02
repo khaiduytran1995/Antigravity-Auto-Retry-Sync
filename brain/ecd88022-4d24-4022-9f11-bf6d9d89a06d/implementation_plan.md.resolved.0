@@ -1,0 +1,25 @@
+# Implementation Plan - Merge Features from Old ASAR to New ASAR
+
+## Goal
+Transfer specific features (UI styling, Supabase login, Bypass logic) from the "old" [115app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/115app.asar) to the "new" [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar) to create a consolidated update.
+
+## Proposed Changes
+
+### 1. Extraction
+- Extract [115app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/115app.asar) to `115app_extracted` (Fresh extract to ensure accuracy).
+- Extract [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar) to `app_extracted` (Fresh extract).
+
+### 2. Analysis & Merging
+- **UI/CSS**: Compare `renderer/updates.css` or main CSS files. Copy relevant styles for "text effects" and "colors".
+- **Supabase Login**: Identify modifications in the main process (likely `main.js` or `electron-main.js`) related to `supabase`. Merge these into the new code.
+- **Bypass Logic**: Identify bypass code (likely related to license checks or `ipcMain` handlers). Merge into new code.
+
+### 3. Repacking
+- Pack `app_extracted` back into [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar).
+
+## Verification Plan
+- **Manual Verification**: User will need to run the app and verify:
+    - UI looks like the old version (colors, effects).
+    - Supabase login works.
+    - Bypass functionalities are active.
+    - New features from the new [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.6/resources/app.asar) are present.

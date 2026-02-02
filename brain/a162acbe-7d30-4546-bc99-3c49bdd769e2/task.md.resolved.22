@@ -1,0 +1,32 @@
+# Task: Replace HWID License with Supabase Login & Fixes
+
+## Planning
+- [x] Analyze current license check flow in app.asar
+- [x] Identify files/functions to modify
+- [x] Create implementation plan
+
+## Implementation (REST API approach)
+- [x] Rewrite Supabase handlers using REST API with fetch
+- [x] Remove SDK dependency
+- [x] Extract original 1.2.9 [app.asar](file:///D:/sorabatchcreatevideo-1.1.0-setup/fastsora-1.2.9-setup/$PLUGINSDIR/resources/app.asar)
+[x] Merge Supabase configuration into 1.2.9 [_index.js](file:///D:/original_129_unpacked/out/main/_index.js)
+[x] Fix syntax errors in [_index.js](file:///D:/original_129_unpacked/out/main/_index.js)
+[x] Patch main process entry point ([index.js](file:///D:/original_129_unpacked/out/main/index.js))
+[x] Integrate 1.2.8 preload script into 1.2.9
+[x] Patch renderer JS bundle with Supabase Login UI
+[x] Repack and verify 1.2.9 + Sora logic preservation
+"Remember Me" logic
+- [x] Bypass Subscription Check (days: 99999)
+
+## Debugging & Fixes
+- [x] Fix Session Capture (Refresh browser page)
+- [x] Fix "Fetch Failed" in 1.2.9 (Resulted from caching)
+  - [x] Rename renderer JS bundle
+  - [x] Update index.html
+  - [x] Disable `app.asar.unpacked`
+- [x] Add Debug Logs
+
+## Verification
+- [x] Test login flow (1.2.8 - Verified)
+- [x] Test task running (1.2.8 - Verified)
+- [/] Test login flow (1.2.9 - Pending User Confirmation)

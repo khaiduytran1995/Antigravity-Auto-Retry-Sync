@@ -24,7 +24,63 @@
 - ✅ Hàm `checkSavedLicense()` tự động nhận diện bypass
 - ✅ App không còn yêu cầu license key
 
-### 4. Dependencies
+### 7. UI Refinements (Feb 1 2026)
+- **Problem**: Sidebar menu items were static single colors.
+- **Solution**: Applied "Rainbow/Sparkle" gradient to all sidebar items.
+- **Details**:
+  - Mapped menu items to `text-transparent bg-clip-text bg-gradient-to-r ...` class.
+  - Fixed special cases for "Chỉnh Sửa Video" (Amber) and "Hướng dẫn & Hỗ trợ" (separate component).
+  - Renamed "Hướng dẫn & Mẹo" to "Hướng dẫn & Hỗ trợ" to match user request.
+
+  - Renamed "Hướng dẫn & Mẹo" to "Hướng dẫn & Hỗ trợ" to match user request.
+
+### 8. Global Starry Theme (Feb 1 2026)
+- **Problem**: Other feature tabs (Video, Content) used standard flat dark backgrounds.
+- **Solution**: Propagated the "Starry/Galaxy" theme to all application tabs.
+- **Details**:
+  - Replaced `dark:bg-slate-900`, `dark:bg-[#0f172a]`, `dark:bg-gray-900` with Custom Starry Gradient.
+  - Affected 60+ UI areas including Video Merger, Content Generator, and Settings panels.
+
+  - Replaced `dark:bg-slate-900`, `dark:bg-[#0f172a]`, `dark:bg-gray-900` with Custom Starry Gradient.
+  - Affected 60+ UI areas including Video Merger, Content Generator, and Settings panels.
+
+### 9. Badges & Glass Panels (Feb 1 2026)
+- **Badges**: Added "premium" badges to all Dashboard cards.
+  - `PRO 🔥`, `AI ✨`, `HOT 🔥`, `FREE`, `EDITOR`, `VIP 💎`, `HELP`.
+- **Glassmorphism**: Updated internal feature panels (previously flat slate).
+  - Applied `bg-slate-800/50` + `backdrop-blur-md` + `border-white/10` to create a translucent glass effect over the starry background.
+
+### 10. Packaging (Feb 1 2026)
+- **Action**: Repacked `resources/app` into `resources/app.asar`.
+- **Result**: Application is now a single distributable bundle again (600MB+).
+
+- **Action**: Repacked `resources/app` into `resources/app.asar`.
+- **Result**: Application is now a single distributable bundle again (600MB+).
+
+### 11. Auth Persistence (Feb 1 2026)
+- **Problem**: Users had to re-login to Supabase every time the app opened.
+- **Solution**: Injected a client-side "Remember Me" patch.
+- **Details**:
+  - Intercepts `verifyLicense` to save credentials to LocalStorage.
+  - Intercepts `checkSavedLicense` to auto-login using saved credentials if backend check fails.
+  - **Correction**: Moved injection point to *before* `ReactDOM.createRoot` to solve race condition where app checked login before patch loaded.
+
+### 13. Custom Supabase Integration (Feb 1 2026)
+- **User Request**: Connect app to personal Supabase server.
+- **Action**: Injected `custom-supabase.js` to override auth endpoints.
+- **Features**:
+  - Connects to `gkhkerlxxoihfvgnexaq.supabase.co`.
+  - Supports Email/Password login via Supabase Auth API.
+  - Supports License Key verification via `licenses` table.
+  - Re-enabled persistent session for this specific server.
+  - **Feature Update**: Added support for `email|password` syntax in the single input field to bypass UI limitations ("Magic Login").
+  - **New Feature**: Added a dedicated **Login Overlay (Gatekeeper)** that appears on startup blocked the app until authenticated.
+  - **UI Polish**: Added "Sparkling" animation, rich gradients, hover effects, and a "Support Author" link to the Login UI.
+  - **Logic Change**: Disabled auto-login check for the overlay. The Gatekeeper UI now appears **every time** the app is opened, forcing manual authentication.
+  - **New Feature**: Added "Ghi nhớ thông tin" Checkbox. If unchecked, login is manual every time. If checked, auto-login is enabled for subsequent launches.
+  - **New Feature**: "Ủng hộ tác giả" button now opens a modal displaying the Donation QR Code.
+
+### 14. Final Status
 - ✅ Copy `node_modules` từ backup v1.2.2
 - ✅ Tương thích với cả v1.2.2 và v1.3.0 features
 
@@ -59,6 +115,11 @@ resources/
    - Paste vào form "Cấu hình Nâng cao"
 4. **Tính năng Gemini** - Upload video để AI phân tích
 5. **Tính năng Puppeteer** - Tự động hóa workflow tạo nội dung
+
+### 🛠️ Tính năng Mới: Export Prompts (Đã Thêm)
+Tại trang **"Bước 2: Xem lại & Tối ưu Prompt"** của Clone Video:
+- Sẽ xuất hiện nút **"💾 Export All Prompts"** ở góc phải màn hình.
+- Bấm vào để tải về file `.txt` chứa toàn bộ prompt kỹ thuật.
 
 ---
 

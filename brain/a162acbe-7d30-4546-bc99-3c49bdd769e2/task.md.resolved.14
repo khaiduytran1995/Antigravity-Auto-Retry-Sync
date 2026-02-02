@@ -1,0 +1,6 @@
+# Task: Analyze FastSora v1.2.8
+
+- [x] Verify file exists at new path (YES - 210MB)
+- [x] Search for backend URLs → Found: `sora.chatgpt.com`, `generativelanguage.googleapis.com`
+- [x] Search for authentication keys/tokens → Uses `auth_client.exe` + env var `GEMINI_API_KEY`
+- [x] Report findings

@@ -1,0 +1,17 @@
+# Task: Replace HWID License with Supabase Login
+
+## Planning
+- [ ] Analyze current license check flow in app.asar
+- [ ] Identify files/functions to modify
+- [ ] Create implementation plan
+
+## Implementation
+- [ ] Extract app.asar to editable folder
+- [ ] Add Supabase client library
+- [ ] Create login UI (email/password)
+- [ ] Replace license check logic with Supabase auth
+- [ ] Repack app.asar
+
+## Verification
+- [ ] Test login flow
+- [ ] Test app functionality after login

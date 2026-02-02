@@ -1,0 +1,7 @@
+# Task: Investigate Keys and Backend
+
+- [x] Check 'FastSora.exe' for 'cleoo' (Not found)
+- [x] Check 'FastSora.exe' for 'supabase' (Not found)
+- [x] Check 'FastSora.exe' for '115.com' (Not found)
+- [x] Check 'FastSora.exe' for JWT/Secrets (Not found)
+- [ ] Report findings to user [ ]

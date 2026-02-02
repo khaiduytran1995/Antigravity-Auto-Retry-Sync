@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_TASK",
+  "summary": "- [x] Extract original 1.2.9 `app.asar`\n- [x] Merge Supabase configuration into 1.2.9 `_index.js`\n- [x] Fix syntax errors in `_index.js`\n- [/] Patch main process entry point (`index.js`)\n- [x] Integrate 1.2.8 preload script into 1.2.9\n- [ ] Patch renderer JS bundle with Supabase Login UI\n- [ ] Repack and verify 1.2.9 + Sora logic preservation",
+  "updatedAt": "2026-02-02T04:55:36.418607Z",
+  "version": "21"
+}

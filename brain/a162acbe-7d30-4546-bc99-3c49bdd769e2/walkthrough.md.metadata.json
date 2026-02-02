@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary": "- **Surgical Merge Strategy**: Instead of cloning 1.2.8, we extracted the pristine 1.2.9 source code and merged the Supabase patches directly into it.\n- **Sora Logic Preservation**: Verified that `SentinelPool` and other 1.2.9-specific logic in `SoraAPI` remain intact.\n- **Supabase Integration**: \n    - Main process `_index.js` now contains both the new Sora bypass and the Supabase license handlers.\n    - Preload script updated with Supabase IPC bindings.\n    - Renderer `index-patched.js` features the updated SweetAlert2 login form with \"Remember Me\" functionality.\n- **Cache Buster**: Renamed renderer bundle to `index-patched.js` and updated `index.html` to force the app to load the new code.",
+  "updatedAt": "2026-02-02T05:11:36.956430600Z",
+  "version": "2"
+}
